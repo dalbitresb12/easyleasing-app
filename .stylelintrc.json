@@ -1,0 +1,13 @@
+{
+  "extends": ["stylelint-config-standard", "stylelint-config-prettier"],
+  "rules": {
+    "declaration-no-important": true,
+    "declaration-block-trailing-semicolon": "always",
+    "at-rule-no-unknown": [
+      true,
+      { "ignoreAtRules": ["tailwind", "apply", "variants", "responsive", "screen", "layer"] }
+    ],
+    "function-no-unknown": [true, { "ignoreFunctions": ["theme"] }]
+  },
+  "ignoreFiles": ["node_modules", "**/*.js", "**/*.ts", "**/*.tsx"]
+}

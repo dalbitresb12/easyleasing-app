@@ -1,0 +1,110 @@
+name: reviewdog
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  eslint:
+    name: 'eslint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Node v${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --immutable
+      - uses: reviewdog/action-eslint@v1
+        with:
+          reporter: 'github-check'
+          filter_mode: 'nofilter'
+          fail_on_error: true
+          eslint_flags: '--ext .js,.jsx,.ts,.tsx .'
+  stylelint:
+    name: 'stylelint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Node v${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --immutable
+      - uses: reviewdog/action-stylelint@v1
+        with:
+          reporter: 'github-check'
+          filter_mode: 'nofilter'
+          fail_on_error: true
+          stylelint_input: 'src/**/*.css src/**/*.vue'
+  prettier:
+    name: 'prettier (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Node v${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --immutable
+      - uses: EPMatt/reviewdog-action-prettier@v1
+        with:
+          reporter: 'github-check'
+          filter_mode: 'nofilter'
+          fail_on_error: true
+  tsc:
+    name: 'tsc (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Node v${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --immutable
+      - uses: EPMatt/reviewdog-action-tsc@v1
+        with:
+          reporter: 'github-check'
+          filter_mode: 'nofilter'
+          fail_on_error: true
+  actionlint:
+    name: 'actionlint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: 'github-check'
+          filter_mode: 'nofilter'
+          fail_on_error: true

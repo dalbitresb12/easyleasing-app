@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply font-inter antialiased;
+  }
+
+  @supports (font-variation-settings: normal) {
+    html {
+      @apply font-inter-var;
+    }
+  }
+
+  a,
+  button {
+    @apply cursor-pointer focus:outline-none focus:ring-0;
+  }
+
+  a[disabled],
+  button[disabled] {
+    @apply cursor-default pointer-events-none;
+  }
+}

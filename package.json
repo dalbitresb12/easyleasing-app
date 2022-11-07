@@ -1,0 +1,60 @@
+{
+  "name": "next-typescript-tailwind-starter",
+  "description": "Starter Next.js project using TypeScript, Tailwind and some DevTools preconfigured.",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export",
+    "analyze": "ANALYZE=true next build",
+    "postinstall": "husky install",
+    "lint": "concurrently -s -n lint: 'yarn:lint:*(!fix)'",
+    "lint:ts": "tsc --noemit",
+    "lint:eslint": "eslint --cache --ext .js,.jsx,.ts,.tsx .",
+    "lint:css": "stylelint --cache **/*.css",
+    "lint:prettier": "prettier --check .",
+    "lint:fix": "concurrently -s -n lint:fix: 'yarn:lint:fix:*'",
+    "lint:fix:eslint": "eslint --cache --ext .js,.jsx,.ts,.tsx --fix .",
+    "lint:fix:css": "stylelint --cache --fix **/*.css",
+    "lint:fix:prettier": "prettier --write ."
+  },
+  "dependencies": {
+    "@next/bundle-analyzer": "13.0.2",
+    "autoprefixer": "^10.4.13",
+    "concurrently": "^7.5.0",
+    "next": "13.0.2",
+    "postcss": "^8.4.18",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "^3.2.2"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "13.0.2",
+    "@svgr/webpack": "^6.5.1",
+    "@tailwindcss/forms": "^0.5.3",
+    "@types/node": "^16.18.3",
+    "@types/prettier": "^2.7.1",
+    "@types/react": "^18.0.25",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "eslint": "^8.26.0",
+    "eslint-config-next": "13.0.2",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-react": "^7.31.10",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1",
+    "stylelint": "^14.14.1",
+    "stylelint-config-prettier": "^9.0.3",
+    "stylelint-config-standard": "^29.0.0",
+    "typescript": "^4.8.4"
+  },
+  "packageManager": "yarn@3.2.1",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
+    "*.css": "stylelint --cache --fix",
+    "*.{js,jsx,ts,tsx,css,md,yml,json}": "prettier --write"
+  }
+}
