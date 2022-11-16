@@ -136,3 +136,6 @@ dist
 .DS_Store
 *.pem
 *.code-workspace
+
+# Wrangler
+.wrangler
