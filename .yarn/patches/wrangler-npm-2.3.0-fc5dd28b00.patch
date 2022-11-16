@@ -1,0 +1,66 @@
+diff --git a/miniflare-dist/index.mjs b/miniflare-dist/index.mjs
+index 37e66dde0d24081cbcf58f77fd071c96cd4c1126..13d8df3271d20dac0dd9b89427f72bd9ec9f2e4e 100644
+--- a/miniflare-dist/index.mjs
++++ b/miniflare-dist/index.mjs
+@@ -5974,7 +5974,7 @@ function parseRedirects(input) {
+ 
+ // src/miniflare-cli/assets.ts
+ var import_mime = __toESM(require_mime());
+-import { fetch as miniflareFetch2 } from "@miniflare/core";
++import { upgradingFetch as miniflareFetch2 } from "@miniflare/web-sockets";
+ import {
+   Response as MiniflareResponse2,
+   Request as MiniflareRequest2
+@@ -6000,7 +6000,12 @@ async function generateASSETSBinding(options) {
+       try {
+         const url = new URL(miniflareRequest.url);
+         url.host = `localhost:${options.proxyPort}`;
+-        return await miniflareFetch2(url, miniflareRequest);
++				const proxyRequest = new MiniflareRequest2(url, miniflareRequest);
++				if (proxyRequest.headers.get("Upgrade") === "websocket") {
++					proxyRequest.headers.delete("Sec-WebSocket-Accept");
++					proxyRequest.headers.delete("Sec-WebSocket-Key");
++				}
++				return await miniflareFetch2(proxyRequest);
+       } catch (thrown) {
+         options.log.error(new Error(`Could not proxy request: ${thrown}`));
+         return new MiniflareResponse2(
+diff --git a/package.json b/package.json
+index f41bbe2d7722bb01b4627bfb6a4ee13d45d11a13..549a00f0a6d38db62e7e00c6c60b6d2570792ff3 100644
+--- a/package.json
++++ b/package.json
+@@ -103,6 +103,7 @@
+ 		"@miniflare/core": "2.10.0",
+ 		"@miniflare/d1": "2.10.0",
+ 		"@miniflare/durable-objects": "2.10.0",
++		"@miniflare/web-sockets": "2.10.0",
+ 		"blake3-wasm": "^2.1.5",
+ 		"chokidar": "^3.5.3",
+ 		"esbuild": "0.14.51",
+diff --git a/src/miniflare-cli/assets.ts b/src/miniflare-cli/assets.ts
+index f97606356092a5fefc620c546b1cbdc1c8d68084..25bc4c752ef821c15d14c63b80604fe0f156c8c8 100644
+--- a/src/miniflare-cli/assets.ts
++++ b/src/miniflare-cli/assets.ts
+@@ -3,7 +3,7 @@ import { join } from "node:path";
+ import { createMetadataObject } from "@cloudflare/pages-shared/metadata-generator/createMetadataObject";
+ import { parseHeaders } from "@cloudflare/pages-shared/metadata-generator/parseHeaders";
+ import { parseRedirects } from "@cloudflare/pages-shared/metadata-generator/parseRedirects";
+-import { fetch as miniflareFetch } from "@miniflare/core";
++import { upgradingFetch as miniflareFetch } from "@miniflare/web-sockets";
+ import {
+ 	Response as MiniflareResponse,
+ 	Request as MiniflareRequest,
+@@ -40,7 +40,12 @@ export default async function generateASSETSBinding(options: Options) {
+ 			try {
+ 				const url = new URL(miniflareRequest.url);
+ 				url.host = `localhost:${options.proxyPort}`;
+-				return await miniflareFetch(url, miniflareRequest);
++				const proxyRequest = new MiniflareRequest(url, miniflareRequest);
++				if (proxyRequest.headers.get("Upgrade") === "websocket") {
++					proxyRequest.headers.delete("Sec-WebSocket-Accept");
++					proxyRequest.headers.delete("Sec-WebSocket-Key");
++				}
++				return await miniflareFetch(proxyRequest);
+ 			} catch (thrown) {
+ 				options.log.error(new Error(`Could not proxy request: ${thrown}`));
+ 
