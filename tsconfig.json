@@ -16,5 +16,5 @@
     "incremental": true
   },
   "include": ["src/typings/*.d.ts", "next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", ".next"]
+  "exclude": ["node_modules", ".next", "functions/**/*"]
 }
