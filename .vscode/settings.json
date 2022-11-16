@@ -1,5 +1,14 @@
 {
   "files.insertFinalNewline": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": "on"
+  },
+  "editor.rulers": [120],
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true,
@@ -12,5 +21,17 @@
   "css.validate": false,
   "less.validate": false,
   "scss.validate": false,
+  "tailwindCSS.showPixelEquivalents": true,
+  "tailwindCSS.experimental.classRegex": [
+    // example: <span textClassName="match" />
+    "[\\S]*[cC]lassName: \"([^\"]*)\"",
+    // Headless UI Transition classes
+    // example: <Transition enterFrom="match" leaveTo="match" enter="match" />
+    "[\\S]*enter(?:From|To)?=\"([^\"]*)\"",
+    "[\\S]*leave(?:From|To)?=\"([^\"]*)\"",
+    // clsx library
+    // example: clsx("match", { "match": true, "match": fn() === false }, var && "match", isTrue() && "match");
+    ["clsx\\(((?:[^)(]|\\((?:[^)(]|\\([^)(]*\\))*\\))*)\\)", "\"([^\"]*)\""]
+  ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }

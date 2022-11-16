@@ -13,6 +13,13 @@
     }
   }
 
+  /* stylelint-disable-next-line selector-id-pattern */
+  html,
+  body,
+  div#__next {
+    @apply w-full h-full;
+  }
+
   a,
   button {
     @apply cursor-pointer focus:outline-none focus:ring-0;
@@ -21,5 +28,11 @@
   a[disabled],
   button[disabled] {
     @apply cursor-default pointer-events-none;
+  }
+
+  svg {
+    width: 1em;
+    height: 1em;
+    fill: currentcolor;
   }
 }

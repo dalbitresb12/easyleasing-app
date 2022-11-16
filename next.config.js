@@ -34,6 +34,21 @@ const createImageConfig = () => {
 
 module.exports = withBundleAnalyzer({
   images: createImageConfig(),
+  // eslint-disable-next-line require-await
+  redirects: async () => {
+    return [
+      {
+        source: "/",
+        destination: "/saved",
+        permanent: false,
+      },
+      {
+        source: "/settings",
+        destination: "/settings/general",
+        permanent: false,
+      },
+    ];
+  },
   webpack: config => {
     config.module.rules.push({
       test: /\.svg$/i,

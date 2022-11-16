@@ -1541,6 +1541,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@material-symbols/svg-400@npm:^0.2.15":
+  version: 0.2.15
+  resolution: "@material-symbols/svg-400@npm:0.2.15"
+  checksum: 8b9b7e971a34305851e98d4edff259b642b1518cf1a0a695145285b40625e0eb48d8e682dc640b6121f89abf9b462f2257ff0cbb24515e883f61fe7c14cf53fb
+  languageName: node
+  linkType: hard
+
 "@next/bundle-analyzer@npm:13.0.2":
   version: 13.0.2
   resolution: "@next/bundle-analyzer@npm:13.0.2"
@@ -2790,6 +2797,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"clsx@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "clsx@npm:1.2.1"
+  checksum: 30befca8019b2eb7dbad38cff6266cf543091dae2825c856a62a8ccf2c3ab9c2907c4d12b288b73101196767f66812365400a227581484a05f968b0307cfaf12
+  languageName: node
+  linkType: hard
+
 "color-convert@npm:^1.9.0":
   version: 1.9.3
   resolution: "color-convert@npm:1.9.3"
@@ -3248,6 +3262,42 @@ __metadata:
   checksum: 7d00d7cd8e49b9afa762a813faac332dee781932d6f2c848dc348939c4253f1d4564341b7af1d041853bc3f32c2ef141b58e0a4d9862c17a7f08f68df1e0f1ed
   languageName: node
   linkType: hard
+
+"easyleasing-app@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "easyleasing-app@workspace:."
+  dependencies:
+    "@material-symbols/svg-400": ^0.2.15
+    "@next/bundle-analyzer": 13.0.2
+    "@next/eslint-plugin-next": 13.0.2
+    "@svgr/webpack": ^6.5.1
+    "@tailwindcss/forms": ^0.5.3
+    "@types/node": ^16.18.3
+    "@types/prettier": ^2.7.1
+    "@types/react": ^18.0.25
+    "@typescript-eslint/eslint-plugin": ^5.42.0
+    "@typescript-eslint/parser": ^5.42.0
+    autoprefixer: ^10.4.13
+    clsx: ^1.2.1
+    concurrently: ^7.5.0
+    eslint: ^8.26.0
+    eslint-config-next: 13.0.2
+    eslint-config-prettier: ^8.5.0
+    eslint-plugin-react: ^7.31.10
+    husky: ^8.0.1
+    lint-staged: ^13.0.3
+    next: 13.0.2
+    postcss: ^8.4.18
+    prettier: ^2.7.1
+    react: 18.2.0
+    react-dom: 18.2.0
+    stylelint: ^14.14.1
+    stylelint-config-prettier: ^9.0.3
+    stylelint-config-standard: ^29.0.0
+    tailwindcss: ^3.2.2
+    typescript: ^4.8.4
+  languageName: unknown
+  linkType: soft
 
 "electron-to-chromium@npm:^1.4.251":
   version: 1.4.284
@@ -5258,40 +5308,6 @@ __metadata:
   checksum: b8ffeb1e262eff7968fc90a2b6767b04cfd9842582a9d0ece0af7049537266e7b2506dfb1d107a32f06dd849ab2aea834d5830f7f4d0e5cb7d36e1ae55d021d9
   languageName: node
   linkType: hard
-
-"next-typescript-tailwind-starter@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "next-typescript-tailwind-starter@workspace:."
-  dependencies:
-    "@next/bundle-analyzer": 13.0.2
-    "@next/eslint-plugin-next": 13.0.2
-    "@svgr/webpack": ^6.5.1
-    "@tailwindcss/forms": ^0.5.3
-    "@types/node": ^16.18.3
-    "@types/prettier": ^2.7.1
-    "@types/react": ^18.0.25
-    "@typescript-eslint/eslint-plugin": ^5.42.0
-    "@typescript-eslint/parser": ^5.42.0
-    autoprefixer: ^10.4.13
-    concurrently: ^7.5.0
-    eslint: ^8.26.0
-    eslint-config-next: 13.0.2
-    eslint-config-prettier: ^8.5.0
-    eslint-plugin-react: ^7.31.10
-    husky: ^8.0.1
-    lint-staged: ^13.0.3
-    next: 13.0.2
-    postcss: ^8.4.18
-    prettier: ^2.7.1
-    react: 18.2.0
-    react-dom: 18.2.0
-    stylelint: ^14.14.1
-    stylelint-config-prettier: ^9.0.3
-    stylelint-config-standard: ^29.0.0
-    tailwindcss: ^3.2.2
-    typescript: ^4.8.4
-  languageName: unknown
-  linkType: soft
 
 "next@npm:13.0.2":
   version: 13.0.2
