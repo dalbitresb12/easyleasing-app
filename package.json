@@ -5,6 +5,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "algorithm": "node algorithm/index.mjs",
     "dev": "concurrently -s -n dev: 'yarn:dev:*'",
     "dev:next": "next dev --port 3001",
     "dev:wrangler": "wrangler pages dev --port 3000 --proxy 3001 --compatibility-date 2022-11-16 --kv users --kv preferences --kv loan_data --persist",
