@@ -318,6 +318,67 @@ const main = async () => {
     console.log(`Tipo de valor: ${extraCost.valueType}`);
     console.log(`Valor: ${extraCost.value}`);
   }
+
+  // Cronograma de pagos
+
+  let plazoDeGracia = "";
+  const saldoInicial = leasingAmount;
+  let saldoFinal = 0;
+  let interes = 0;
+  let totalIntereses = 0;
+  let amortizacion = 0;
+  let totalAmortizacion = 0;
+  /* 
+  const totalSeguro = 0;
+  const totalComisiones = 0;
+  const ahorroTributario = 0;
+  */
+  let cuota = 0;
+
+  for (let periodo = 1; periodo <= periodos; periodo++) {
+    console.log(`Periodo ${periodo}`);
+
+    interes = roundMoney(periodicalInterestRate * saldoInicial);
+    do {
+      plazoDeGracia = inquirer.prompt({
+        name: "plazoDeGracia",
+        type: "list",
+        message: `Escoja el tipo de plazo de gracia: `,
+        choices: ["Total", "Parcial", "Sin plazo de gracia"],
+      });
+    } while (periodo < periodos);
+
+    switch (plazoDeGracia) {
+      case "Total":
+        cuota = 0;
+        amortizacion = 0;
+        saldoFinal = saldoInicial + interes;
+        break;
+      case "Parcial":
+        cuota = interes;
+        amortizacion = 0;
+        saldoFinal = saldoInicial;
+        break;
+      case "Sin plazo de gracia":
+        cuota = roundMoney(
+          (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) * saldoInicial * periodicalInterestRate) /
+            (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1),
+        );
+        amortizacion = cuota - interes;
+        saldoFinal = saldoInicial - amortizacion;
+        break;
+    }
+
+    console.log(`Saldo inicial: S/ ${saldoInicial}`);
+    console.log(`Intereses: S/ ${interes}`);
+    console.log(`Amortización: S/ ${amortizacion}`);
+    console.log(`Saldo final: S/ ${saldoFinal}`);
+    totalIntereses += interes;
+    totalAmortizacion += amortizacion;
+  }
+  console.log(`Monto total por intereses: S/ ${totalIntereses}`);
+  console.log(`Monto total amortizado: S/ ${totalAmortizacion}`);
+  console.log(`Monto total por intereses: S/ ${totalIntereses}`);
 };
 
 main();
