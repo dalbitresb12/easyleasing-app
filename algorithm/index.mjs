@@ -99,6 +99,20 @@ const main = async () => {
       transformer: input => currencyFormatter.format(input),
     },
     {
+      name: "percentageInitialFee",
+      type: "input",
+      message: "Ingrese el porcentaje de cuota inicial: ",
+      validate: percentageValidation,
+      filter: value => {
+        const parsed = Number(value);
+        if (percentageValidation(parsed) === true) {
+          return parsed;
+        }
+        return value;
+      },
+      transformer: input => percentageFormatter.format(input / 100),
+    },
+    {
       name: "paymentFrequency",
       type: "list",
       message: "Elija su frecuencia de pago: ",
@@ -223,6 +237,13 @@ const main = async () => {
           type: "input",
           message: "Ingrese el valor: ",
           validate: extraCostValidation,
+          filter: (value, answers) => {
+            const parsed = Number(value);
+            if (extraCostValidation(parsed, answers) === true) {
+              return parsed;
+            }
+            return value;
+          },
           transformer: (value, answers) => {
             if (answers.valueType === "Monetario") {
               return currencyFormatter.format(value);
@@ -241,9 +262,27 @@ const main = async () => {
     } while (extraCosts[extraCosts.length - 1].keepAdding);
   }
 
+  const percentageInitialFee = inputs.percentageInitialFee / 100;
+
+  const initialFee = percentageInitialFee * inputs.sellingPrice;
+
+  const newSellingPrice = inputs.sellingPrice - initialFee;
+
   const loanTimeInDays = inputs.loanTime * 360;
-  const montoIGV = roundMoney(inputs.sellingPrice * IGV);
-  const valorVenta = roundMoney(inputs.sellingPrice - montoIGV);
+  const montoIGV = roundMoney(newSellingPrice * IGV);
+  const sellingValue = roundMoney(newSellingPrice - montoIGV);
+
+  let totalInitialCosts = 0;
+
+  for (const extraCost of extraCosts) {
+    if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
+      totalInitialCosts += extraCost.value;
+    } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
+      totalInitialCosts += (extraCost.value / 100) * inputs.sellingPrice;
+    }
+  }
+
+  const leasingAmount = totalInitialCosts + sellingValue;
 
   const cuotasAnuales = 360 / inputs.paymentFrequency;
   const periodos = loanTimeInDays / inputs.paymentFrequency;
@@ -260,8 +299,12 @@ const main = async () => {
   }
 
   console.log(`Precio de venta del activo: S/${inputs.sellingPrice}`);
-  console.log(`Monto de IGV: S/${montoIGV}`);
-  console.log(`Valor de venta del activo: S/${valorVenta}`);
+  console.log(`Cuota inicial: S/ ${initialFee}`);
+  console.log(`Nuevo precio de venta S/ ${newSellingPrice}`);
+  console.log(`Monto de IGV: S/ ${montoIGV}`);
+  console.log(`Valor de venta del activo: S/${sellingValue}`);
+  console.log(`Total por costos iniciales: S/ ${totalInitialCosts}`);
+  console.log(`Monto del leasing: S/ ${leasingAmount}`);
 
   console.log(`N° cuotas al año: ${cuotasAnuales}`);
   console.log(`N° periodos de pago: ${periodos}`);
