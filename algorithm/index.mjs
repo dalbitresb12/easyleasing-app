@@ -321,7 +321,7 @@ const main = async () => {
 
   // Cronograma de pagos
 
-  let plazoDeGracia = "";
+  let tipoPlazo = "";
   const saldoInicial = leasingAmount;
   let saldoFinal = 0;
   let interes = 0;
@@ -336,49 +336,47 @@ const main = async () => {
   let cuota = 0;
 
   for (let periodo = 1; periodo <= periodos; periodo++) {
-    console.log(`Periodo ${periodo}`);
+    console.log(`= = = = = Periodo ${periodo} = = = = =`);
 
     interes = roundMoney(periodicalInterestRate * saldoInicial);
-    do {
-      plazoDeGracia = inquirer.prompt({
+    if (periodo < periodos) {
+      const input = await inquirer.prompt({
         name: "plazoDeGracia",
         type: "list",
         message: `Escoja el tipo de plazo de gracia: `,
         choices: ["Total", "Parcial", "Sin plazo de gracia"],
       });
-    } while (periodo < periodos);
 
-    switch (plazoDeGracia) {
-      case "Total":
-        cuota = 0;
-        amortizacion = 0;
-        saldoFinal = saldoInicial + interes;
-        break;
-      case "Parcial":
-        cuota = interes;
-        amortizacion = 0;
-        saldoFinal = saldoInicial;
-        break;
-      case "Sin plazo de gracia":
-        cuota = roundMoney(
-          (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) * saldoInicial * periodicalInterestRate) /
-            (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1),
-        );
-        amortizacion = cuota - interes;
-        saldoFinal = saldoInicial - amortizacion;
-        break;
+      tipoPlazo = input.plazoDeGracia;
     }
 
-    console.log(`Saldo inicial: S/ ${saldoInicial}`);
+    if (tipoPlazo === "Total") {
+      cuota = 0;
+      amortizacion = 0;
+      saldoFinal = roundMoney(saldoInicial + interes);
+    } else if (tipoPlazo === "Parcial") {
+      cuota = interes;
+      amortizacion = 0;
+      saldoFinal = saldoInicial;
+    } else {
+      cuota = roundMoney(
+        (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) * saldoInicial * periodicalInterestRate) /
+          (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1),
+      );
+      amortizacion = roundMoney(cuota - interes);
+      saldoFinal = roundMoney(saldoInicial - amortizacion);
+    }
+
+    console.log(`\nSaldo inicial: S/ ${saldoInicial}`);
+    console.log(`Cuota: S/ ${cuota}`);
     console.log(`Intereses: S/ ${interes}`);
     console.log(`Amortización: S/ ${amortizacion}`);
-    console.log(`Saldo final: S/ ${saldoFinal}`);
-    totalIntereses += interes;
-    totalAmortizacion += amortizacion;
+    console.log(`Saldo final: S/ ${saldoFinal}\n`);
+    totalIntereses = roundMoney(totalIntereses + interes);
+    totalAmortizacion = roundMoney(totalAmortizacion + amortizacion);
   }
   console.log(`Monto total por intereses: S/ ${totalIntereses}`);
   console.log(`Monto total amortizado: S/ ${totalAmortizacion}`);
-  console.log(`Monto total por intereses: S/ ${totalIntereses}`);
 };
 
 main();
