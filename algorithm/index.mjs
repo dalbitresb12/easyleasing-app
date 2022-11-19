@@ -295,7 +295,7 @@ const main = async () => {
   let montoRecompra = 0;
 
   if (inputs.buyingOption) {
-    montoRecompra = inputs.sellingPrice * (inputs.buyingOptionPercentage / 100);
+    montoRecompra = sellingValue * (inputs.buyingOptionPercentage / 100);
   }
 
   let totalInitialCosts = 0;
