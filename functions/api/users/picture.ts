@@ -31,7 +31,7 @@ export const onRequestHead: AppFunction = async ctx => {
     return new Response(null, { status: 404 });
   }
 
-  const upload = await ctx.env.easyleasinguploads.head(picture);
+  const upload = await ctx.env.uploads.head(picture);
   if (!upload) {
     return new Response(null, { status: 404 });
   }
@@ -49,7 +49,7 @@ export const onRequestGet: AppFunction = async ctx => {
   }
 
   const range = parseRange(ctx.request.headers.get("range"));
-  const upload = await ctx.env.easyleasinguploads.get(picture, { range, onlyIf: ctx.request.headers });
+  const upload = await ctx.env.uploads.get(picture, { range, onlyIf: ctx.request.headers });
   if (!upload) {
     return new Response(null, { status: 404 });
   }
@@ -85,7 +85,7 @@ export const onRequestPut: AppFunction = async ctx => {
   const uploadId = uuidv4();
   const previousPicture = ctx.data.user.profilePicture;
 
-  const duplicateUpload = await ctx.env.easyleasinguploads.head(uploadId);
+  const duplicateUpload = await ctx.env.uploads.head(uploadId);
   if (duplicateUpload) {
     throw new ServerError("Another upload already exists with the same UUID.", {
       user: ctx.data.user.email,
@@ -93,7 +93,7 @@ export const onRequestPut: AppFunction = async ctx => {
     });
   }
 
-  const upload = await ctx.env.easyleasinguploads.put(uploadId, ctx.request.body, {
+  const upload = await ctx.env.uploads.put(uploadId, ctx.request.body, {
     httpMetadata: ctx.request.headers,
   });
 
@@ -101,7 +101,7 @@ export const onRequestPut: AppFunction = async ctx => {
   await ctx.env.users.put(ctx.data.user.email, JSON.stringify(ctx.data.user));
 
   if (previousPicture) {
-    await ctx.env.easyleasinguploads.delete(previousPicture);
+    await ctx.env.uploads.delete(previousPicture);
   }
 
   const headers = new Headers();
@@ -115,7 +115,7 @@ export const onRequestDelete: AppFunction = async ctx => {
     return new Response(null, { status: 404 });
   }
 
-  await ctx.env.easyleasinguploads.delete(picture);
+  await ctx.env.uploads.delete(picture);
 
   delete ctx.data.user.profilePicture;
   await ctx.env.users.put(ctx.data.user.email, JSON.stringify(ctx.data.user));
