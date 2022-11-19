@@ -110,13 +110,7 @@ export type ActionTemplateModel = BasicTemplateModel & {
   action_url: string;
 };
 
-const createActionTemplateOptions = (
-  ctx: AppContext,
-  pathname: string,
-  templateAlias: string,
-  code: string,
-  user: User,
-) => {
+const createActionTemplateOptions = (ctx: AppContext, pathname: string, template: string, code: string, user: User) => {
   const actionQuery = new URLSearchParams();
   actionQuery.set("email", user.email);
   actionQuery.set("code", code);
@@ -130,19 +124,23 @@ const createActionTemplateOptions = (
   return {
     From: ctx.env.POSTMARK_SENDER,
     To: `"${user.fullname}" <${user.email}>`,
-    TemplateAlias: templateAlias,
+    TemplateAlias: template,
     TemplateModel: model,
   };
 };
 
-export const sendConfirmationEmail: SendEmailFunction = async (ctx, user) => {
-  const code = uuidv4();
+const createActionSenderFunction = (pathname: string, template: string): SendEmailFunction => {
+  return async (ctx, user) => {
+    const code = uuidv4();
 
-  const options = createActionTemplateOptions(ctx, "/auth/verify-email", "email-verification", code, user);
-  const response = await sendWithTemplate(ctx.env.POSTMARK_SERVER_TOKEN, options);
+    const options = createActionTemplateOptions(ctx, pathname, template, code, user);
+    const response = await sendWithTemplate(ctx.env.POSTMARK_SERVER_TOKEN, options);
 
-  if (response.success) {
-    user.verificationCode = code;
-  }
-  return response;
+    if (response.success) {
+      user.verificationCode = code;
+    }
+    return response;
+  };
 };
+
+export const sendConfirmationEmail = createActionSenderFunction("/auth/verify-email", "email-verification");
