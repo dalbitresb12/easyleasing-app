@@ -6,6 +6,7 @@ export interface AppEnv {
   loan_data: KVNamespace;
   JWT_SECRET: string;
   POSTMARK_SERVER_TOKEN: string;
+  POSTMARK_SENDER: string;
 }
 
 export interface AppData extends Record<string, unknown> {
@@ -13,3 +14,4 @@ export interface AppData extends Record<string, unknown> {
 }
 
 export type AppFunction = PagesFunction<AppEnv, string, AppData>;
+export type AppContext = EventContext<AppEnv, string, AppData>;

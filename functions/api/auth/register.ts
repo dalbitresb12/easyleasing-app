@@ -44,7 +44,7 @@ export const onRequestPost: AppFunction = async ctx => {
   };
 
   // Send confirmation email
-  const emailResponse = await sendConfirmationEmail(ctx.env.POSTMARK_SERVER_TOKEN, ctx.request, user);
+  const emailResponse = await sendConfirmationEmail(ctx, user);
   if (!emailResponse.success) {
     throw new ServerError("An internal error occurred while trying to send the confirmation email.", emailResponse.raw);
   }
