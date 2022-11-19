@@ -4,6 +4,5 @@ compatibility_date = "2022-11-16"
 
 kv_namespaces = [
   { binding = "users", id = "b60e4a0214c14515b906126ec9927754", preview_id = "ca2337af1b054c4f85c1cff5e12cea61" },
-  { binding = "preferences", id = "cf57b357c8654c05897f731ad9d86da2", preview_id = "b7f210c9a1fa4168bce8607a34b642a9" },
   { binding = "loan_data", id = "b0ddc475efd14e0b9613294345e09295", preview_id = "b45f1e79d7d942f0be42e41051630692" },
 ]
