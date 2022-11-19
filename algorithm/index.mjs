@@ -1,4 +1,5 @@
 import inquirer from "inquirer";
+import { irr } from "financial";
 
 const currencyFormatter = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
 const percentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent" });
@@ -375,6 +376,9 @@ const main = async () => {
   let vnaFlujoBruto = 0;
   let vnaFlujoNeto = 0;
 
+  const flujosBrutos = [leasingAmount];
+  const flujosNetos = [leasingAmount];
+
   for (let periodo = 1; periodo <= periodos; periodo++) {
     console.log(`= = = = = Periodo ${periodo} = = = = =`);
 
@@ -450,6 +454,9 @@ const main = async () => {
     totalCostosPeriodicos += periodicCosts;
     totalSeguro += insuranceAmount;
     saldoInicial = saldoFinal;
+
+    flujosBrutos.push(roundMoney(flujoBruto));
+    flujosNetos.push(roundMoney(flujoNeto));
   }
 
   const desembolsoTotal = totalIntereses + totalAmortizacion + totalSeguro + totalCostosPeriodicos + montoRecompra;
@@ -462,9 +469,19 @@ const main = async () => {
 
   vnaFlujoBruto = vnaFlujoBruto + leasingAmount;
   vnaFlujoNeto = vnaFlujoNeto + leasingAmount;
+  const tirFlujoBruto = irr(flujosBrutos, 0.01);
+  const tirFlujoNeto = irr(flujosNetos, 0.01);
+
+  const tceaFlujoBruto = Math.pow(1 + tirFlujoBruto, cuotasAnuales) - 1;
+  const tceaFlujoNeto = Math.pow(1 + tirFlujoNeto, cuotasAnuales) - 1;
+
   console.log("= = = = = Indicadores de Rentabilidad = = = = =");
+  console.log(`TCEA Flujo Bruto: ${tceaFlujoBruto * 100}%`);
+  console.log(`TCEA Flujo Neto: ${tceaFlujoNeto * 100}%`);
   console.log(`VAN Flujo Bruto: ${roundMoney(vnaFlujoBruto)}`);
   console.log(`VAN Flujo Neto: ${roundMoney(vnaFlujoNeto)}`);
+  console.log(`TIR Flujo Bruto: ${tirFlujoBruto * 100}%`);
+  console.log(`TIR Flujo Neto: ${tirFlujoNeto * 100}%`);
 };
 
 main();

@@ -3723,6 +3723,7 @@ __metadata:
     eslint-config-next: 13.0.2
     eslint-config-prettier: ^8.5.0
     eslint-plugin-react: ^7.31.10
+    financial: ^0.1.3
     husky: ^8.0.1
     inquirer: ^9.1.4
     lint-staged: ^13.0.3
@@ -4540,6 +4541,13 @@ __metadata:
   dependencies:
     to-regex-range: ^5.0.1
   checksum: cc283f4e65b504259e64fd969bcf4def4eb08d85565e906b7d36516e87819db52029a76b6363d0f02d0d532f0033c9603b9e2d943d56ee3b0d4f7ad3328ff917
+  languageName: node
+  linkType: hard
+
+"financial@npm:^0.1.3":
+  version: 0.1.3
+  resolution: "financial@npm:0.1.3"
+  checksum: c5350f1afd431bbec77955b210908e22aa74f8b37df317e10f4fbdd2f05949439be0ec94600d4cf2a8d487a6a6110e2da9f030ebf6a7aae29c785f517339e15c
   languageName: node
   linkType: hard
 
