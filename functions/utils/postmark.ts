@@ -93,7 +93,7 @@ export const sendConfirmationEmail = async (
   const url = new URL(request.url);
   const model: ConfirmationEmailTemplateModel = {
     product_url: `${url.protocol}//${url.hostname}`,
-    action_url: `${url.protocol}//${url.hostname}/auth/verify-email?code=${code}`,
+    action_url: `${url.protocol}//${url.hostname}/auth/verify-email?email=${user.email}&code=${code}`,
     name: user.fullname,
   };
 
