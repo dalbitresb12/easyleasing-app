@@ -273,12 +273,15 @@ const main = async () => {
   const sellingValue = roundMoney(newSellingPrice - montoIGV);
 
   let totalInitialCosts = 0;
+  let periodicCosts = 0;
 
   for (const extraCost of extraCosts) {
     if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
       totalInitialCosts += extraCost.value;
     } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
       totalInitialCosts += (extraCost.value / 100) * inputs.sellingPrice;
+    } else if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
+      periodicCosts += extraCost.value;
     }
   }
 
@@ -328,6 +331,7 @@ const main = async () => {
   let totalIntereses = 0;
   let amortizacion = 0;
   let totalAmortizacion = 0;
+  let totalCostosPeriodicos = 0;
   /* 
   const totalSeguro = 0;
   const totalComisiones = 0;
@@ -380,12 +384,15 @@ const main = async () => {
     console.log(`Intereses: S/ ${roundMoney(intereses)}`);
     console.log(`Cuota: S/ ${roundMoney(cuota)}`);
     console.log(`Amortización: S/ ${roundMoney(amortizacion)}`);
+    console.log(`Costos periódicos: S/. ${roundMoney(periodicCosts)}`);
     console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}\n`);
 
+    totalCostosPeriodicos += periodicCosts;
     saldoInicial = saldoFinal;
   }
   console.log(`Monto total por intereses: S/ ${roundMoney(totalIntereses)}`);
   console.log(`Monto total amortizado: S/ ${roundMoney(totalAmortizacion)}`);
+  console.log(`Monto total por costos periódicos: S/ ${roundMoney(totalCostosPeriodicos)}`);
 };
 
 main();
