@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import { irr } from "financial";
 
 const currencyFormatter = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
-const percentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent" });
+const percentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 2 });
 
 function roundMoney(num) {
   return Math.round((num + Number.EPSILON) * 100) / 100;
@@ -192,7 +192,7 @@ const main = async () => {
         }
         return value;
       },
-      transformer: input => `${input}%`,
+      transformer: input => percentageFormatter.format(input / 100),
     },
     {
       name: "extraCosts",
@@ -241,7 +241,7 @@ const main = async () => {
             if (answers.valueType === "Monetario") {
               return currencyFormatter.format(value);
             }
-            return `${value}%`;
+            return percentageFormatter.format(value / 100);
           },
         },
         {
@@ -267,7 +267,7 @@ const main = async () => {
       }
       return value;
     },
-    transformer: input => `${input}%`,
+    transformer: input => percentageFormatter.format(input / 100),
   });
 
   const tasaIndicadorNeto = await inquirer.prompt({
@@ -282,7 +282,7 @@ const main = async () => {
       }
       return value;
     },
-    transformer: input => `${input}%`,
+    transformer: input => percentageFormatter.format(input / 100),
   });
 
   const descuentoKs = Math.pow(1 + tasaIndicadorBruto.descuentoKs / 100, inputs.paymentFrequency / 360) - 1;
@@ -414,12 +414,12 @@ const main = async () => {
       saldoFinal = saldoInicial + amortizacion;
     }
 
-    console.log(`\nSaldo inicial: S/ ${roundMoney(saldoInicial)}`);
-    console.log(`Intereses: S/ ${roundMoney(intereses)}`);
-    console.log(`Cuota: S/ ${roundMoney(cuota)}`);
-    console.log(`Amortización: S/ ${roundMoney(amortizacion)}`);
-    console.log(`Monto de seguro contra todo riesgo: S/ ${roundMoney(insuranceAmount)}`);
-    console.log(`Costos periódicos: S/. ${roundMoney(periodicCosts)}`);
+    console.log(`\nSaldo inicial: ${currencyFormatter.format(roundMoney(saldoInicial))}`);
+    console.log(`Intereses: ${currencyFormatter.format(roundMoney(intereses))}`);
+    console.log(`Cuota: ${currencyFormatter.format(roundMoney(cuota))}`);
+    console.log(`Amortización: ${currencyFormatter.format(roundMoney(amortizacion))}`);
+    console.log(`Monto de seguro contra todo riesgo: ${currencyFormatter.format(roundMoney(insuranceAmount))}`);
+    console.log(`Costos periódicos: ${currencyFormatter.format(roundMoney(periodicCosts))}`);
 
     ahorroTributario = (intereses + insuranceAmount + periodicCosts + depreciacion) * IR;
     montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts) * IGV;
@@ -428,7 +428,7 @@ const main = async () => {
     if (inputs.buyingOption && periodo === periodos) {
       montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts + montoRecompra) * IGV;
       flujoBruto = cuota + insuranceAmount + periodicCosts + montoRecompra;
-      console.log(`Monto de recompra: S/ ${roundMoney(montoRecompra)}`);
+      console.log(`Monto de recompra: ${currencyFormatter.format(roundMoney(montoRecompra))}`);
     }
 
     flujoIGV = flujoBruto + montoIGVPeriodico;
@@ -437,13 +437,13 @@ const main = async () => {
     vnaFlujoBruto += flujoBruto / Math.pow(1 + descuentoKs, periodo);
     vnaFlujoNeto += flujoNeto / Math.pow(1 + descuentoWACC, periodo);
 
-    console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}`);
-    console.log(`Depreciación: S/ ${roundMoney(depreciacion)}`);
-    console.log(`Ahorro tributario: S/ ${roundMoney(ahorroTributario)}`);
-    console.log(`IGV: S/ ${roundMoney(montoIGVPeriodico)}`);
-    console.log(`Flujo Bruto: S/ ${roundMoney(flujoBruto)}`);
-    console.log(`Flujo con IGV: S/ ${roundMoney(flujoIGV)}`);
-    console.log(`Flujo Neto:S/ ${roundMoney(flujoNeto)}\n`);
+    console.log(`Saldo final: ${currencyFormatter.format(roundMoney(saldoFinal))}`);
+    console.log(`Depreciación: ${currencyFormatter.format(roundMoney(depreciacion))}`);
+    console.log(`Ahorro tributario: ${currencyFormatter.format(roundMoney(ahorroTributario))}`);
+    console.log(`IGV: ${currencyFormatter.format(roundMoney(montoIGVPeriodico))}`);
+    console.log(`Flujo Bruto: ${currencyFormatter.format(roundMoney(flujoBruto))}`);
+    console.log(`Flujo con IGV: ${currencyFormatter.format(roundMoney(flujoIGV))}`);
+    console.log(`Flujo Neto: ${currencyFormatter.format(roundMoney(flujoNeto))}\n`);
 
     totalAmortizacion = totalAmortizacion + amortizacion;
 
@@ -461,11 +461,11 @@ const main = async () => {
 
   const desembolsoTotal = totalIntereses + totalAmortizacion + totalSeguro + totalCostosPeriodicos + montoRecompra;
 
-  console.log(`Monto total por intereses: S/ ${roundMoney(-totalIntereses)}`);
-  console.log(`Monto total amortizado: S/ ${roundMoney(-totalAmortizacion)}`);
-  console.log(`Monto total por costos periódicos: S/ ${roundMoney(-totalCostosPeriodicos)}`);
-  console.log(`Monto total por seguro contra todo riesgo: S/ ${roundMoney(-totalSeguro)}`);
-  console.log(`Desembolso total: S/ ${roundMoney(-desembolsoTotal)}\n`);
+  console.log(`Monto total por intereses: ${currencyFormatter.format(roundMoney(-totalIntereses))}`);
+  console.log(`Monto total amortizado: ${currencyFormatter.format(roundMoney(-totalAmortizacion))}`);
+  console.log(`Monto total por costos periódicos: ${currencyFormatter.format(roundMoney(-totalCostosPeriodicos))}`);
+  console.log(`Monto total por seguro contra todo riesgo: ${currencyFormatter.format(roundMoney(-totalSeguro))}`);
+  console.log(`Desembolso total: ${currencyFormatter.format(roundMoney(-desembolsoTotal))}\n`);
 
   vnaFlujoBruto = vnaFlujoBruto + leasingAmount;
   vnaFlujoNeto = vnaFlujoNeto + leasingAmount;
@@ -476,12 +476,12 @@ const main = async () => {
   const tceaFlujoNeto = Math.pow(1 + tirFlujoNeto, cuotasAnuales) - 1;
 
   console.log("= = = = = Indicadores de Rentabilidad = = = = =");
-  console.log(`TCEA Flujo Bruto: ${tceaFlujoBruto * 100}%`);
-  console.log(`TCEA Flujo Neto: ${tceaFlujoNeto * 100}%`);
-  console.log(`VAN Flujo Bruto: ${roundMoney(vnaFlujoBruto)}`);
-  console.log(`VAN Flujo Neto: ${roundMoney(vnaFlujoNeto)}`);
-  console.log(`TIR Flujo Bruto: ${tirFlujoBruto * 100}%`);
-  console.log(`TIR Flujo Neto: ${tirFlujoNeto * 100}%`);
+  console.log(`TCEA Flujo Bruto: ${percentageFormatter.format(tceaFlujoBruto)}`);
+  console.log(`TCEA Flujo Neto: ${percentageFormatter.format(tceaFlujoNeto)}`);
+  console.log(`VAN Flujo Bruto: ${currencyFormatter.format(roundMoney(vnaFlujoBruto))}`);
+  console.log(`VAN Flujo Neto: ${currencyFormatter.format(roundMoney(vnaFlujoNeto))}`);
+  console.log(`TIR Flujo Bruto: ${percentageFormatter.format(tirFlujoBruto)}`);
+  console.log(`TIR Flujo Neto: ${percentageFormatter.format(tirFlujoNeto)}`);
 };
 
 main();
