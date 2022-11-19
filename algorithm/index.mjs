@@ -113,6 +113,26 @@ const main = async () => {
       transformer: input => percentageFormatter.format(input / 100),
     },
     {
+      name: "buyingOption",
+      type: "confirm",
+      message: "¿Adquirirá el activo al finalizar la operación de leasing? ",
+      default: false,
+    },
+    {
+      name: "buyingOptionPercentage",
+      type: "input",
+      message: "Especifique el valor del porcentaje para la recompra: ",
+      validate: percentageValidation,
+      filter: value => {
+        const parsed = Number(value);
+        if (percentageValidation(parsed) === true) {
+          return parsed;
+        }
+        return value;
+      },
+      transformer: input => percentageFormatter.format(input / 100),
+    },
+    {
       name: "paymentFrequency",
       type: "list",
       message: "Elija su frecuencia de pago: ",
@@ -176,7 +196,7 @@ const main = async () => {
       name: "extraCosts",
       type: "confirm",
       message: "¿Desea registrar costos extra (iniciales o periódicos)?",
-      default: true,
+      default: false,
     },
     /*
     {
@@ -271,6 +291,12 @@ const main = async () => {
   const loanTimeInDays = inputs.loanTime * 360;
   const montoIGV = roundMoney((newSellingPrice * IGV) / (1 + IGV));
   const sellingValue = roundMoney(newSellingPrice - montoIGV);
+
+  let montoRecompra = 0;
+
+  if (inputs.buyingOption) {
+    montoRecompra = inputs.sellingPrice * (inputs.buyingOptionPercentage / 100);
+  }
 
   let totalInitialCosts = 0;
   let periodicCosts = 0;
@@ -385,6 +411,9 @@ const main = async () => {
     console.log(`Cuota: S/ ${roundMoney(cuota)}`);
     console.log(`Amortización: S/ ${roundMoney(amortizacion)}`);
     console.log(`Costos periódicos: S/. ${roundMoney(periodicCosts)}`);
+    if (periodo === periodos) {
+      console.log(`Monto de recompra: S/ ${roundMoney(montoRecompra)}`);
+    }
     console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}\n`);
 
     totalCostosPeriodicos += periodicCosts;
