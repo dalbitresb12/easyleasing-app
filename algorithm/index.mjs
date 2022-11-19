@@ -254,6 +254,39 @@ const main = async () => {
     } while (extraCosts[extraCosts.length - 1].keepAdding);
   }
 
+  const tasaIndicadorBruto = await inquirer.prompt({
+    name: "descuentoKs",
+    type: "input",
+    message: "Tasa de descuento Ks: ",
+    validate: percentageValidation,
+    filter: value => {
+      const parsed = Number(value);
+      if (percentageValidation(parsed) === true) {
+        return parsed;
+      }
+      return value;
+    },
+    transformer: input => `${input}%`,
+  });
+
+  const tasaIndicadorNeto = await inquirer.prompt({
+    name: "descuentoWACC",
+    type: "input",
+    message: "Tasa de descuento WACC: ",
+    validate: percentageValidation,
+    filter: value => {
+      const parsed = Number(value);
+      if (percentageValidation(parsed) === true) {
+        return parsed;
+      }
+      return value;
+    },
+    transformer: input => `${input}%`,
+  });
+
+  const descuentoKs = Math.pow(1 + tasaIndicadorBruto.descuentoKs / 100, inputs.paymentFrequency / 360) - 1;
+  const descuentoWACC = Math.pow(1 + tasaIndicadorNeto.descuentoWACC / 100, inputs.paymentFrequency / 360) - 1;
+
   const percentageInitialFee = inputs.percentageInitialFee / 100;
 
   const initialFee = percentageInitialFee * inputs.sellingPrice;
@@ -269,7 +302,7 @@ const main = async () => {
 
   let montoRecompra = 0;
   if (inputs.buyingOption) {
-    montoRecompra = sellingValue * (inputs.buyingOptionPercentage / 100);
+    montoRecompra = -(sellingValue * (inputs.buyingOptionPercentage / 100));
   }
 
   let totalInitialCosts = 0;
@@ -282,9 +315,9 @@ const main = async () => {
     } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
       totalInitialCosts += (extraCost.value / 100) * inputs.sellingPrice;
     } else if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
-      periodicCosts += extraCost.value;
+      periodicCosts -= extraCost.value;
     } else {
-      insuranceAmount = ((extraCost.value / 100) * newSellingPrice) / cuotasAnuales;
+      insuranceAmount = -(((extraCost.value / 100) * newSellingPrice) / cuotasAnuales);
     }
   }
 
@@ -316,6 +349,9 @@ const main = async () => {
   console.log(`Tipo de tasa de interés: ${inputs.interestRateType}`);
   console.log(`Tasa efectiva del periodo: ${periodicalInterestRate * 100}%\n`);
 
+  console.log(`Tasa descuento Ks equivalente: ${descuentoKs * 100}%`);
+  console.log(`Tasa descuento WACC equivalente: ${descuentoWACC * 100}%`);
+
   // Cronograma de pagos
 
   let tipoPlazo = "";
@@ -324,7 +360,7 @@ const main = async () => {
   let intereses = 0;
   let amortizacion = 0;
   let saldoFinal = 0;
-  const depreciacion = sellingValue / periodos;
+  const depreciacion = -(sellingValue / periodos);
   let ahorroTributario = 0;
   let montoIGVPeriodico = 0;
   let flujoBruto = 0;
@@ -336,10 +372,13 @@ const main = async () => {
   let totalCostosPeriodicos = 0;
   let totalSeguro = 0;
 
+  let vnaFlujoBruto = 0;
+  let vnaFlujoNeto = 0;
+
   for (let periodo = 1; periodo <= periodos; periodo++) {
     console.log(`= = = = = Periodo ${periodo} = = = = =`);
 
-    intereses = periodicalInterestRate * saldoInicial;
+    intereses = -(periodicalInterestRate * saldoInicial);
 
     if (periodo < periodos) {
       const input = await inquirer.prompt({
@@ -357,18 +396,18 @@ const main = async () => {
     if (tipoPlazo === "Total") {
       cuota = 0;
       amortizacion = 0;
-      saldoFinal = saldoInicial + intereses;
+      saldoFinal = saldoInicial - intereses;
     } else if (tipoPlazo === "Parcial") {
       cuota = intereses;
       amortizacion = 0;
-      saldoFinal = saldoInicial;
     } else {
-      cuota =
+      cuota = -(
         (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) * saldoInicial * periodicalInterestRate) /
-        (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1);
+        (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1)
+      );
 
       amortizacion = cuota - intereses;
-      saldoFinal = saldoInicial - amortizacion;
+      saldoFinal = saldoInicial + amortizacion;
     }
 
     console.log(`\nSaldo inicial: S/ ${roundMoney(saldoInicial)}`);
@@ -391,10 +430,13 @@ const main = async () => {
     flujoIGV = flujoBruto + montoIGVPeriodico;
     flujoNeto = flujoBruto - ahorroTributario;
 
+    vnaFlujoBruto += flujoBruto / Math.pow(1 + descuentoKs, periodo);
+    vnaFlujoNeto += flujoNeto / Math.pow(1 + descuentoWACC, periodo);
+
     console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}`);
     console.log(`Depreciación: S/ ${roundMoney(depreciacion)}`);
     console.log(`Ahorro tributario: S/ ${roundMoney(ahorroTributario)}`);
-    console.log(`IGV: ${roundMoney(montoIGVPeriodico)}`);
+    console.log(`IGV: S/ ${roundMoney(montoIGVPeriodico)}`);
     console.log(`Flujo Bruto: S/ ${roundMoney(flujoBruto)}`);
     console.log(`Flujo con IGV: S/ ${roundMoney(flujoIGV)}`);
     console.log(`Flujo Neto:S/ ${roundMoney(flujoNeto)}\n`);
@@ -412,11 +454,17 @@ const main = async () => {
 
   const desembolsoTotal = totalIntereses + totalAmortizacion + totalSeguro + totalCostosPeriodicos + montoRecompra;
 
-  console.log(`Monto total por intereses: S/ ${roundMoney(totalIntereses)}`);
-  console.log(`Monto total amortizado: S/ ${roundMoney(totalAmortizacion)}`);
-  console.log(`Monto total por costos periódicos: S/ ${roundMoney(totalCostosPeriodicos)}`);
-  console.log(`Monto total por seguro contra todo riesgo: S/ ${roundMoney(totalSeguro)}`);
-  console.log(`Desembolso total: S/ ${roundMoney(desembolsoTotal)}`);
+  console.log(`Monto total por intereses: S/ ${roundMoney(-totalIntereses)}`);
+  console.log(`Monto total amortizado: S/ ${roundMoney(-totalAmortizacion)}`);
+  console.log(`Monto total por costos periódicos: S/ ${roundMoney(-totalCostosPeriodicos)}`);
+  console.log(`Monto total por seguro contra todo riesgo: S/ ${roundMoney(-totalSeguro)}`);
+  console.log(`Desembolso total: S/ ${roundMoney(-desembolsoTotal)}\n`);
+
+  vnaFlujoBruto = vnaFlujoBruto + leasingAmount;
+  vnaFlujoNeto = vnaFlujoNeto + leasingAmount;
+  console.log("= = = = = Indicadores de Rentabilidad = = = = =");
+  console.log(`VAN Flujo Bruto: ${roundMoney(vnaFlujoBruto)}`);
+  console.log(`VAN Flujo Neto: ${roundMoney(vnaFlujoNeto)}`);
 };
 
 main();
