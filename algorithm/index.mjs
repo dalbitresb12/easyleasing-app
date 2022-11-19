@@ -124,7 +124,7 @@ const main = async () => {
       type: "input",
       message: "Especifique el valor del porcentaje para la recompra: ",
       validate: percentageValidation,
-      when: answers => answers.buyingOpyition,
+      when: answers => answers.buyingOption,
       filter: value => {
         const parsed = Number(value);
         if (percentageValidation(parsed) === true) {
