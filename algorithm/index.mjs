@@ -124,7 +124,7 @@ const main = async () => {
       type: "input",
       message: "Especifique el valor del porcentaje para la recompra: ",
       validate: percentageValidation,
-      when: answers => !answers.buyingOpyition,
+      when: answers => answers.buyingOpyition,
       filter: value => {
         const parsed = Number(value);
         if (percentageValidation(parsed) === true) {
@@ -404,12 +404,12 @@ const main = async () => {
     } else if (tipoPlazo === "Parcial") {
       cuota = intereses;
       amortizacion = 0;
+      saldoFinal = saldoInicial + amortizacion;
     } else {
       cuota = -(
         (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) * saldoInicial * periodicalInterestRate) /
         (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1)
       );
-
       amortizacion = cuota - intereses;
       saldoFinal = saldoInicial + amortizacion;
     }
