@@ -359,6 +359,7 @@ const main = async () => {
   let intereses = 0;
   let totalIntereses = 0;
   let amortizacion = 0;
+  const depreciacion = sellingValue / periodos;
   let totalAmortizacion = 0;
   let totalCostosPeriodicos = 0;
   let totalSeguro = 0;
@@ -421,7 +422,8 @@ const main = async () => {
       console.log(`Monto de recompra: S/ ${roundMoney(montoRecompra)}`);
     }
 
-    console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}\n`);
+    console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}`);
+    console.log(`Depreciación: S/ ${depreciacion}`);
 
     totalCostosPeriodicos += periodicCosts;
     totalSeguro += insuranceAmount;
