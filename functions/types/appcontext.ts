@@ -4,6 +4,7 @@ export interface AppEnv {
   users: KVNamespace;
   preferences: KVNamespace;
   loan_data: KVNamespace;
+  easyleasinguploads: R2Bucket;
   JWT_SECRET: string;
   POSTMARK_SERVER_TOKEN: string;
   POSTMARK_SENDER: string;

@@ -6,6 +6,7 @@ export const User = z.object({
   preferredName: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(8).max(72),
+  profilePicture: z.string().uuid().optional(),
   verified: z.boolean().default(false).optional(),
   verificationCode: z.string().optional(),
   currency: z.string().length(3).default("PEN").optional(),
