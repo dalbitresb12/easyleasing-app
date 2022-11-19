@@ -5,10 +5,12 @@ export const User = z.object({
   fullname: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(8).max(72),
+  verified: z.boolean().default(false).optional(),
+  verificationCode: z.string().uuid().optional(),
 });
 
 export type User = z.infer<typeof User>;
 
-export const SanitizedUser = User.omit({ password: true });
+export const SanitizedUser = User.omit({ password: true, verificationCode: true });
 
 export type SanitizedUser = z.infer<typeof SanitizedUser>;

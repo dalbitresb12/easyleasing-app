@@ -5,6 +5,7 @@ export interface AppEnv {
   preferences: KVNamespace;
   loan_data: KVNamespace;
   JWT_SECRET: string;
+  POSTMARK_SERVER_TOKEN: string;
 }
 
 export interface AppData extends Record<string, unknown> {

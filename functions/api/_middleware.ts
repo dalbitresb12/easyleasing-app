@@ -1,7 +1,7 @@
 import * as jwt from "@tsndr/cloudflare-worker-jwt";
 import { User } from "../models/user";
 import type { AppFunction } from "../types/appcontext";
-import { HttpError, ValidationError } from "../types/httperror";
+import { HttpError, ServerError, ValidationError } from "../types/httperror";
 
 export const errorHandler: AppFunction = async ctx => {
   try {
@@ -13,6 +13,11 @@ export const errorHandler: AppFunction = async ctx => {
       if (flatten) formatted = issues.flatten();
       else formatted = issues.format();
       return Response.json({ error: message, issues: formatted }, { status });
+    }
+    if (err instanceof ServerError) {
+      const { message, status } = err;
+      console.log(err);
+      return Response.json({ error: "Server error", message }, { status });
     }
     if (err instanceof HttpError) {
       const { message, status } = err;

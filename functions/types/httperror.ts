@@ -9,6 +9,15 @@ export class HttpError extends Error {
   }
 }
 
+export class ServerError extends HttpError {
+  data?: unknown;
+
+  constructor(message: string, data?: unknown) {
+    super(500, message);
+    this.data = data;
+  }
+}
+
 export class ValidationError extends HttpError {
   issues: ZodError;
   flatten: boolean;
