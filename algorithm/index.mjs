@@ -324,7 +324,7 @@ const main = async () => {
   let tipoPlazo = "";
   let saldoInicial = leasingAmount;
   let saldoFinal = 0;
-  let interes = 0;
+  let intereses = 0;
   let totalIntereses = 0;
   let amortizacion = 0;
   let totalAmortizacion = 0;
@@ -338,7 +338,7 @@ const main = async () => {
   for (let periodo = 1; periodo <= periodos; periodo++) {
     console.log(`= = = = = Periodo ${periodo} = = = = =`);
 
-    interes = roundMoney(periodicalInterestRate * saldoInicial);
+    intereses = periodicalInterestRate * saldoInicial;
 
     if (periodo < periodos) {
       const input = await inquirer.prompt({
@@ -356,33 +356,36 @@ const main = async () => {
     if (tipoPlazo === "Total") {
       cuota = 0;
       amortizacion = 0;
-      saldoFinal = roundMoney(saldoInicial + interes);
+      saldoFinal = saldoInicial + intereses;
     } else if (tipoPlazo === "Parcial") {
-      cuota = interes;
+      cuota = intereses;
       amortizacion = 0;
       saldoFinal = saldoInicial;
     } else {
-      cuota = roundMoney(
+      cuota =
         (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) * saldoInicial * periodicalInterestRate) /
-          (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1),
-      );
-      amortizacion = roundMoney(cuota - interes);
-      saldoFinal = roundMoney(saldoInicial - amortizacion);
+        (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1);
+
+      amortizacion = cuota - intereses;
+      saldoFinal = saldoInicial - amortizacion;
     }
 
-    totalAmortizacion = roundMoney(totalAmortizacion + amortizacion);
-    totalIntereses = roundMoney(totalIntereses + interes);
+    totalAmortizacion = totalAmortizacion + amortizacion;
 
-    console.log(`\nSaldo inicial: S/ ${saldoInicial}`);
-    console.log(`Intereses: S/ ${interes}`);
-    console.log(`Cuota: S/ ${cuota}`);
-    console.log(`Amortización: S/ ${amortizacion}`);
-    console.log(`Saldo final: S/ ${saldoFinal}\n`);
+    if (!(tipoPlazo === "Total")) {
+      totalIntereses = totalIntereses + intereses;
+    }
+
+    console.log(`\nSaldo inicial: S/ ${roundMoney(saldoInicial)}`);
+    console.log(`Intereses: S/ ${roundMoney(intereses)}`);
+    console.log(`Cuota: S/ ${roundMoney(cuota)}`);
+    console.log(`Amortización: S/ ${roundMoney(amortizacion)}`);
+    console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}\n`);
 
     saldoInicial = saldoFinal;
   }
-  console.log(`Monto total por intereses: S/ ${totalIntereses}`);
-  console.log(`Monto total amortizado: S/ ${totalAmortizacion}`);
+  console.log(`Monto total por intereses: S/ ${roundMoney(totalIntereses)}`);
+  console.log(`Monto total amortizado: S/ ${roundMoney(totalAmortizacion)}`);
 };
 
 main();
