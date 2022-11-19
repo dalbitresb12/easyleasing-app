@@ -32,12 +32,17 @@ export const PostmarkEmailResponse = z.object({
 export type PostmarkEmailResponse = z.infer<typeof PostmarkEmailResponse>;
 
 const applicationJson = "application/json";
+const postmarkTestToken = "POSTMARK_API_TEST";
 
 const sendRequest = async (
   endpoint: string,
   token: string,
   options: PostmarkEmailOptions,
 ): Promise<PostmarkEmailResponse> => {
+  if (postmarkTestToken === token) {
+    return { MessageID: "value" };
+  }
+
   const body = JSON.stringify(options);
   const url = new URL(endpoint, "https://api.postmarkapp.com/");
   const headers = new Headers();
