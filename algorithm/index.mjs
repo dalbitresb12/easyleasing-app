@@ -268,7 +268,7 @@ const main = async () => {
             if (answers.valueType === "Monetario") {
               return currencyFormatter.format(value);
             }
-            return percentageFormatter.format(value / 100);
+            return `${value}%`;
           },
         },
         {
@@ -292,6 +292,9 @@ const main = async () => {
   const montoIGV = roundMoney((newSellingPrice * IGV) / (1 + IGV));
   const sellingValue = roundMoney(newSellingPrice - montoIGV);
 
+  const cuotasAnuales = 360 / inputs.paymentFrequency;
+  const periodos = loanTimeInDays / inputs.paymentFrequency;
+
   let montoRecompra = 0;
 
   if (inputs.buyingOption) {
@@ -300,6 +303,7 @@ const main = async () => {
 
   let totalInitialCosts = 0;
   let periodicCosts = 0;
+  let insuranceAmount = 0;
 
   for (const extraCost of extraCosts) {
     if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
@@ -308,13 +312,12 @@ const main = async () => {
       totalInitialCosts += (extraCost.value / 100) * inputs.sellingPrice;
     } else if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
       periodicCosts += extraCost.value;
+    } else {
+      insuranceAmount = ((extraCost.value / 100) * newSellingPrice) / cuotasAnuales;
     }
   }
 
   const leasingAmount = totalInitialCosts + sellingValue;
-
-  const cuotasAnuales = 360 / inputs.paymentFrequency;
-  const periodos = loanTimeInDays / inputs.paymentFrequency;
 
   let periodicalInterestRate = 0;
 
@@ -358,6 +361,7 @@ const main = async () => {
   let amortizacion = 0;
   let totalAmortizacion = 0;
   let totalCostosPeriodicos = 0;
+  let totalSeguro = 0;
   /* 
   const totalSeguro = 0;
   const totalComisiones = 0;
@@ -410,18 +414,23 @@ const main = async () => {
     console.log(`Intereses: S/ ${roundMoney(intereses)}`);
     console.log(`Cuota: S/ ${roundMoney(cuota)}`);
     console.log(`Amortización: S/ ${roundMoney(amortizacion)}`);
+    console.log(`Monto de seguro contra todo riesgo: S/ ${roundMoney(insuranceAmount)}`);
     console.log(`Costos periódicos: S/. ${roundMoney(periodicCosts)}`);
+
     if (periodo === periodos) {
       console.log(`Monto de recompra: S/ ${roundMoney(montoRecompra)}`);
     }
+
     console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}\n`);
 
     totalCostosPeriodicos += periodicCosts;
+    totalSeguro += insuranceAmount;
     saldoInicial = saldoFinal;
   }
   console.log(`Monto total por intereses: S/ ${roundMoney(totalIntereses)}`);
   console.log(`Monto total amortizado: S/ ${roundMoney(totalAmortizacion)}`);
   console.log(`Monto total por costos periódicos: S/ ${roundMoney(totalCostosPeriodicos)}`);
+  console.log(`Monto total por seguro contra todo riesgo: S/ ${roundMoney(totalSeguro)}`);
 };
 
 main();
