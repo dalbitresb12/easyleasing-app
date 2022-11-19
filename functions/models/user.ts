@@ -6,7 +6,7 @@ export const User = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(72),
   verified: z.boolean().default(false).optional(),
-  verificationCode: z.string().uuid().optional(),
+  verificationCode: z.string().optional(),
 });
 
 export type User = z.infer<typeof User>;

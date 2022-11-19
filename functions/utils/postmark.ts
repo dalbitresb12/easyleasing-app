@@ -144,3 +144,5 @@ const createActionSenderFunction = (pathname: string, template: string): SendEma
 };
 
 export const sendConfirmationEmail = createActionSenderFunction("/auth/verify-email", "email-verification");
+
+export const sendResetPasswordEmail = createActionSenderFunction("/auth/reset-password", "reset-password");
