@@ -118,12 +118,12 @@ const createActionTemplateOptions = (ctx: AppContext, pathname: string, template
   const model: ActionTemplateModel = {
     product_url: createUrlFromRequest(ctx.request),
     action_url: createUrlFromRequest(ctx.request, pathname, actionQuery),
-    name: user.fullname,
+    name: user.fullName,
   };
 
   return {
     From: ctx.env.POSTMARK_SENDER,
-    To: `"${user.fullname}" <${user.email}>`,
+    To: `"${user.fullName}" <${user.email}>`,
     TemplateAlias: template,
     TemplateModel: model,
   };

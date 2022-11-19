@@ -7,7 +7,7 @@ import { sendConfirmationEmail } from "../../utils/postmark";
 
 export const onRequestGet: AppFunction = ctx => Response.json(SanitizedUser.parse(ctx.data.user));
 
-const UpdatableUser = User.pick({ email: true, fullname: true, password: true }).partial();
+const UpdatableUser = User.pick({ email: true, fullName: true, password: true }).partial();
 
 export const onRequestPatch: AppFunction = async ctx => {
   const patch = await parseBody(ctx.request, UpdatableUser);

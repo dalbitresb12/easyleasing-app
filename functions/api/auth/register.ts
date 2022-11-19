@@ -7,7 +7,7 @@ import { HttpError, ServerError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 import { sendConfirmationEmail } from "../../utils/postmark";
 
-export const RegisterRequest = User.pick({ fullname: true, email: true, password: true });
+export const RegisterRequest = User.pick({ fullName: true, email: true, password: true });
 export type RegisterRequest = z.infer<typeof RegisterRequest>;
 
 export type RegisterResponse = {

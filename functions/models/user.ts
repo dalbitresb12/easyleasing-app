@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const User = z.object({
   uuid: z.string().uuid(),
+  fullName: z.string().min(1),
   fullname: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(8).max(72),

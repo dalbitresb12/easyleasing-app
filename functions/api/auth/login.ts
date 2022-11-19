@@ -45,7 +45,7 @@ export const onRequestPost: AppFunction = async ctx => {
   const url = new URL(ctx.request.url);
   const payload: JwtPayload = {
     sub: user.email,
-    name: user.fullname,
+    name: user.fullName,
     email: user.email,
     aud: url.hostname,
     exp: Math.floor(Date.now() / 1000 + ms("30d") / 1000),
