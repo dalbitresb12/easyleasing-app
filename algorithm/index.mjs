@@ -80,7 +80,7 @@ const extraCostValidation = (value, extraCosts) => {
 };
 
 const IGV = 0.18;
-// const IR = 0.3;
+const IR = 0.3;
 
 const main = async () => {
   const inputs = await inquirer.prompt([
@@ -116,13 +116,14 @@ const main = async () => {
       name: "buyingOption",
       type: "confirm",
       message: "¿Adquirirá el activo al finalizar la operación de leasing? ",
-      default: false,
+      default: true,
     },
     {
       name: "buyingOptionPercentage",
       type: "input",
       message: "Especifique el valor del porcentaje para la recompra: ",
       validate: percentageValidation,
+      when: answers => !answers.buyingOpyition,
       filter: value => {
         const parsed = Number(value);
         if (percentageValidation(parsed) === true) {
@@ -196,37 +197,8 @@ const main = async () => {
       name: "extraCosts",
       type: "confirm",
       message: "¿Desea registrar costos extra (iniciales o periódicos)?",
-      default: false,
+      default: true,
     },
-    /*
-    {
-      name: "periodicCommission",
-      type: "input",
-      message: "Ingrese el monto de comisión periódica: ",
-      validate: positiveValidation,
-      filter: value => {
-        const parsed = Number(value);
-        if (positiveValidation(parsed) === true) {
-          return parsed;
-        }
-        return value;
-      },
-      transformer: input => currencyFormatter.format(input),
-    },
-    {
-      name: "insurance",
-      type: "input",
-      message: "Ingrese el porcentaje del seguro contra todo riesgo: ",
-      validate: percentageValidation,
-      filter: value => {
-        const parsed = Number(value);
-        if (percentageValidation(parsed) === true) {
-          return parsed;
-        }
-        return value;
-      },
-      transformer: input => `${input}%`,
-    }, */
   ]);
 
   const extraCosts = [];
@@ -296,7 +268,6 @@ const main = async () => {
   const periodos = loanTimeInDays / inputs.paymentFrequency;
 
   let montoRecompra = 0;
-
   if (inputs.buyingOption) {
     montoRecompra = sellingValue * (inputs.buyingOptionPercentage / 100);
   }
@@ -330,45 +301,40 @@ const main = async () => {
       Math.pow(1 + inputs.interestRate / 100, inputs.paymentFrequency / inputs.interestRateFrequency) - 1;
   }
 
-  console.log(`Precio de venta del activo: S/ ${inputs.sellingPrice}`);
-  console.log(`Cuota inicial: S/ ${initialFee}`);
+  console.log(`\nPrecio de venta del activo: S/ ${inputs.sellingPrice}`);
+  console.log(`Cuota inicial: S/ ${initialFee}\n`);
   console.log(`Nuevo precio de venta S/ ${newSellingPrice}`);
   console.log(`Monto de IGV: S/ ${montoIGV}`);
   console.log(`Valor de venta del activo: S/ ${sellingValue}`);
   console.log(`Total por costos iniciales: S/ ${totalInitialCosts}`);
   console.log(`Monto del leasing: S/ ${leasingAmount}`);
 
-  console.log(`N° cuotas al año: ${cuotasAnuales}`);
+  console.log(`\nN° cuotas al año: ${cuotasAnuales}`);
   console.log(`N° periodos de pago: ${periodos}`);
-  console.log(`Frecuencia de pago: ${inputs.paymentFrequency} días`);
+  console.log(`Frecuencia de pago: ${inputs.paymentFrequency} días\n`);
 
   console.log(`Tipo de tasa de interés: ${inputs.interestRateType}`);
-  console.log(`Tasa efectiva del periodo: ${periodicalInterestRate * 100}%`);
-  for (const extraCost of extraCosts) {
-    console.log(`Nombre del gasto extra: ${extraCost.name}`);
-    console.log(`Tipo: ${extraCost.type}`);
-    console.log(`Tipo de valor: ${extraCost.valueType}`);
-    console.log(`Valor: ${extraCost.value}`);
-  }
+  console.log(`Tasa efectiva del periodo: ${periodicalInterestRate * 100}%\n`);
 
   // Cronograma de pagos
 
   let tipoPlazo = "";
   let saldoInicial = leasingAmount;
-  let saldoFinal = 0;
+  let cuota = 0;
   let intereses = 0;
-  let totalIntereses = 0;
   let amortizacion = 0;
+  let saldoFinal = 0;
   const depreciacion = sellingValue / periodos;
+  let ahorroTributario = 0;
+  let montoIGVPeriodico = 0;
+  let flujoBruto = 0;
+  let flujoIGV = 0;
+  let flujoNeto = 0;
+
+  let totalIntereses = 0;
   let totalAmortizacion = 0;
   let totalCostosPeriodicos = 0;
   let totalSeguro = 0;
-  /* 
-  const totalSeguro = 0;
-  const totalComisiones = 0;
-  const ahorroTributario = 0;
-  */
-  let cuota = 0;
 
   for (let periodo = 1; periodo <= periodos; periodo++) {
     console.log(`= = = = = Periodo ${periodo} = = = = =`);
@@ -405,12 +371,6 @@ const main = async () => {
       saldoFinal = saldoInicial - amortizacion;
     }
 
-    totalAmortizacion = totalAmortizacion + amortizacion;
-
-    if (!(tipoPlazo === "Total")) {
-      totalIntereses = totalIntereses + intereses;
-    }
-
     console.log(`\nSaldo inicial: S/ ${roundMoney(saldoInicial)}`);
     console.log(`Intereses: S/ ${roundMoney(intereses)}`);
     console.log(`Cuota: S/ ${roundMoney(cuota)}`);
@@ -418,21 +378,45 @@ const main = async () => {
     console.log(`Monto de seguro contra todo riesgo: S/ ${roundMoney(insuranceAmount)}`);
     console.log(`Costos periódicos: S/. ${roundMoney(periodicCosts)}`);
 
-    if (periodo === periodos) {
+    ahorroTributario = (intereses + insuranceAmount + periodicCosts + depreciacion) * IR;
+    montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts) * IGV;
+    flujoBruto = cuota + insuranceAmount + periodicCosts;
+
+    if (inputs.buyingOption && periodo === periodos) {
+      montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts + montoRecompra) * IGV;
+      flujoBruto = cuota + insuranceAmount + periodicCosts + montoRecompra;
       console.log(`Monto de recompra: S/ ${roundMoney(montoRecompra)}`);
     }
 
+    flujoIGV = flujoBruto + montoIGVPeriodico;
+    flujoNeto = flujoBruto - ahorroTributario;
+
     console.log(`Saldo final: S/ ${roundMoney(saldoFinal)}`);
-    console.log(`Depreciación: S/ ${depreciacion}`);
+    console.log(`Depreciación: S/ ${roundMoney(depreciacion)}`);
+    console.log(`Ahorro tributario: S/ ${roundMoney(ahorroTributario)}`);
+    console.log(`IGV: ${roundMoney(montoIGVPeriodico)}`);
+    console.log(`Flujo Bruto: S/ ${roundMoney(flujoBruto)}`);
+    console.log(`Flujo con IGV: S/ ${roundMoney(flujoIGV)}`);
+    console.log(`Flujo Neto:S/ ${roundMoney(flujoNeto)}\n`);
+
+    totalAmortizacion = totalAmortizacion + amortizacion;
+
+    if (!(tipoPlazo === "Total")) {
+      totalIntereses = totalIntereses + intereses;
+    }
 
     totalCostosPeriodicos += periodicCosts;
     totalSeguro += insuranceAmount;
     saldoInicial = saldoFinal;
   }
+
+  const desembolsoTotal = totalIntereses + totalAmortizacion + totalSeguro + totalCostosPeriodicos + montoRecompra;
+
   console.log(`Monto total por intereses: S/ ${roundMoney(totalIntereses)}`);
   console.log(`Monto total amortizado: S/ ${roundMoney(totalAmortizacion)}`);
   console.log(`Monto total por costos periódicos: S/ ${roundMoney(totalCostosPeriodicos)}`);
   console.log(`Monto total por seguro contra todo riesgo: S/ ${roundMoney(totalSeguro)}`);
+  console.log(`Desembolso total: S/ ${roundMoney(desembolsoTotal)}`);
 };
 
 main();
