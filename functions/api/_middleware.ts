@@ -1,7 +1,7 @@
-import type { AppFunction } from "../types/appcontext";
-import { HttpError, ValidationError } from "../types/httperror";
 import * as jwt from "@tsndr/cloudflare-worker-jwt";
 import { User } from "../models/user";
+import type { AppFunction } from "../types/appcontext";
+import { HttpError, ValidationError } from "../types/httperror";
 
 export const errorHandler: AppFunction = async ctx => {
   try {

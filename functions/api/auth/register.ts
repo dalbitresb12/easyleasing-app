@@ -1,9 +1,9 @@
-import type { AppFunction } from "../../types/appcontext";
-import { User } from "../../models/user";
-import { v4 as uuidv4 } from "uuid";
-import { HttpError, ValidationError } from "../../types/httperror";
-import { z } from "zod";
 import * as bcrypt from "bcryptjs";
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+import { User } from "../../models/user";
+import type { AppFunction } from "../../types/appcontext";
+import { HttpError, ValidationError } from "../../types/httperror";
 
 export const RegisterRequest = User.omit({ uuid: true });
 export type RegisterRequest = z.infer<typeof RegisterRequest>;
