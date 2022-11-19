@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { User } from "../../models/user";
 import type { AppFunction } from "../../types/appcontext";
-import { HttpError, ValidationError } from "../../types/httperror";
+import { HttpError } from "../../types/httperror";
+import { parseBody } from "../../utils/bodyparser";
 
 export const VerifyEmailRequest = z.object({
   email: z.string().email(),
@@ -14,14 +15,7 @@ export type VerifyEmailResponse = {
 };
 
 export const onRequestPost: AppFunction = async ctx => {
-  const reqBody = await ctx.request.json();
-
-  // Validate request body
-  const parsed = VerifyEmailRequest.safeParse(reqBody);
-  if (!parsed.success) {
-    throw new ValidationError(parsed.error);
-  }
-  const { data: req } = parsed;
+  const req = await parseBody(ctx.request, VerifyEmailRequest);
 
   // Find the requested user
   const data = await ctx.env.users.get(req.email);

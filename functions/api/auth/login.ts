@@ -4,7 +4,8 @@ import ms from "ms";
 import { z } from "zod";
 import { SanitizedUser, User } from "../../models/user";
 import type { AppFunction } from "../../types/appcontext";
-import { HttpError, ValidationError } from "../../types/httperror";
+import { HttpError } from "../../types/httperror";
+import { parseBody } from "../../utils/bodyparser";
 
 export const LoginRequest = User.pick({ email: true, password: true });
 export type LoginRequest = z.infer<typeof LoginRequest>;
@@ -20,12 +21,7 @@ export interface JwtPayload extends jwt.JwtPayload {
 }
 
 export const onRequestPost: AppFunction = async ctx => {
-  // Validate request body
-  const parsed = LoginRequest.safeParse(await ctx.request.json());
-  if (!parsed.success) {
-    throw new ValidationError(parsed.error);
-  }
-  const { data: req } = parsed;
+  const req = await parseBody(ctx.request, LoginRequest);
 
   // Get user from KV
   const data = await ctx.env.users.get(req.email);

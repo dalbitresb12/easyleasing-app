@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { User } from "../../models/user";
 import type { AppFunction } from "../../types/appcontext";
-import { HttpError, ServerError, ValidationError } from "../../types/httperror";
+import { HttpError, ServerError } from "../../types/httperror";
+import { parseBody } from "../../utils/bodyparser";
 import { sendConfirmationEmail } from "../../utils/postmark";
 
 export const RegisterRequest = User.pick({ fullname: true, email: true, password: true });
@@ -14,14 +15,7 @@ export type RegisterResponse = {
 };
 
 export const onRequestPost: AppFunction = async ctx => {
-  const reqBody = await ctx.request.json();
-
-  // Validate request body
-  const parsed = RegisterRequest.safeParse(reqBody);
-  if (!parsed.success) {
-    throw new ValidationError(parsed.error);
-  }
-  const { data: req } = parsed;
+  const req = await parseBody(ctx.request, RegisterRequest);
 
   // Check for duplicates
   const duplicateUser = await ctx.env.users.get(req.email);
