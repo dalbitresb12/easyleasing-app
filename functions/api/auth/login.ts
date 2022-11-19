@@ -34,6 +34,11 @@ export const onRequestPost: AppFunction = async ctx => {
   }
   const user = User.parse(JSON.parse(data));
 
+  // Don't allow unverified users to login
+  if (!user.verified) {
+    throw new HttpError(401, "User is missing email verification.");
+  }
+
   // Verify password
   const isValid = await bcrypt.compare(req.password, user.password);
   if (!isValid) {
