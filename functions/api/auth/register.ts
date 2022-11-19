@@ -7,7 +7,7 @@ import { HttpError, ServerError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 import { sendConfirmationEmail } from "../../utils/postmark";
 
-export const RegisterRequest = User.pick({ fullName: true, email: true, password: true });
+export const RegisterRequest = User.pick({ fullName: true, preferredName: true, email: true, password: true });
 export type RegisterRequest = z.infer<typeof RegisterRequest>;
 
 export type RegisterResponse = {
@@ -30,12 +30,12 @@ export const onRequestPost: AppFunction = async ctx => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.password, salt);
 
-  const user: User = {
+  const user = User.parse({
     ...req,
     uuid: uuid,
     password: hashedPassword,
     verified: false,
-  };
+  });
 
   // Send confirmation email
   const emailResponse = await sendConfirmationEmail(ctx, user);
