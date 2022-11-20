@@ -80,6 +80,15 @@ const extraCostValidation = (value, extraCosts) => {
   return percentageValidation(value);
 };
 
+// const plazoDeGracia => (numeroCuota, cuotas) {}
+
+const tirCalculation = flujos => {
+  return irr(flujos, 0.01);
+};
+const tceaCalculation = (tir, cuotasAnuales) => {
+  return Math.pow(1 + tir, cuotasAnuales) - 1;
+};
+
 const IGV = 0.18;
 const IR = 0.3;
 
@@ -469,11 +478,12 @@ const main = async () => {
 
   vnaFlujoBruto = vnaFlujoBruto + leasingAmount;
   vnaFlujoNeto = vnaFlujoNeto + leasingAmount;
-  const tirFlujoBruto = irr(flujosBrutos, 0.01);
-  const tirFlujoNeto = irr(flujosNetos, 0.01);
 
-  const tceaFlujoBruto = Math.pow(1 + tirFlujoBruto, cuotasAnuales) - 1;
-  const tceaFlujoNeto = Math.pow(1 + tirFlujoNeto, cuotasAnuales) - 1;
+  const tirFlujoBruto = tirCalculation(flujosBrutos);
+  const tirFlujoNeto = tirCalculation(flujosNetos);
+
+  const tceaFlujoBruto = tceaCalculation(tirFlujoBruto, cuotasAnuales);
+  const tceaFlujoNeto = tceaCalculation(tirFlujoBruto, cuotasAnuales);
 
   console.log("= = = = = Indicadores de Rentabilidad = = = = =");
   console.log(`TCEA Flujo Bruto: ${percentageFormatter.format(tceaFlujoBruto)}`);
