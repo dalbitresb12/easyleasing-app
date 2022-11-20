@@ -31,3 +31,10 @@ export class JwtStore {
     });
   }
 }
+
+export class JwtStoreError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "JwtError";
+  }
+}

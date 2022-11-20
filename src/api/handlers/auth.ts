@@ -8,7 +8,7 @@ import {
   VerifyEmailRequest,
 } from "@/shared/api/types";
 import { HttpClient, JsonRecord } from "@/utils/http-client";
-import { JwtStore } from "@/utils/jwt-store";
+import { JwtStoreError, JwtStore } from "@/utils/jwt-store";
 
 const prefix = (path: string) => `/api/auth${path}`;
 
@@ -22,8 +22,7 @@ export const loginHandler = async (data: LoginRequest): Promise<LoginResponse> =
   const response = await HttpClient.post(prefix("/login"), data, LoginResponse);
   const isSaved = await JwtStore.save(response.jwt);
   if (!isSaved) {
-    // TODO: Improve error handling
-    throw new Error("Unable to store JWT token to local storage.");
+    throw new JwtStoreError("Unable to store JWT token to local storage.");
   }
   return response;
 };
