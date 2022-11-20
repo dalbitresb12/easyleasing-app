@@ -21,6 +21,7 @@ const RegisterForm = RegisterRequest.extend({
     ctx.addIssue({
       code: "custom",
       message: "Las contraseñas no coinciden",
+      path: ["confirmation"],
     });
   }
 });
