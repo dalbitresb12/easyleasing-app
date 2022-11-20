@@ -5,6 +5,7 @@ export enum HttpErrorCode {
   UnknownError,
   HttpError,
   ServerError,
+  ClientError,
   ValidationError,
 }
 
@@ -22,8 +23,13 @@ export class HttpError extends Error {
 
   constructor(status: number, message: string) {
     super(message);
-    (this.name = "Bad request"), (this.status = status);
-    this.code = HttpErrorCode.HttpError;
+    this.name = this.isClientError(status) ? "Client error" : "Http error";
+    this.status = status;
+    this.code = this.isClientError(status) ? HttpErrorCode.ClientError : HttpErrorCode.HttpError;
+  }
+
+  private isClientError(status: number): boolean {
+    return status >= 400 && status <= 499;
   }
 
   toJSON(): HttpErrorSchema {
