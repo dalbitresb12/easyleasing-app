@@ -1,9 +1,5 @@
-interface Environment {
-  users: KVNamespace;
-  preferences: KVNamespace;
-  loan_data: KVNamespace;
-}
+import type { AppFunction } from "../types/appcontext";
 
-export const onRequest: PagesFunction<Environment> = async () => {
-  return await Promise.resolve(Response.json({ success: true }));
+export const onRequest: AppFunction = () => {
+  return new Response(null, { status: 200 });
 };

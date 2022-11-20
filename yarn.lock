@@ -1501,6 +1501,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hookform/resolvers@npm:^2.9.10":
+  version: 2.9.10
+  resolution: "@hookform/resolvers@npm:2.9.10"
+  peerDependencies:
+    react-hook-form: ^7.0.0
+  checksum: ae3395372d6ff11506a72bb6b3c57046bd14b457c2fe1f0485f60cf2dba0ef4484e3a2fb5a0f6a217f6d701393ebc3683a2ede7c81c6f13e71f965f520c7af16
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.11.6":
   version: 0.11.7
   resolution: "@humanwhocodes/config-array@npm:0.11.7"
@@ -1582,6 +1591,13 @@ __metadata:
     "@jridgewell/resolve-uri": 3.1.0
     "@jridgewell/sourcemap-codec": 1.4.14
   checksum: 9d703b859cff5cd83b7308fd457a431387db5db96bd781a63bf48e183418dd9d3d44e76b9e4ae13237f6abeeb25d739ec9215c1d5bfdd08f66f750a50074a339
+  languageName: node
+  linkType: hard
+
+"@lukemorales/query-key-factory@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@lukemorales/query-key-factory@npm:1.0.3"
+  checksum: d84d5e4529ed6836ba261901932e513096411776f0182e470340b367b3bf4dea83af960dc41107a7a29b8e328ef1b848f584ab0cb09a64c646d34d85d64895b5
   languageName: node
   linkType: hard
 
@@ -2146,6 +2162,56 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/match-sorter-utils@npm:8.1.1":
+  version: 8.1.1
+  resolution: "@tanstack/match-sorter-utils@npm:8.1.1"
+  dependencies:
+    remove-accents: 0.4.2
+  checksum: bf1458b7ca08cf79750ebd46fddef9c9b845ef55b5b69c0f7f69d48d6cbd73dbfd98763509f655298033b93cfc92b21d54f9f13a4d631cc68ca9191913967205
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:4.15.1":
+  version: 4.15.1
+  resolution: "@tanstack/query-core@npm:4.15.1"
+  checksum: ee98e75a3770fd35a6a10b9e7b3c417ea9da2b072481b5191d759182b29fd7bc4e8e340f83e2961b46fe4e1adac356087df04d4661c9459d09ff4d0574f683eb
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^4.16.1":
+  version: 4.16.1
+  resolution: "@tanstack/react-query-devtools@npm:4.16.1"
+  dependencies:
+    "@tanstack/match-sorter-utils": 8.1.1
+    superjson: ^1.10.0
+    use-sync-external-store: ^1.2.0
+  peerDependencies:
+    "@tanstack/react-query": 4.16.1
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: fb2ea13a485f99a97cadc4b139c5723107a03522471468e8ee6a6d125807b9bfed6fa01f229711b2a3e1aff3241fc63da40877ebf3c8388a1e511896770cd2be
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^4.16.1":
+  version: 4.16.1
+  resolution: "@tanstack/react-query@npm:4.16.1"
+  dependencies:
+    "@tanstack/query-core": 4.15.1
+    use-sync-external-store: ^1.2.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-native: "*"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+    react-native:
+      optional: true
+  checksum: 2c2d4c5c8bab2cd978ddd42153d33f844bd24a17ebe42f269cc64ee2a031f60f980b441640172885d9fd156fe9abc74ffc800fb68c6b6f6ef4fe48ffadafff79
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
@@ -2157,6 +2223,20 @@ __metadata:
   version: 0.2.0
   resolution: "@trysound/sax@npm:0.2.0"
   checksum: 11226c39b52b391719a2a92e10183e4260d9651f86edced166da1d95f39a0a1eaa470e44d14ac685ccd6d3df7e2002433782872c0feeb260d61e80f21250e65c
+  languageName: node
+  linkType: hard
+
+"@tsndr/cloudflare-worker-jwt@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "@tsndr/cloudflare-worker-jwt@npm:2.1.2"
+  checksum: 405446aea8544916093fb59c49e9b587763033e9c972240ac5cd78fb5c39f4ce80cb68476d9ac7f781b6dc1113c93246d13402adc45abebedbaa575700aeeb55
+  languageName: node
+  linkType: hard
+
+"@types/bcryptjs@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@types/bcryptjs@npm:2.4.2"
+  checksum: 220dade7b0312b41e23ccfb15f2ddde7804eb3c7ef41db41a6c49054be1e19a15eb3dd8c8ef196494f0866307cce22ad6f3f272941387124707d81dc66155bbc
   languageName: node
   linkType: hard
 
@@ -2197,6 +2277,13 @@ __metadata:
   version: 1.2.2
   resolution: "@types/minimist@npm:1.2.2"
   checksum: b8da83c66eb4aac0440e64674b19564d9d86c80ae273144db9681e5eeff66f238ade9515f5006ffbfa955ceff8b89ad2bd8ec577d7caee74ba101431fb07045d
+  languageName: node
+  linkType: hard
+
+"@types/ms@npm:^0.7.31":
+  version: 0.7.31
+  resolution: "@types/ms@npm:0.7.31"
+  checksum: daadd354aedde024cce6f5aa873fefe7b71b22cd0e28632a69e8b677aeb48ae8caa1c60e5919bb781df040d116b01cb4316335167a3fc0ef6a63fa3614c0f6da
   languageName: node
   linkType: hard
 
@@ -2280,6 +2367,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 9578470db0b527c26e246a1220ae9bffc6bf47f20f89c54aac467c083ab1f7e16c00d9a7b4bb6cb4e2dfae465027270827e5908a6236063f6214625e50585d78
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^8.3.4":
+  version: 8.3.4
+  resolution: "@types/uuid@npm:8.3.4"
+  checksum: 6f11f3ff70f30210edaa8071422d405e9c1d4e53abbe50fdce365150d3c698fe7bbff65c1e71ae080cbfb8fded860dbb5e174da96fdbbdfcaa3fb3daa474d20f
   languageName: node
   linkType: hard
 
@@ -2868,6 +2962,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bcryptjs@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "bcryptjs@npm:2.4.3"
+  checksum: 0e80ed852a41f5dfb1853f53ee14a7390b0ef263ce05dba6e2ef3cd919dfad025a7c21ebcfe5bc7fa04b100990edf90c7a877ff7fe623d3e479753253131b629
+  languageName: node
+  linkType: hard
+
 "binary-extensions@npm:^2.0.0":
   version: 2.2.0
   resolution: "binary-extensions@npm:2.2.0"
@@ -3342,6 +3443,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"copy-anything@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "copy-anything@npm:3.0.2"
+  dependencies:
+    is-what: ^4.1.6
+  checksum: 394491d62ab0c77c81616668bce51b91cf4e7b539bd530bb5b22c226151b0bc6122c01de21ffe46d5ec273f504fb34f6569f349ffb823fa814dddb8b27a4750c
+  languageName: node
+  linkType: hard
+
 "core-js-compat@npm:^3.25.1":
   version: 3.26.0
   resolution: "core-js-compat@npm:3.26.0"
@@ -3705,18 +3815,27 @@ __metadata:
   resolution: "easyleasing-app@workspace:."
   dependencies:
     "@cloudflare/workers-types": ^3.18.0
+    "@hookform/resolvers": ^2.9.10
+    "@lukemorales/query-key-factory": ^1.0.3
     "@material-symbols/svg-400": ^0.2.15
     "@next/bundle-analyzer": 13.0.2
     "@next/eslint-plugin-next": 13.0.2
     "@svgr/webpack": ^6.5.1
     "@tailwindcss/forms": ^0.5.3
+    "@tanstack/react-query": ^4.16.1
+    "@tanstack/react-query-devtools": ^4.16.1
+    "@tsndr/cloudflare-worker-jwt": ^2.1.2
+    "@types/bcryptjs": ^2.4.2
     "@types/inquirer": ^9.0.3
+    "@types/ms": ^0.7.31
     "@types/node": ^16.18.3
     "@types/prettier": ^2.7.1
     "@types/react": ^18.0.25
+    "@types/uuid": ^8.3.4
     "@typescript-eslint/eslint-plugin": ^5.42.0
     "@typescript-eslint/parser": ^5.42.0
     autoprefixer: ^10.4.13
+    bcryptjs: ^2.4.3
     clsx: ^1.2.1
     concurrently: ^7.5.0
     eslint: ^8.26.0
@@ -3726,17 +3845,22 @@ __metadata:
     husky: ^8.0.1
     inquirer: ^9.1.4
     lint-staged: ^13.0.3
+    ms: ^2.1.3
     next: 13.0.2
     postcss: ^8.4.18
     prettier: ^2.7.1
     react: 18.2.0
     react-dom: 18.2.0
+    react-hook-form: ^7.39.4
+    react-spinners: ^0.13.6
     stylelint: ^14.14.1
     stylelint-config-prettier: ^9.0.3
     stylelint-config-standard: ^29.0.0
     tailwindcss: ^3.2.2
     typescript: ^4.8.4
+    uuid: ^9.0.0
     wrangler: ^2.3.0
+    zod: ^3.19.1
   languageName: unknown
   linkType: soft
 
@@ -5418,6 +5542,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-what@npm:^4.1.6":
+  version: 4.1.7
+  resolution: "is-what@npm:4.1.7"
+  checksum: aade39dcc45a209d6cb2f2d5dbcf0e63ed894aadbae37bd5693c64e9876a27632431b43fc9d9332ebf0795eddd2abc11a2d0f3c6fa41c36330616a645660530e
+  languageName: node
+  linkType: hard
+
 "isexe@npm:^2.0.0":
   version: 2.0.0
   resolution: "isexe@npm:2.0.0"
@@ -6096,7 +6227,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ms@npm:^2.0.0, ms@npm:^2.1.1":
+"ms@npm:^2.0.0, ms@npm:^2.1.1, ms@npm:^2.1.3":
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
   checksum: aa92de608021b242401676e35cfa5aa42dd70cbdc082b916da7fb925c542173e36bce97ea3e804923fe92c0ad991434e4a38327e15a1b5b5f945d66df615ae6d
@@ -6911,10 +7042,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-hook-form@npm:^7.39.4":
+  version: 7.39.4
+  resolution: "react-hook-form@npm:7.39.4"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18
+  checksum: 767337330a9ce305296adb435e05380fb138308931a0ca20f7a681604acf16a978f14f48d52279fb2eccc690f808622fa4db019835fd0e4fd6a768d2c13b83d0
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.13.1":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: f7a19ac3496de32ca9ae12aa030f00f14a3d45374f1ceca0af707c831b2a6098ef0d6bdae51bd437b0a306d7f01d4677fcc8de7c0d331eb47ad0f46130e53c5f
+  languageName: node
+  linkType: hard
+
+"react-spinners@npm:^0.13.6":
+  version: 0.13.6
+  resolution: "react-spinners@npm:0.13.6"
+  peerDependencies:
+    react: ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 0e557190b5811e62774de0000f91fdcc3afe845872084abd5620d16335eb8292ed3fb3fdb94527fe2802a8366ac4e5d42c8e5bffda9e8ed0d85d3c34b3829d8e
   languageName: node
   linkType: hard
 
@@ -7075,6 +7225,13 @@ __metadata:
   bin:
     regjsparser: bin/parser
   checksum: 5e1b76afe8f1d03c3beaf9e0d935dd467589c3625f6d65fb8ffa14f224d783a0fed4bf49c2c1b8211043ef92b6117313419edf055a098ed8342e340586741afc
+  languageName: node
+  linkType: hard
+
+"remove-accents@npm:0.4.2":
+  version: 0.4.2
+  resolution: "remove-accents@npm:0.4.2"
+  checksum: 84a6988555dea24115e2d1954db99509588d43fe55a1590f0b5894802776f7b488b3151c37ceb9e4f4b646f26b80b7325dcea2fae58bc3865df146e1fa606711
   languageName: node
   linkType: hard
 
@@ -7892,6 +8049,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"superjson@npm:^1.10.0":
+  version: 1.11.0
+  resolution: "superjson@npm:1.11.0"
+  dependencies:
+    copy-anything: ^3.0.2
+  checksum: 943c2ffd67422a601fae0b2b9df176f421cebcee710cc2c379b0c01bca6aca98d0941bb0e91856dc785ede1c3353c524f8215a67916a48e3a59a45539a2c2bc4
+  languageName: node
+  linkType: hard
+
 "supports-color@npm:^5.3.0":
   version: 5.5.0
   resolution: "supports-color@npm:5.5.0"
@@ -8317,7 +8483,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:1.2.0":
+"use-sync-external-store@npm:1.2.0, use-sync-external-store@npm:^1.2.0":
   version: 1.2.0
   resolution: "use-sync-external-store@npm:1.2.0"
   peerDependencies:
@@ -8330,6 +8496,15 @@ __metadata:
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
   checksum: 474acf1146cb2701fe3b074892217553dfcf9a031280919ba1b8d651a068c9b15d863b7303cb15bd00a862b498e6cf4ad7b4a08fb134edd5a6f7641681cb54a2
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "uuid@npm:9.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 
@@ -8665,5 +8840,12 @@ __metadata:
     mustache: ^4.2.0
     stack-trace: 0.0.10
   checksum: e81644ad9469a26949a85cb2e1a3f9c9faf11daa67a265e9ad0361942b2c06cf02ee1dc8c85d74fe7ad25d35bbc2fee34717a54c5a0b8eeb82dc9276d139906b
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.19.1":
+  version: 3.19.1
+  resolution: "zod@npm:3.19.1"
+  checksum: 56e420ea5845912324a8fc61833714a2aec84954e418b52660d76502183c6e62fef9447cbfa64349640c5ce190cf2c24267e006bb80f066183e2f3fa9fe11864
   languageName: node
   linkType: hard

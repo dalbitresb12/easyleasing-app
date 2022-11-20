@@ -1,3 +1,15 @@
-import { createRedirectPage } from "../utils/redirect-page";
+import { useRouter } from "next/router";
 
-export default createRedirectPage("/saved");
+import { useAuthGuard } from "@/utils/use-auth-guard";
+
+const HomePage: React.FunctionComponent = () => {
+  const router = useRouter();
+
+  useAuthGuard({
+    onAuthenticated: () => router.push("/saved"),
+  });
+
+  return null;
+};
+
+export default HomePage;
