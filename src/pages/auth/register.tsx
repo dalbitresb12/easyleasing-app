@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC } from "react";
@@ -8,7 +8,6 @@ import { PulseLoader } from "react-spinners";
 import { z } from "zod";
 
 import { registerHandler } from "@/api/handlers";
-import { queries } from "@/api/keys";
 import { FormButton } from "@/components/form-button";
 import { FormInput } from "@/components/form-input";
 import { RegisterRequest } from "@/shared/api/types";
@@ -36,12 +35,13 @@ const RegisterPage: FC = () => {
     formState: { errors },
   } = useForm<RegisterForm>({ resolver: zodResolver(RegisterForm) });
 
-  const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: registerHandler,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ ...queries.users._def });
-      router.push("/");
+    onSuccess: (_, variables) => {
+      router.push({
+        pathname: "/auth/verify-email",
+        query: { email: variables.email },
+      });
     },
   });
 
