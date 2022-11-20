@@ -32,6 +32,6 @@ export const registerHandler = createSuccessHandler<RegisterRequest>(prefix("/re
 
 export const resetPasswordHandler = createSuccessHandler<ResetPasswordRequest>(prefix("/reset-password"));
 
-export const sendResetPasswordHandler = createSuccessHandler<SendResetPasswordRequest>(prefix("/reset-password"));
+export const sendResetPasswordHandler = createSuccessHandler<SendResetPasswordRequest>(prefix("/send-reset-password"));
 
 export const verifyEmailHandler = createSuccessHandler<VerifyEmailRequest>(prefix("/verify-email"));

@@ -1,10 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { PulseLoader } from "react-spinners";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { UrlObject } from "url";
 
 import { loginHandler } from "@/api/handlers";
 import { queries } from "@/api/keys";
@@ -19,8 +20,15 @@ const LoginPage: FC = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm<LoginRequest>({ resolver: zodResolver(LoginRequest) });
+  } = useForm<LoginRequest>({
+    resolver: zodResolver(LoginRequest),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
@@ -37,6 +45,17 @@ const LoginPage: FC = () => {
 
   const onSubmit = (data: LoginRequest) => {
     mutation.mutate(data);
+  };
+
+  const email = watch("email");
+  const getResetPasswordUrl = (): UrlObject | string => {
+    if (email.length > 0) {
+      return {
+        pathname: "/auth/send-reset-password",
+        query: { email },
+      };
+    }
+    return "/auth/send-reset-password";
   };
 
   return (
@@ -78,7 +97,7 @@ const LoginPage: FC = () => {
             <FormButton type="submit" disabled={mutation.isLoading}>
               {mutation.isLoading ? <PulseLoader size="0.5rem" color="#fff" /> : "Iniciar sesión"}
             </FormButton>
-            <Link href="/auth/reset-password">
+            <Link href={getResetPasswordUrl()}>
               <FormButton type="button" style="text" padding={false}>
                 ¿Olvidaste tu contraseña?
               </FormButton>
