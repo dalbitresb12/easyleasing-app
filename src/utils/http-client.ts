@@ -8,14 +8,14 @@ export enum HttpMethods {
   GET = "GET",
   HEAD = "HEAD",
   OPTIONS = "OPTIONS",
+  DELETE = "DELETE",
   POST = "POST",
   PUT = "PUT",
   PATCH = "PATCH",
-  DELETE = "DELETE",
 }
 
-export const HttpMethodsWithBody = [HttpMethods.POST, HttpMethods.PUT, HttpMethods.PATCH, HttpMethods.DELETE];
-export type HttpMethodsWithBody = HttpMethods.POST | HttpMethods.PUT | HttpMethods.PATCH | HttpMethods.DELETE;
+export const HttpMethodsWithBody = [HttpMethods.POST, HttpMethods.PUT, HttpMethods.PATCH];
+export type HttpMethodsWithBody = HttpMethods.POST | HttpMethods.PUT | HttpMethods.PATCH;
 export type HttpMethodsWithoutBody = Exclude<HttpMethods, HttpMethodsWithBody>;
 
 export class HttpClient {
@@ -92,6 +92,12 @@ export class HttpClient {
   ): Promise<z.infer<TModel>> {
     return this.request(path, HttpMethods.OPTIONS, model);
   }
+  static delete<TShape extends ZodRawShape, TModel extends ZodObject<TShape>>(
+    path: string,
+    model: TModel,
+  ): Promise<z.infer<TModel>> {
+    return this.request(path, HttpMethods.DELETE, model);
+  }
 
   static post<TShape extends ZodRawShape, TModel extends ZodObject<TShape>, TBody extends JsonRecord = JsonRecord>(
     path: string,
@@ -113,12 +119,5 @@ export class HttpClient {
     model: TModel,
   ): Promise<z.infer<TModel>> {
     return this.request(path, HttpMethods.PATCH, model, body);
-  }
-  static delete<TShape extends ZodRawShape, TModel extends ZodObject<TShape>, TBody extends JsonRecord = JsonRecord>(
-    path: string,
-    body: TBody,
-    model: TModel,
-  ): Promise<z.infer<TModel>> {
-    return this.request(path, HttpMethods.DELETE, model, body);
   }
 }
