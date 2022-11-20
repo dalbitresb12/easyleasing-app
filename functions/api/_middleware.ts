@@ -1,8 +1,9 @@
 import * as jwt from "@tsndr/cloudflare-worker-jwt";
 
-import { User } from "@/shared/models/user";
-import type { AppFunction } from "../types/appcontext";
 import { HttpError, HttpErrorCode, HttpErrorSchema } from "@/shared/api/types";
+import { User } from "@/shared/models/user";
+import { setupZodErrorMap } from "@/shared/utils/zod-errors";
+import type { AppFunction } from "../types/appcontext";
 
 export const errorHandler: AppFunction = async ctx => {
   try {
@@ -27,6 +28,11 @@ export const errorHandler: AppFunction = async ctx => {
     };
     return Response.json(response, { status: 500 });
   }
+};
+
+export const zodErrorMap: AppFunction = ctx => {
+  setupZodErrorMap();
+  return ctx.next();
 };
 
 export const authentication: AppFunction = async ctx => {
@@ -62,4 +68,4 @@ export const authentication: AppFunction = async ctx => {
   return await ctx.next();
 };
 
-export const onRequest: AppFunction[] = [errorHandler, authentication];
+export const onRequest: AppFunction[] = [errorHandler, zodErrorMap, authentication];
