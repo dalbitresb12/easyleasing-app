@@ -4,6 +4,7 @@
     "*.css": "tailwindcss",
     ".dev.vars": "ini"
   },
+  "files.eol": "\n",
   // "editor.quickSuggestions": {
   //   "other": "on",
   //   "comments": "off",
