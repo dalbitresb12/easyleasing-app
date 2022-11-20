@@ -35,12 +35,12 @@ export class HttpError extends Error {
     };
   }
 
-  static fromJSON(data: unknown): HttpErrorSchema | null {
-    try {
-      return HttpErrorSchema.parse(data);
-    } catch (_) {
-      return null;
-    }
+  static fromJSON(data: unknown): HttpError {
+    const parsed = HttpErrorSchema.parse(data);
+    const error = new HttpError(parsed.status, parsed.message);
+    error.name = parsed.error;
+    error.code = parsed.code;
+    return error;
   }
 }
 
