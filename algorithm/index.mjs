@@ -2,7 +2,8 @@ import inquirer from "inquirer";
 import { irr } from "financial";
 
 const currencyFormatter = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
-const percentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 2 });
+const inputPercentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 2 });
+const outputPercentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 7 });
 
 const IGV = 0.18;
 const IR = 0.3;
@@ -84,23 +85,26 @@ const percentageValidation = value => {
   return "Ingrese un valor porcentual adecuado";
 };
 
+const extraCostValidation = (value, extraCosts) => {
+  if (extraCosts.valueType === "Monetario") {
+    return positiveValidation(value);
+  }
+  return percentageValidation(value);
+};
+
 const getInitialFee = (initialFeePercentage, sellingPrice) => {
   return initialFeePercentage * sellingPrice;
 };
 
 const getBuyingOptionFee = (answers, sellingValue) => {
-  if (answers.buyingOption) {
+  if (answers.buyingOption === true) {
     return (answers.buyingOptionPercentage / 100) * sellingValue;
   }
   return 0;
 };
 
 const getIgvFee = sellingPrice => {
-  return roundMoney(IGV * sellingPrice) / (1 + IGV);
-};
-
-const getSellingValue = sellingPrice => {
-  return roundMoney(sellingPrice - getIgvFee(sellingPrice));
+  return roundMoney((sellingPrice * IGV) / (1 + IGV));
 };
 
 const getPeriods = (loanTime, paymentFrequency) => {
@@ -118,13 +122,6 @@ const getInterestRatePerPeriod = answers => {
   return convertirTasaEfectivaEnEfectiva(answers.interestRate, answers.interestRateFrequency, answers.paymentFrequency);
 };
 
-const extraCostValidation = (value, extraCosts) => {
-  if (extraCosts.valueType === "Monetario") {
-    return positiveValidation(value);
-  }
-  return percentageValidation(value);
-};
-
 const tirCalculation = flujos => {
   return irr(flujos, 0.01);
 };
@@ -132,218 +129,19 @@ const tceaCalculation = (tir, cuotasAnuales) => {
   return Math.pow(1 + tir, cuotasAnuales) - 1;
 };
 
-const main = async () => {
-  const inputs = await inquirer.prompt([
-    {
-      name: "sellingPrice",
-      type: "input",
-      message: "Especifique el precio de venta del activo: ",
-      validate: positiveValidation,
-      filter: value => {
-        const parsed = Number(value);
-        if (positiveValidation(parsed) === true) {
-          return parsed;
-        }
-        return value;
-      },
-      transformer: input => currencyFormatter.format(input),
-    },
-    {
-      name: "percentageInitialFee",
-      type: "input",
-      message: "Ingrese el porcentaje de cuota inicial: ",
-      validate: percentageValidation,
-      filter: value => {
-        const parsed = Number(value);
-        if (percentageValidation(parsed) === true) {
-          return parsed;
-        }
-        return value;
-      },
-      transformer: input => percentageFormatter.format(input / 100),
-    },
-    {
-      name: "buyingOption",
-      type: "confirm",
-      message: "¿Adquirirá el activo al finalizar la operación de leasing? ",
-      default: true,
-    },
-    {
-      name: "buyingOptionPercentage",
-      type: "input",
-      message: "Especifique el valor del porcentaje para la recompra: ",
-      validate: percentageValidation,
-      when: answers => answers.buyingOption,
-      filter: value => {
-        const parsed = Number(value);
-        if (percentageValidation(parsed) === true) {
-          return parsed;
-        }
-        return value;
-      },
-      transformer: input => percentageFormatter.format(input / 100),
-    },
-    {
-      name: "paymentFrequency",
-      type: "list",
-      message: "Elija su frecuencia de pago: ",
-      choices: frequencies,
-      filter(paymentFrequency) {
-        return inDays(paymentFrequency);
-      },
-    },
-    {
-      name: "loanTime",
-      type: "input",
-      message: "Especifique el tiempo total de pago (mínimo 2): ",
-      validate: loanTimeValidation,
-      filter: value => {
-        const parsed = Number(value);
-        if (loanTimeValidation(parsed) === true) {
-          return parsed;
-        }
-        return value;
-      },
-      transformer: input => `${input} años`,
-    },
-    {
-      name: "interestRateType",
-      type: "list",
-      message: "Elija el tipo de tasa de interés: ",
-      choices: ["Nominal", "Efectiva"],
-    },
-    {
-      name: "capitalizacion",
-      type: "list",
-      message: "Especifique la capitalizacion de la tasa nominal: ",
-      choices: frequencies,
-      when: answers => answers.interestRateType === "Nominal",
-      filter: capitalizacion => inDays(capitalizacion),
-    },
-    {
-      name: "interestRateFrequency",
-      type: "list",
-      message: "Especifique la frecuencia de la tasa de interés: ",
-      choices: frequencies,
-      filter(interestRateFrequency) {
-        return inDays(interestRateFrequency);
-      },
-    },
-    {
-      name: "interestRate",
-      type: "input",
-      message: "Ingrese el valor de la tasa de interés: ",
-      validate: percentageValidation,
-      filter: value => {
-        const parsed = Number(value);
-        if (percentageValidation(parsed) === true) {
-          return parsed;
-        }
-        return value;
-      },
-      transformer: input => percentageFormatter.format(input / 100),
-    },
-    {
-      name: "extraCosts",
-      type: "confirm",
-      message: "¿Desea registrar costos extra (iniciales o periódicos)?",
-      default: true,
-    },
-  ]);
-
-  const extraCosts = [];
-
-  if (inputs.extraCosts) {
-    do {
-      const data = await inquirer.prompt([
-        {
-          name: "name",
-          type: "input",
-          message: "Nombre del costo: ",
-          validate: input => input.length > 0,
-        },
-        {
-          name: "type",
-          type: "list",
-          message: "Elija el tipo de gasto: ",
-          choices: ["Inicial", "Periódico"],
-        },
-        {
-          name: "valueType",
-          type: "list",
-          message: "Indique el tipo de valor: ",
-          choices: ["Monetario", "Porcentual"],
-        },
-        {
-          name: "value",
-          type: "input",
-          message: "Ingrese el valor: ",
-          validate: extraCostValidation,
-          filter: (value, answers) => {
-            const parsed = Number(value);
-            if (extraCostValidation(parsed, answers) === true) {
-              return parsed;
-            }
-            return value;
-          },
-          transformer: (value, answers) => {
-            if (answers.valueType === "Monetario") {
-              return currencyFormatter.format(value);
-            }
-            return percentageFormatter.format(value / 100);
-          },
-        },
-        {
-          name: "keepAdding",
-          type: "confirm",
-          message: "¿Quiere continuar añadiendo costos?",
-          default: true,
-        },
-      ]);
-      extraCosts.push(data);
-    } while (extraCosts[extraCosts.length - 1].keepAdding);
-  }
-
-  const tasaIndicadorBruto = await inquirer.prompt({
-    name: "descuentoKs",
-    type: "input",
-    message: "Tasa de descuento Ks: ",
-    validate: percentageValidation,
-    filter: value => {
-      const parsed = Number(value);
-      if (percentageValidation(parsed) === true) {
-        return parsed;
-      }
-      return value;
-    },
-    transformer: input => percentageFormatter.format(input / 100),
-  });
-
-  const tasaIndicadorNeto = await inquirer.prompt({
-    name: "descuentoWACC",
-    type: "input",
-    message: "Tasa de descuento WACC: ",
-    validate: percentageValidation,
-    filter: value => {
-      const parsed = Number(value);
-      if (percentageValidation(parsed) === true) {
-        return parsed;
-      }
-      return value;
-    },
-    transformer: input => percentageFormatter.format(input / 100),
-  });
-
+const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescuentoWACC) => {
   const initialFee = getInitialFee(inputs.percentageInitialFee / 100, inputs.sellingPrice);
 
   const newSellingPrice = inputs.sellingPrice - initialFee;
 
-  const sellingValue = getSellingValue(inputs.sellingPrice);
+  const montoIgv = getIgvFee(newSellingPrice);
+
+  const sellingValue = newSellingPrice - montoIgv;
 
   const cuotasAnuales = 360 / inputs.paymentFrequency;
   const periodos = getPeriods(inputs.loanTime, inputs.paymentFrequency);
 
-  const montoRecompra = getBuyingOptionFee(inputs, sellingValue);
+  const montoRecompra = -getBuyingOptionFee(inputs, sellingValue);
 
   let totalInitialCosts = 0;
   let periodicCosts = 0;
@@ -365,27 +163,26 @@ const main = async () => {
 
   const interesRatePerPeriod = getInterestRatePerPeriod(inputs);
 
-  const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaIndicadorBruto.descuentoKs, 360, inputs.paymentFrequency);
-  const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaIndicadorNeto.descuentoWACC, 360, inputs.paymentFrequency);
+  const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaDescuentoKs, 360, inputs.paymentFrequency);
+  const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaDescuentoWACC, 360, inputs.paymentFrequency);
 
-  console.log(`\nPrecio de venta del activo: S/ ${inputs.sellingPrice}`);
-  console.log(`Cuota inicial: S/ ${initialFee}\n`);
-  console.log(`Nuevo precio de venta S/ ${newSellingPrice}`);
-  console.log(`Valor de venta del activo: S/ ${sellingValue}`);
-  console.log(`Total por costos iniciales: S/ ${totalInitialCosts}`);
-  console.log(`Monto del leasing: S/ ${leasingAmount}`);
+  console.log(`\nPrecio de venta del activo: ${inputs.sellingPrice}`);
+  console.log(`Cuota inicial: ${currencyFormatter.format(initialFee)}\n`);
+  console.log(`Nuevo precio de venta: ${currencyFormatter.format(newSellingPrice)}`);
+  console.log(`Monto IGV: ${currencyFormatter.format(montoIgv)}`);
+  console.log(`Valor de venta del activo: ${currencyFormatter.format(sellingValue)}`);
+  console.log(`Total por costos iniciales: ${currencyFormatter.format(totalInitialCosts)}`);
+  console.log(`Monto del leasing: ${currencyFormatter.format(leasingAmount)}`);
 
   console.log(`\nN° cuotas al año: ${cuotasAnuales}`);
   console.log(`N° periodos de pago: ${periodos}`);
   console.log(`Frecuencia de pago: ${inputs.paymentFrequency} días\n`);
 
   console.log(`Tipo de tasa de interés: ${inputs.interestRateType}`);
-  console.log(`Tasa efectiva del periodo: ${interesRatePerPeriod * 100}%\n`);
+  console.log(`Tasa efectiva del periodo: ${outputPercentageFormatter.format(interesRatePerPeriod * 100)}\n`);
 
-  console.log(`Tasa descuento Ks equivalente: ${descuentoKs * 100}%`);
-  console.log(`Tasa descuento WACC equivalente: ${descuentoWACC * 100}%`);
-
-  // Cronograma de pagos
+  console.log(`Tasa descuento Ks equivalente: ${outputPercentageFormatter.format(descuentoKs)}`);
+  console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(descuentoWACC)}`);
 
   let tipoPlazo = "";
   let saldoInicial = leasingAmount;
@@ -506,15 +303,221 @@ const main = async () => {
   const tirFlujoNeto = tirCalculation(flujosNetos);
 
   const tceaFlujoBruto = tceaCalculation(tirFlujoBruto, cuotasAnuales);
-  const tceaFlujoNeto = tceaCalculation(tirFlujoBruto, cuotasAnuales);
+  const tceaFlujoNeto = tceaCalculation(tirFlujoNeto, cuotasAnuales);
 
   console.log("= = = = = Indicadores de Rentabilidad = = = = =");
-  console.log(`TCEA Flujo Bruto: ${percentageFormatter.format(tceaFlujoBruto)}`);
-  console.log(`TCEA Flujo Neto: ${percentageFormatter.format(tceaFlujoNeto)}`);
+  console.log(`TCEA Flujo Bruto: ${outputPercentageFormatter.format(tceaFlujoBruto)}`);
+  console.log(`TCEA Flujo Neto: ${outputPercentageFormatter.format(tceaFlujoNeto)}`);
   console.log(`VAN Flujo Bruto: ${currencyFormatter.format(roundMoney(vnaFlujoBruto))}`);
   console.log(`VAN Flujo Neto: ${currencyFormatter.format(roundMoney(vnaFlujoNeto))}`);
-  console.log(`TIR Flujo Bruto: ${percentageFormatter.format(tirFlujoBruto)}`);
-  console.log(`TIR Flujo Neto: ${percentageFormatter.format(tirFlujoNeto)}`);
+  console.log(`TIR Flujo Bruto: ${outputPercentageFormatter.format(tirFlujoBruto)}`);
+  console.log(`TIR Flujo Neto: ${outputPercentageFormatter.format(tirFlujoNeto)}`);
+};
+
+const main = async () => {
+  const inputs = await inquirer.prompt([
+    {
+      name: "sellingPrice",
+      type: "input",
+      message: "Especifique el precio de venta del activo: ",
+      validate: positiveValidation,
+      filter: value => {
+        const parsed = Number(value);
+        if (positiveValidation(parsed) === true) {
+          return parsed;
+        }
+        return value;
+      },
+      transformer: input => currencyFormatter.format(input),
+    },
+    {
+      name: "percentageInitialFee",
+      type: "input",
+      message: "Ingrese el porcentaje de cuota inicial: ",
+      validate: percentageValidation,
+      filter: value => {
+        const parsed = Number(value);
+        if (percentageValidation(parsed) === true) {
+          return parsed;
+        }
+        return value;
+      },
+      transformer: input => inputPercentageFormatter.format(input / 100),
+    },
+    {
+      name: "buyingOption",
+      type: "confirm",
+      message: "¿Adquirirá el activo al finalizar la operación de leasing? ",
+      default: true,
+    },
+    {
+      name: "buyingOptionPercentage",
+      type: "input",
+      message: "Especifique el valor del porcentaje para la recompra: ",
+      validate: percentageValidation,
+      when: answers => answers.buyingOption,
+      filter: value => {
+        const parsed = Number(value);
+        if (percentageValidation(parsed) === true) {
+          return parsed;
+        }
+        return value;
+      },
+      transformer: input => inputPercentageFormatter.format(input / 100),
+    },
+    {
+      name: "paymentFrequency",
+      type: "list",
+      message: "Elija su frecuencia de pago: ",
+      choices: frequencies,
+      filter(paymentFrequency) {
+        return inDays(paymentFrequency);
+      },
+    },
+    {
+      name: "loanTime",
+      type: "input",
+      message: "Especifique el tiempo total de pago (mínimo 2): ",
+      validate: loanTimeValidation,
+      filter: value => {
+        const parsed = Number(value);
+        if (loanTimeValidation(parsed) === true) {
+          return parsed;
+        }
+        return value;
+      },
+      transformer: input => `${input} años`,
+    },
+    {
+      name: "interestRateType",
+      type: "list",
+      message: "Elija el tipo de tasa de interés: ",
+      choices: ["Nominal", "Efectiva"],
+    },
+    {
+      name: "capitalizacion",
+      type: "list",
+      message: "Especifique la capitalizacion de la tasa nominal: ",
+      choices: frequencies,
+      when: answers => answers.interestRateType === "Nominal",
+      filter: capitalizacion => inDays(capitalizacion),
+    },
+    {
+      name: "interestRateFrequency",
+      type: "list",
+      message: "Especifique la frecuencia de la tasa de interés: ",
+      choices: frequencies,
+      filter(interestRateFrequency) {
+        return inDays(interestRateFrequency);
+      },
+    },
+    {
+      name: "interestRate",
+      type: "input",
+      message: "Ingrese el valor de la tasa de interés: ",
+      validate: percentageValidation,
+      filter: value => {
+        const parsed = Number(value);
+        if (percentageValidation(parsed) === true) {
+          return parsed;
+        }
+        return value;
+      },
+      transformer: input => inputPercentageFormatter.format(input / 100),
+    },
+    {
+      name: "extraCosts",
+      type: "confirm",
+      message: "¿Desea registrar costos extra (iniciales o periódicos)?",
+      default: true,
+    },
+  ]);
+
+  const extraCosts = [];
+
+  if (inputs.extraCosts) {
+    do {
+      const data = await inquirer.prompt([
+        {
+          name: "name",
+          type: "input",
+          message: "Nombre del costo: ",
+          validate: input => input.length > 0,
+        },
+        {
+          name: "type",
+          type: "list",
+          message: "Elija el tipo de gasto: ",
+          choices: ["Inicial", "Periódico"],
+        },
+        {
+          name: "valueType",
+          type: "list",
+          message: "Indique el tipo de valor: ",
+          choices: ["Monetario", "Porcentual"],
+        },
+        {
+          name: "value",
+          type: "input",
+          message: "Ingrese el valor: ",
+          validate: extraCostValidation,
+          filter: (value, answers) => {
+            const parsed = Number(value);
+            if (extraCostValidation(parsed, answers) === true) {
+              return parsed;
+            }
+            return value;
+          },
+          transformer: (value, answers) => {
+            if (answers.valueType === "Monetario") {
+              return currencyFormatter.format(value);
+            }
+            return inputPercentageFormatter.format(value / 100);
+          },
+        },
+        {
+          name: "keepAdding",
+          type: "confirm",
+          message: "¿Quiere continuar añadiendo costos?",
+          default: true,
+        },
+      ]);
+      extraCosts.push(data);
+    } while (extraCosts[extraCosts.length - 1].keepAdding);
+  }
+
+  const tasaIndicadorBruto = await inquirer.prompt({
+    name: "descuentoKs",
+    type: "input",
+    message: "Tasa de descuento Ks: ",
+    validate: percentageValidation,
+    filter: value => {
+      const parsed = Number(value);
+      if (percentageValidation(parsed) === true) {
+        return parsed;
+      }
+      return value;
+    },
+    transformer: input => inputPercentageFormatter.format(input / 100),
+  });
+
+  const tasaIndicadorNeto = await inquirer.prompt({
+    name: "descuentoWACC",
+    type: "input",
+    message: "Tasa de descuento WACC: ",
+    validate: percentageValidation,
+    filter: value => {
+      const parsed = Number(value);
+      if (percentageValidation(parsed) === true) {
+        return parsed;
+      }
+      return value;
+    },
+    transformer: input => inputPercentageFormatter.format(input / 100),
+  });
+
+  // Cronograma de pagos
+  getPaymentSchedule(inputs, extraCosts, tasaIndicadorBruto.descuentoKs, tasaIndicadorNeto.descuentoWACC);
 };
 
 main();
