@@ -4,12 +4,13 @@ import { FieldError } from "react-hook-form";
 
 export interface Props extends ComponentPropsWithoutRef<"input"> {
   label?: string;
+  helper?: string;
   errors?: FieldError;
 }
 
 export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const id = useId();
-  const { className, label, errors, ...attrs } = props;
+  const { className, label, helper, errors, ...attrs } = props;
 
   const styles = clsx(
     className,
@@ -27,7 +28,8 @@ export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
         </label>
       )}
       <input ref={ref} id={id} className={styles} {...attrs} />
-      {errors && <span className="text-sm">{errors.message}</span>}
+      {helper && <span className="text-sm">{helper}</span>}
+      {errors && <span className="text-sm text-red-500">{errors.message}</span>}
     </>
   );
 });

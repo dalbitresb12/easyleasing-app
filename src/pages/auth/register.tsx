@@ -1,30 +1,43 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { PulseLoader } from "react-spinners";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
-import { loginHandler } from "@/api/handlers";
+import { registerHandler } from "@/api/handlers";
 import { queries } from "@/api/keys";
 import { FormButton } from "@/components/form-button";
 import { FormInput } from "@/components/form-input";
-import { LoginRequest } from "@/shared/api/types";
+import { RegisterRequest } from "@/shared/api/types";
 import { useAuthGuard } from "@/utils/use-auth-guard";
 
-const LoginPage: FC = () => {
+const RegisterForm = RegisterRequest.extend({
+  confirmation: RegisterRequest.shape.password,
+}).superRefine(({ password, confirmation }, ctx) => {
+  if (password !== confirmation) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Las contraseñas no coinciden",
+    });
+  }
+});
+type RegisterForm = z.infer<typeof RegisterForm>;
+
+const RegisterPage: FC = () => {
   const router = useRouter();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginRequest>({ resolver: zodResolver(LoginRequest) });
+  } = useForm<RegisterForm>({ resolver: zodResolver(RegisterForm) });
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: loginHandler,
+    mutationFn: registerHandler,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ ...queries.users._def });
       router.push("/");
@@ -35,22 +48,43 @@ const LoginPage: FC = () => {
     onAuthenticated: () => router.push("/"),
   });
 
-  const onSubmit = (data: LoginRequest) => {
+  const onSubmit = (form: RegisterForm) => {
+    const data = RegisterRequest.parse(form);
     mutation.mutate(data);
   };
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-full bg-sky-50 py-8">
       <h1 className="text-sky-700 text-xl font-bold mb-4">EasyLeasing</h1>
-      <h2 className="text-gray-900 text-2xl font-bold ">Inicia sesión en tu cuenta</h2>
+      <h2 className="text-gray-900 text-2xl font-bold ">Crea tu cuenta gratis</h2>
       <span className="mb-10 text-sm">
         O{" "}
-        <Link href="/auth/register">
-          <span className="text-sky-700">crea tu cuenta gratuita aquí</span>
+        <Link href="/auth/login">
+          <span className="text-sky-700">inicia sesión con tu cuenta</span>
         </Link>
       </span>
       <div className="bg-white py-5 px-6 sm:py-9 sm:px-10 rounded-md shadow w-full max-w-md mx-4">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col space-y-8" noValidate>
+          <div className="flex flex-col space-y-1">
+            <FormInput
+              type="text"
+              disabled={mutation.isLoading}
+              autoComplete="name"
+              label="Nombre completo"
+              errors={errors.fullName}
+              {...register("fullName")}
+            />
+          </div>
+          <div className="flex flex-col space-y-1">
+            <FormInput
+              type="text"
+              disabled={mutation.isLoading}
+              autoComplete="nickname"
+              label="¿Cómo prefieres que te llamemos?"
+              errors={errors.preferredName}
+              {...register("preferredName")}
+            />
+          </div>
           <div className="flex flex-col space-y-1">
             <FormInput
               type="email"
@@ -66,23 +100,29 @@ const LoginPage: FC = () => {
             <FormInput
               type="password"
               disabled={mutation.isLoading}
-              autoComplete="current-password"
+              autoComplete="new-password"
               spellCheck={false}
               label="Contraseña"
               errors={errors.password}
               {...register("password")}
             />
           </div>
+          <div className="flex flex-col space-y-1">
+            <FormInput
+              type="password"
+              disabled={mutation.isLoading}
+              autoComplete="new-password"
+              spellCheck={false}
+              label="Confirma tu contraseña"
+              errors={errors.confirmation}
+              {...register("confirmation")}
+            />
+          </div>
 
           <div className="flex flex-col space-y-4">
             <FormButton type="submit" disabled={mutation.isLoading}>
-              {mutation.isLoading ? <PulseLoader size="0.5rem" color="#fff" /> : "Iniciar sesión"}
+              {mutation.isLoading ? <PulseLoader size="0.5rem" color="#fff" /> : "Crear cuenta"}
             </FormButton>
-            <Link href="/auth/reset-password">
-              <FormButton type="button" style="text" padding={false}>
-                ¿Olvidaste tu contraseña?
-              </FormButton>
-            </Link>
           </div>
         </form>
       </div>
@@ -90,4 +130,4 @@ const LoginPage: FC = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
