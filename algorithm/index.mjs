@@ -4,6 +4,9 @@ import { irr } from "financial";
 const currencyFormatter = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
 const percentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 2 });
 
+const IGV = 0.18;
+const IR = 0.3;
+
 function roundMoney(num) {
   return Math.round((num + Number.EPSILON) * 100) / 100;
 }
@@ -81,6 +84,40 @@ const percentageValidation = value => {
   return "Ingrese un valor porcentual adecuado";
 };
 
+const getInitialFee = (initialFeePercentage, sellingPrice) => {
+  return initialFeePercentage * sellingPrice;
+};
+
+const getBuyingOptionFee = (answers, sellingValue) => {
+  if (answers.buyingOption) {
+    return (answers.buyingOptionPercentage / 100) * sellingValue;
+  }
+  return 0;
+};
+
+const getIgvFee = sellingPrice => {
+  return roundMoney(IGV * sellingPrice) / (1 + IGV);
+};
+
+const getSellingValue = sellingPrice => {
+  return roundMoney(sellingPrice - getIgvFee(sellingPrice));
+};
+
+const getPeriods = (loanTime, paymentFrequency) => {
+  return (loanTime * 360) / paymentFrequency;
+};
+
+const getInterestRatePerPeriod = answers => {
+  if (answers.interestRateType === "Nominal") {
+    return convertirTasaNominalEnEfectiva(
+      answers.interestRate,
+      answers.interestRateFrequency / answers.capitalizacion,
+      answers.paymentFrequency / answers.capitalizacion,
+    );
+  }
+  return convertirTasaEfectivaEnEfectiva(answers.interestRate, answers.interestRateFrequency, answers.paymentFrequency);
+};
+
 const extraCostValidation = (value, extraCosts) => {
   if (extraCosts.valueType === "Monetario") {
     return positiveValidation(value);
@@ -88,17 +125,12 @@ const extraCostValidation = (value, extraCosts) => {
   return percentageValidation(value);
 };
 
-// const plazoDeGracia => (numeroCuota, cuotas) {}
-
 const tirCalculation = flujos => {
   return irr(flujos, 0.01);
 };
 const tceaCalculation = (tir, cuotasAnuales) => {
   return Math.pow(1 + tir, cuotasAnuales) - 1;
 };
-
-const IGV = 0.18;
-const IR = 0.3;
 
 const main = async () => {
   const inputs = await inquirer.prompt([
@@ -302,26 +334,16 @@ const main = async () => {
     transformer: input => percentageFormatter.format(input / 100),
   });
 
-  const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaIndicadorBruto.descuentoKs, 360, inputs.paymentFrequency);
-  const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaIndicadorNeto.descuentoWACC, 360, inputs.paymentFrequency);
-
-  const percentageInitialFee = inputs.percentageInitialFee / 100;
-
-  const initialFee = percentageInitialFee * inputs.sellingPrice;
+  const initialFee = getInitialFee(inputs.percentageInitialFee / 100, inputs.sellingPrice);
 
   const newSellingPrice = inputs.sellingPrice - initialFee;
 
-  const loanTimeInDays = inputs.loanTime * 360;
-  const montoIGV = roundMoney((newSellingPrice * IGV) / (1 + IGV));
-  const sellingValue = roundMoney(newSellingPrice - montoIGV);
+  const sellingValue = getSellingValue(inputs.sellingPrice);
 
   const cuotasAnuales = 360 / inputs.paymentFrequency;
-  const periodos = loanTimeInDays / inputs.paymentFrequency;
+  const periodos = getPeriods(inputs.loanTime, inputs.paymentFrequency);
 
-  let montoRecompra = 0;
-  if (inputs.buyingOption) {
-    montoRecompra = -(sellingValue * (inputs.buyingOptionPercentage / 100));
-  }
+  const montoRecompra = getBuyingOptionFee(inputs, sellingValue);
 
   let totalInitialCosts = 0;
   let periodicCosts = 0;
@@ -341,26 +363,14 @@ const main = async () => {
 
   const leasingAmount = totalInitialCosts + sellingValue;
 
-  let periodicalInterestRate = 0;
+  const interesRatePerPeriod = getInterestRatePerPeriod(inputs);
 
-  if (inputs.interestRateType === "Nominal") {
-    periodicalInterestRate = convertirTasaNominalEnEfectiva(
-      inputs.interestRate,
-      inputs.interestRateFrequency / inputs.capitalizacion,
-      inputs.paymentFrequency / inputs.capitalizacion,
-    );
-  } else {
-    periodicalInterestRate = convertirTasaEfectivaEnEfectiva(
-      inputs.interestRate,
-      inputs.interestRateFrequency,
-      inputs.paymentFrequency,
-    );
-  }
+  const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaIndicadorBruto.descuentoKs, 360, inputs.paymentFrequency);
+  const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaIndicadorNeto.descuentoWACC, 360, inputs.paymentFrequency);
 
   console.log(`\nPrecio de venta del activo: S/ ${inputs.sellingPrice}`);
   console.log(`Cuota inicial: S/ ${initialFee}\n`);
   console.log(`Nuevo precio de venta S/ ${newSellingPrice}`);
-  console.log(`Monto de IGV: S/ ${montoIGV}`);
   console.log(`Valor de venta del activo: S/ ${sellingValue}`);
   console.log(`Total por costos iniciales: S/ ${totalInitialCosts}`);
   console.log(`Monto del leasing: S/ ${leasingAmount}`);
@@ -370,7 +380,7 @@ const main = async () => {
   console.log(`Frecuencia de pago: ${inputs.paymentFrequency} días\n`);
 
   console.log(`Tipo de tasa de interés: ${inputs.interestRateType}`);
-  console.log(`Tasa efectiva del periodo: ${periodicalInterestRate * 100}%\n`);
+  console.log(`Tasa efectiva del periodo: ${interesRatePerPeriod * 100}%\n`);
 
   console.log(`Tasa descuento Ks equivalente: ${descuentoKs * 100}%`);
   console.log(`Tasa descuento WACC equivalente: ${descuentoWACC * 100}%`);
@@ -404,7 +414,7 @@ const main = async () => {
   for (let periodo = 1; periodo <= periodos; periodo++) {
     console.log(`= = = = = Periodo ${periodo} = = = = =`);
 
-    intereses = -(periodicalInterestRate * saldoInicial);
+    intereses = -(interesRatePerPeriod * saldoInicial);
 
     if (periodo < periodos) {
       const input = await inquirer.prompt({
@@ -429,8 +439,8 @@ const main = async () => {
       saldoFinal = saldoInicial + amortizacion;
     } else {
       cuota = -(
-        (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) * saldoInicial * periodicalInterestRate) /
-        (Math.pow(1 + periodicalInterestRate, periodos - periodo + 1) - 1)
+        (Math.pow(1 + interesRatePerPeriod, periodos - periodo + 1) * saldoInicial * interesRatePerPeriod) /
+        (Math.pow(1 + interesRatePerPeriod, periodos - periodo + 1) - 1)
       );
       amortizacion = cuota - intereses;
       saldoFinal = saldoInicial + amortizacion;
