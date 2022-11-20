@@ -26,8 +26,11 @@
     "lint:fix:prettier": "prettier --write ."
   },
   "dependencies": {
+    "@lukemorales/query-key-factory": "^1.0.3",
     "@material-symbols/svg-400": "^0.2.15",
     "@next/bundle-analyzer": "13.0.2",
+    "@tanstack/react-query": "^4.16.1",
+    "@tanstack/react-query-devtools": "^4.16.1",
     "@tsndr/cloudflare-worker-jwt": "^2.1.2",
     "autoprefixer": "^10.4.13",
     "bcryptjs": "^2.4.3",
