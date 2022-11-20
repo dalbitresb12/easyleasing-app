@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+
 import { JwtStore } from "./jwt-store";
 
 type UseAuthGuardOptions = {

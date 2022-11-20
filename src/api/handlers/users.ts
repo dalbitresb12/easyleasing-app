@@ -1,4 +1,5 @@
 import { SanitizedUser } from "@/shared/models/user";
+
 import { HttpClient } from "@/utils/http-client";
 
 const prefix = (path: string) => `/api/users${path}`;

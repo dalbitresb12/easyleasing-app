@@ -10,6 +10,8 @@
   "bracketSameLine": false,
   "arrowParens": "avoid",
   "endOfLine": "lf",
+  "importOrder": ["^@/shared/(.*)$", "^@/api/(.*)$", "^@/components/(.*)$", "^@/utils/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
   "overrides": [
     {
       "files": "*.yml",

@@ -7,12 +7,16 @@ import { useForm } from "react-hook-form";
 import { PulseLoader } from "react-spinners";
 import { z } from "zod";
 
+import { ResetPasswordRequest } from "@/shared/api/types";
+
 import { resetPasswordHandler } from "@/api/handlers";
+
 import { FormButton } from "@/components/form-button";
 import { FormInput } from "@/components/form-input";
-import { ResetPasswordRequest } from "@/shared/api/types";
+
 import { takeFirstQuery } from "@/utils/query";
 import { useAuthGuard } from "@/utils/use-auth-guard";
+
 import UndrawAuthentication from "../../../public/undraw_authentication_re_svpt.svg";
 import UndrawServerDown from "../../../public/undraw_server_down_s-4-lk.svg";
 

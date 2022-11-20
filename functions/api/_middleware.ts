@@ -3,6 +3,7 @@ import * as jwt from "@tsndr/cloudflare-worker-jwt";
 import { HttpError, HttpErrorCode, HttpErrorSchema } from "@/shared/api/types";
 import { User } from "@/shared/models/user";
 import { setupZodErrorMap } from "@/shared/utils/zod-errors";
+
 import type { AppFunction } from "../types/appcontext";
 
 export const errorHandler: AppFunction = async ctx => {

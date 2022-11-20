@@ -1,6 +1,7 @@
 import { z, ZodObject, ZodRawShape } from "zod";
 
 import { HttpError } from "@/shared/api/types";
+
 import { JwtStore } from "./jwt-store";
 
 export type JsonRecord = Record<string, unknown>;
