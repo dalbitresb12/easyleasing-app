@@ -2,30 +2,30 @@ import * as jwt from "@tsndr/cloudflare-worker-jwt";
 
 import { User } from "@/shared/models/user";
 import type { AppFunction } from "../types/appcontext";
-import { HttpError, ServerError, ValidationError } from "../types/httperror";
+import { HttpError, HttpErrorCode, HttpErrorSchema } from "@/shared/api/types";
 
 export const errorHandler: AppFunction = async ctx => {
   try {
     return await ctx.next();
   } catch (err) {
-    if (err instanceof ValidationError) {
-      const { message, issues, status, flatten } = err;
-      let formatted;
-      if (flatten) formatted = issues.flatten();
-      else formatted = issues.format();
-      return Response.json({ error: message, issues: formatted }, { status });
-    }
-    if (err instanceof ServerError) {
-      const { message, status } = err;
-      console.log(err);
-      return Response.json({ error: "Server error", message }, { status });
-    }
     if (err instanceof HttpError) {
-      const { message, status } = err;
-      return Response.json({ error: "Bad request", message }, { status });
+      const response = err.toJSON();
+      // Only log server errors to Cloudflare
+      if (err.code === HttpErrorCode.ServerError) {
+        console.log(err);
+      }
+      return Response.json(response, { status: err.status });
     }
-    console.error(err);
-    return Response.json({ error: "An unknown error has ocurred." }, { status: 500 });
+
+    // Log to Cloudflare
+    console.log(err);
+    const response: HttpErrorSchema = {
+      error: "Unknown Error",
+      message: "An unknown internal server error has occurred.",
+      code: HttpErrorCode.UnknownError,
+      status: 500,
+    };
+    return Response.json(response, { status: 500 });
   }
 };
 

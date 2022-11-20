@@ -1,10 +1,9 @@
 import * as bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 
-import { RegisterRequest, SuccessResponse } from "@/shared/api/types";
+import { HttpError, RegisterRequest, ServerError, SuccessResponse } from "@/shared/api/types";
 import { User } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
-import { HttpError, ServerError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 import { sendConfirmationEmail } from "../../utils/postmark";
 

@@ -2,10 +2,9 @@ import * as jwt from "@tsndr/cloudflare-worker-jwt";
 import * as bcrypt from "bcryptjs";
 import ms from "ms";
 
-import { JwtPayload, LoginRequest, LoginResponse } from "@/shared/api/types";
+import { HttpError, JwtPayload, LoginRequest, LoginResponse } from "@/shared/api/types";
 import { SanitizedUser, User } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
-import { HttpError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 
 export const onRequestPost: AppFunction = async ctx => {

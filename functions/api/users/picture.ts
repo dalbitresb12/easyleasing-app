@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 
+import { HttpError, ServerError } from "@/shared/api/types";
 import type { AppFunction } from "../../types/appcontext";
-import { HttpError, ServerError } from "../../types/httperror";
 
 type BytesRange = {
   offset: number;

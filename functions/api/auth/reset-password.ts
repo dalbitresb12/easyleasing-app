@@ -1,9 +1,8 @@
 import * as bcrypt from "bcryptjs";
 
-import { ResetPasswordRequest, SuccessResponse } from "@/shared/api/types";
+import { HttpError, ResetPasswordRequest, SuccessResponse } from "@/shared/api/types";
 import { User } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
-import { HttpError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 
 export const onRequestPost: AppFunction = async ctx => {

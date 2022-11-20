@@ -1,8 +1,8 @@
 import * as bcrypt from "bcryptjs";
 
+import { ServerError } from "@/shared/api/types";
 import { SanitizedUser, UpdatableUser } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
-import { ServerError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 import { sendConfirmationEmail } from "../../utils/postmark";
 
