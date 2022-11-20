@@ -49,6 +49,14 @@ const frequencies = [
   "Anual",
 ];
 
+const convertirTasaEfectivaEnEfectiva = (tasa, frecuenciaAntigua, frecuenciaNueva) => {
+  return Math.pow(1 + tasa / 100, frecuenciaNueva / frecuenciaAntigua) - 1;
+};
+
+const convertirTasaNominalEnEfectiva = (tasa, m, n) => {
+  Math.pow(1 + tasa / 100 / m, n) - 1;
+};
+
 const positiveValidation = value => {
   const parsed = Number(value);
   if (!Number.isNaN(parsed) && parsed > 0) {
@@ -294,8 +302,8 @@ const main = async () => {
     transformer: input => percentageFormatter.format(input / 100),
   });
 
-  const descuentoKs = Math.pow(1 + tasaIndicadorBruto.descuentoKs / 100, inputs.paymentFrequency / 360) - 1;
-  const descuentoWACC = Math.pow(1 + tasaIndicadorNeto.descuentoWACC / 100, inputs.paymentFrequency / 360) - 1;
+  const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaIndicadorBruto.descuentoKs, 360, inputs.paymentFrequency);
+  const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaIndicadorNeto.descuentoWACC, 360, inputs.paymentFrequency);
 
   const percentageInitialFee = inputs.percentageInitialFee / 100;
 
@@ -336,12 +344,17 @@ const main = async () => {
   let periodicalInterestRate = 0;
 
   if (inputs.interestRateType === "Nominal") {
-    const m = inputs.interestRateFrequency / inputs.capitalizacion;
-    const n = inputs.paymentFrequency / inputs.capitalizacion;
-    periodicalInterestRate = Math.pow(1 + inputs.interestRate / 100 / m, n) - 1;
+    periodicalInterestRate = convertirTasaNominalEnEfectiva(
+      inputs.interestRate,
+      inputs.interestRateFrequency / inputs.capitalizacion,
+      inputs.paymentFrequency / inputs.capitalizacion,
+    );
   } else {
-    periodicalInterestRate =
-      Math.pow(1 + inputs.interestRate / 100, inputs.paymentFrequency / inputs.interestRateFrequency) - 1;
+    periodicalInterestRate = convertirTasaEfectivaEnEfectiva(
+      inputs.interestRate,
+      inputs.interestRateFrequency,
+      inputs.paymentFrequency,
+    );
   }
 
   console.log(`\nPrecio de venta del activo: S/ ${inputs.sellingPrice}`);
