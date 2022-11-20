@@ -19,6 +19,11 @@ export class JwtStore {
     });
   }
 
+  static async exists(): Promise<boolean> {
+    const token = await this.get();
+    return token !== null;
+  }
+
   static clear(): Promise<boolean> {
     return new Promise(resolve => {
       localStorage.removeItem(this.key);
