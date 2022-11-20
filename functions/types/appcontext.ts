@@ -1,4 +1,4 @@
-import type { User } from "../models/user";
+import type { User } from "@/shared/models/user";
 
 export interface AppEnv {
   users: KVNamespace;

@@ -18,3 +18,15 @@ export type User = z.infer<typeof User>;
 
 export const SanitizedUser = User.omit({ password: true, verificationCode: true });
 export type SanitizedUser = z.infer<typeof SanitizedUser>;
+
+export const UpdatableUser = User.pick({
+  fullName: true,
+  preferredName: true,
+  email: true,
+  password: true,
+  currency: true,
+  interest_rate_type: true,
+  language: true,
+  timezone: true,
+}).partial();
+export type UpdatableUser = z.infer<typeof UpdatableUser>;

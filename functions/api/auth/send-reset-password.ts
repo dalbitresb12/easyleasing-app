@@ -1,18 +1,9 @@
-import { z } from "zod";
-import { User } from "../../models/user";
+import { SendResetPasswordRequest, SuccessResponse } from "@/shared/api/types";
+import { User } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
 import { HttpError, ServerError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 import { sendResetPasswordEmail } from "../../utils/postmark";
-
-export const SendResetPasswordRequest = z.object({
-  email: z.string().email(),
-});
-export type SendResetPasswordRequest = z.infer<typeof SendResetPasswordRequest>;
-
-export type SendResetPasswordResponse = {
-  success: boolean;
-};
 
 export const onRequestPost: AppFunction = async ctx => {
   const req = await parseBody(ctx.request, SendResetPasswordRequest);
@@ -36,6 +27,6 @@ export const onRequestPost: AppFunction = async ctx => {
   // Save to KV
   await ctx.env.users.put(req.email, JSON.stringify(user));
 
-  const resBody: SendResetPasswordResponse = { success: true };
+  const resBody: SuccessResponse = { success: true };
   return Response.json(resBody);
 };

@@ -1,5 +1,6 @@
 import * as jwt from "@tsndr/cloudflare-worker-jwt";
-import { User } from "../models/user";
+
+import { User } from "@/shared/models/user";
 import type { AppFunction } from "../types/appcontext";
 import { HttpError, ServerError, ValidationError } from "../types/httperror";
 

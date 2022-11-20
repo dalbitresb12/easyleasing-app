@@ -1,18 +1,8 @@
-import { z } from "zod";
-import { User } from "../../models/user";
+import { VerifyEmailRequest, SuccessResponse } from "@/shared/api/types";
+import { User } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
 import { HttpError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
-
-export const VerifyEmailRequest = z.object({
-  email: z.string().email(),
-  code: z.string(),
-});
-export type VerifyEmailRequest = z.infer<typeof VerifyEmailRequest>;
-
-export type VerifyEmailResponse = {
-  success: boolean;
-};
 
 export const onRequestPost: AppFunction = async ctx => {
   const req = await parseBody(ctx.request, VerifyEmailRequest);
@@ -39,6 +29,6 @@ export const onRequestPost: AppFunction = async ctx => {
   delete user.verificationCode;
   await ctx.env.users.put(user.email, JSON.stringify(user));
 
-  const resBody: VerifyEmailResponse = { success: true };
+  const resBody: SuccessResponse = { success: true };
   return Response.json(resBody);
 };

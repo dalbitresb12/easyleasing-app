@@ -1,24 +1,12 @@
 import * as jwt from "@tsndr/cloudflare-worker-jwt";
 import * as bcrypt from "bcryptjs";
 import ms from "ms";
-import { z } from "zod";
-import { SanitizedUser, User } from "../../models/user";
+
+import { JwtPayload, LoginRequest, LoginResponse } from "@/shared/api/types";
+import { SanitizedUser, User } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
 import { HttpError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
-
-export const LoginRequest = User.pick({ email: true, password: true });
-export type LoginRequest = z.infer<typeof LoginRequest>;
-
-export type LoginResponse = {
-  jwt: string;
-  user: SanitizedUser;
-};
-
-export interface JwtPayload extends jwt.JwtPayload {
-  name: string;
-  email: string;
-}
 
 export const onRequestPost: AppFunction = async ctx => {
   const req = await parseBody(ctx.request, LoginRequest);

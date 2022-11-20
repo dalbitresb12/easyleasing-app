@@ -1,18 +1,12 @@
 import * as bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod";
-import { User } from "../../models/user";
+
+import { RegisterRequest, SuccessResponse } from "@/shared/api/types";
+import { User } from "@/shared/models/user";
 import type { AppFunction } from "../../types/appcontext";
 import { HttpError, ServerError } from "../../types/httperror";
 import { parseBody } from "../../utils/bodyparser";
 import { sendConfirmationEmail } from "../../utils/postmark";
-
-export const RegisterRequest = User.pick({ fullName: true, preferredName: true, email: true, password: true });
-export type RegisterRequest = z.infer<typeof RegisterRequest>;
-
-export type RegisterResponse = {
-  success: boolean;
-};
 
 export const onRequestPost: AppFunction = async ctx => {
   const req = await parseBody(ctx.request, RegisterRequest);
@@ -46,6 +40,6 @@ export const onRequestPost: AppFunction = async ctx => {
   // Save to KV
   await ctx.env.users.put(req.email, JSON.stringify(user));
 
-  const resBody: RegisterResponse = { success: true };
+  const resBody: SuccessResponse = { success: true };
   return Response.json(resBody);
 };
