@@ -31,6 +31,16 @@ export class HttpClient {
     return await model.parseAsync(body);
   }
 
+  private static async withAuthentication(options: RequestInit): Promise<RequestInit> {
+    const token = await JwtStore.get();
+    if (token) {
+      const headers = new Headers(options.headers);
+      headers.set("authorization", `Bearer ${token}`);
+      options.headers = headers;
+    }
+    return options;
+  }
+
   static async request<TShape extends ZodRawShape, TModel extends ZodObject<TShape>>(
     path: string,
     method: HttpMethodsWithoutBody,
@@ -47,16 +57,21 @@ export class HttpClient {
     TModel extends ZodObject<TShape>,
     TBody extends JsonRecord = JsonRecord,
   >(path: string, method: HttpMethods, model: TModel, body?: TBody): Promise<z.infer<TModel>> {
-    const options: RequestInit = { method };
-    const token = await JwtStore.get();
-    if (token) {
-      const headers = new Headers();
-      headers.set("authorization", `Bearer ${token}`);
-      options.headers = headers;
-    }
+    const options = await this.withAuthentication({ method });
     if (body) options.body = JSON.stringify(body);
     const response = await fetch(path, options);
     return this.handleResponse<TShape, TModel>(response, model);
+  }
+
+  static async getFile(path: string): Promise<string> {
+    const options = await this.withAuthentication({ method: HttpMethods.GET });
+    const response = await fetch(path, options);
+    if (!response.ok) {
+      // TODO: Improve error handling, share common types and validation for errors
+      throw new Error(response.statusText);
+    }
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
   }
 
   static get<TShape extends ZodRawShape, TModel extends ZodObject<TShape>>(
