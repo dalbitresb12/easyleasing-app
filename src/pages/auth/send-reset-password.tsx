@@ -38,14 +38,13 @@ const SendResetPasswordPage: FC = () => {
   });
 
   const email = takeFirstQuery(router.query.email);
-  const code = takeFirstQuery(router.query.code);
 
   useEffect(() => {
     const state = getValues("email");
     if (router.isReady && email && state.length === 0) {
       setValue("email", email);
     }
-  }, [router.isReady, email, code, setValue, getValues]);
+  }, [router.isReady, email, setValue, getValues]);
 
   const onSubmit = (data: SendResetPasswordRequest) => {
     mutation.mutate(data);
