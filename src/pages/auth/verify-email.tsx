@@ -39,10 +39,10 @@ const VerifyEmailPage: FC = () => {
 
   if (!code) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-full bg-sky-50 py-8">
+      <div className="flex flex-col items-center justify-center w-full min-h-full bg-sky-50 py-8 px-4">
         <h1 className="text-sky-700 text-xl font-bold mb-4">EasyLeasing</h1>
         <h2 className="text-gray-900 text-2xl font-bold mb-10">Verifica tu correo</h2>
-        <div className="bg-white py-5 px-6 sm:py-9 sm:px-10 rounded-md shadow w-full max-w-md mx-4 space-y-6">
+        <div className="bg-white py-5 px-6 sm:py-9 sm:px-10 rounded-md shadow w-full max-w-md space-y-6">
           <div className="flex justify-center">
             <UndrawMailSent viewBox="0 0 570 511.67482" className="w-auto h-36" />
           </div>

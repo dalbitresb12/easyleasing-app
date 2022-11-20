@@ -57,10 +57,10 @@ const SendResetPasswordPage: FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-full bg-sky-50 py-8">
+    <div className="flex flex-col items-center justify-center w-full min-h-full bg-sky-50 py-8 px-4">
       <h1 className="text-sky-700 text-xl font-bold mb-4">EasyLeasing</h1>
       <h2 className="text-gray-900 text-2xl font-bold mb-10">Olvidaste tu contraseña</h2>
-      <div className="bg-white py-5 px-6 sm:py-9 sm:px-10 rounded-md shadow w-full max-w-md mx-4 space-y-6">
+      <div className="bg-white py-5 px-6 sm:py-9 sm:px-10 rounded-md shadow w-full max-w-md space-y-6">
         <div className="flex justify-center">
           <UndrawForgotPassword viewBox="0 0 951.23547 632.16225" className="w-auto h-36" />
         </div>
