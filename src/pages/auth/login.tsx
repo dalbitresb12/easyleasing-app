@@ -1,16 +1,26 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { FormEventHandler, useId, useRef, FC } from "react";
+import { FC } from "react";
+import { useForm } from "react-hook-form";
+import { PulseLoader } from "react-spinners";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { loginHandler } from "@/api/handlers";
-import { useAuthGuard } from "@/utils/use-auth-guard";
 import { queries } from "@/api/keys";
+import { FormButton } from "@/components/form-button";
+import { FormInput } from "@/components/form-input";
+import { LoginRequest } from "@/shared/api/types";
+import { useAuthGuard } from "@/utils/use-auth-guard";
 
 const LoginPage: FC = () => {
   const router = useRouter();
-  const emailInputId = useId();
-  const passwordInputId = useId();
-  const formRef = useRef<HTMLFormElement>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginRequest>({ resolver: zodResolver(LoginRequest) });
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
@@ -25,30 +35,57 @@ const LoginPage: FC = () => {
     onAuthenticated: () => router.push("/"),
   });
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = event => {
-    event.preventDefault();
-    if (!formRef.current) return;
-    const inputs = new FormData(formRef.current);
-    const email = inputs.get("email")?.toString() ?? "";
-    const password = inputs.get("password")?.toString() ?? "";
-    mutation.mutate({ email, password });
+  const onSubmit = (data: LoginRequest) => {
+    mutation.mutate(data);
   };
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
-      <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col space-y-2">
-        <div className="flex flex-col space-y-1">
-          <label htmlFor={emailInputId}>Email</label>
-          <input id={emailInputId} name="email" type="text" disabled={mutation.isLoading} />
-        </div>
-        <div className="flex flex-col space-y-1">
-          <label htmlFor={passwordInputId}>Password</label>
-          <input id={passwordInputId} name="password" type="password" disabled={mutation.isLoading} />
-        </div>
-        <button type="submit" disabled={mutation.isLoading}>
-          {mutation.isLoading ? "Loading..." : "Login"}
-        </button>
-      </form>
+    <div className="flex flex-col items-center justify-center w-full h-full bg-sky-50">
+      <h1 className="text-sky-700 text-xl font-bold mb-4">EasyLeasing</h1>
+      <h2 className="text-gray-900 text-2xl font-bold ">Inicia sesión en tu cuenta</h2>
+      <span className="mb-10 text-sm">
+        O{" "}
+        <Link href="/auth/register">
+          <span className="text-sky-700">crea tu cuenta gratuita aquí</span>
+        </Link>
+      </span>
+      <div className="bg-white py-5 px-6 sm:py-9 sm:px-10 rounded-md shadow w-full max-w-md mx-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col space-y-8" noValidate>
+          <div className="flex flex-col space-y-1">
+            <FormInput
+              type="email"
+              disabled={mutation.isLoading}
+              autoComplete="email"
+              spellCheck={false}
+              label="Email"
+              errors={errors.email}
+              {...register("email")}
+            />
+          </div>
+          <div className="flex flex-col space-y-1">
+            <FormInput
+              type="password"
+              disabled={mutation.isLoading}
+              autoComplete="current-password"
+              spellCheck={false}
+              label="Contraseña"
+              errors={errors.password}
+              {...register("password")}
+            />
+          </div>
+
+          <div className="flex flex-col space-y-4">
+            <FormButton type="submit" disabled={mutation.isLoading}>
+              {mutation.isLoading ? <PulseLoader size="0.5rem" color="#fff" /> : "Iniciar sesión"}
+            </FormButton>
+            <Link href="/auth/reset-password">
+              <FormButton type="button" style="text" padding={false}>
+                ¿Olvidaste tu contraseña?
+              </FormButton>
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
