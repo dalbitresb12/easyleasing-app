@@ -7,6 +7,7 @@ import {
   SuccessResponse,
   VerifyEmailRequest,
 } from "@/shared/api/types";
+
 import { HttpClient, JsonRecord } from "@/utils/http-client";
 import { JwtStoreError, JwtStore } from "@/utils/jwt-store";
 

@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { FC, useEffect } from "react";
 
 import { verifyEmailHandler } from "@/api/handlers";
+
 import { takeFirstQuery } from "@/utils/query";
 import { useAuthGuard } from "@/utils/use-auth-guard";
 

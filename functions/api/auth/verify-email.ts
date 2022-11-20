@@ -1,5 +1,6 @@
 import { HttpError, SuccessResponse, VerifyEmailRequest } from "@/shared/api/types";
 import { User } from "@/shared/models/user";
+
 import type { AppFunction } from "../../types/appcontext";
 import { parseBody } from "../../utils/bodyparser";
 

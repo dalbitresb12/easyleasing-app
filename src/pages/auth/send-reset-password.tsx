@@ -5,10 +5,13 @@ import { FC, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PulseLoader } from "react-spinners";
 
+import { SendResetPasswordRequest } from "@/shared/api/types";
+
 import { sendResetPasswordHandler } from "@/api/handlers";
+
 import { FormButton } from "@/components/form-button";
 import { FormInput } from "@/components/form-input";
-import { SendResetPasswordRequest } from "@/shared/api/types";
+
 import { takeFirstQuery } from "@/utils/query";
 import { useAuthGuard } from "@/utils/use-auth-guard";
 

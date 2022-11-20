@@ -1,5 +1,5 @@
-import { z } from "zod";
 import type { JwtPayload as BaseJwtPayload } from "@tsndr/cloudflare-worker-jwt";
+import { z } from "zod";
 
 import { SanitizedUser, User } from "@/shared/models/user";
 

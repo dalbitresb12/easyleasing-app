@@ -7,11 +7,14 @@ import { useForm } from "react-hook-form";
 import { PulseLoader } from "react-spinners";
 import { UrlObject } from "url";
 
+import { LoginRequest } from "@/shared/api/types";
+
 import { loginHandler } from "@/api/handlers";
 import { queries } from "@/api/keys";
+
 import { FormButton } from "@/components/form-button";
 import { FormInput } from "@/components/form-input";
-import { LoginRequest } from "@/shared/api/types";
+
 import { useAuthGuard } from "@/utils/use-auth-guard";
 
 const LoginPage: FC = () => {

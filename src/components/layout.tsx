@@ -1,20 +1,23 @@
-import { FC, PropsWithChildren } from "react";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import clsx from "clsx";
 import BookmarkIcon from "@material-symbols/svg-400/rounded/bookmark.svg";
 import CalculateIcon from "@material-symbols/svg-400/rounded/calculate.svg";
-import SettingsIcon from "@material-symbols/svg-400/rounded/settings.svg";
 import HelpIcon from "@material-symbols/svg-400/rounded/help.svg";
 import LogoutIcon from "@material-symbols/svg-400/rounded/logout.svg";
-
-import { MaterialIcon } from "./material-icon";
-import { ReactSVGElement } from "../typings/svg";
+import SettingsIcon from "@material-symbols/svg-400/rounded/settings.svg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { queries } from "@/api/keys";
-import { pictureHandler, usersHandler } from "@/api/handlers";
-import { JwtStore } from "@/utils/jwt-store";
+import clsx from "clsx";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { FC, PropsWithChildren } from "react";
+
 import { HttpError, HttpErrorCode } from "@/shared/api/types";
+
+import { pictureHandler, usersHandler } from "@/api/handlers";
+import { queries } from "@/api/keys";
+
+import { JwtStore } from "@/utils/jwt-store";
+
+import { ReactSVGElement } from "../typings/svg";
+import { MaterialIcon } from "./material-icon";
 
 export interface NavigationItem {
   href: string;

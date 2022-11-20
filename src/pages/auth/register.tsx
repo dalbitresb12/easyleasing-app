@@ -7,10 +7,13 @@ import { useForm } from "react-hook-form";
 import { PulseLoader } from "react-spinners";
 import { z } from "zod";
 
+import { RegisterRequest } from "@/shared/api/types";
+
 import { registerHandler } from "@/api/handlers";
+
 import { FormButton } from "@/components/form-button";
 import { FormInput } from "@/components/form-input";
-import { RegisterRequest } from "@/shared/api/types";
+
 import { useAuthGuard } from "@/utils/use-auth-guard";
 
 const RegisterForm = RegisterRequest.extend({
