@@ -1,5 +1,6 @@
 import { z, ZodObject, ZodRawShape } from "zod";
 
+import { HttpError } from "@/shared/api/types";
 import { JwtStore } from "./jwt-store";
 
 export type JsonRecord = Record<string, unknown>;
@@ -23,11 +24,10 @@ export class HttpClient {
     response: Response,
     model: TModel,
   ): Promise<z.infer<TModel>> {
-    if (!response.ok) {
-      // TODO: Improve error handling, share common types and validation for errors
-      throw new Error(response.statusText);
-    }
     const body = await response.json();
+    if (!response.ok) {
+      throw HttpError.fromJSON(body);
+    }
     return await model.parseAsync(body);
   }
 
@@ -67,8 +67,7 @@ export class HttpClient {
     const options = await this.withAuthentication({ method: HttpMethods.GET });
     const response = await fetch(path, options);
     if (!response.ok) {
-      // TODO: Improve error handling, share common types and validation for errors
-      throw new Error(response.statusText);
+      throw new HttpError(response.status, response.statusText);
     }
     const blob = await response.blob();
     return URL.createObjectURL(blob);

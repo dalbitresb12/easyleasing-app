@@ -14,6 +14,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queries } from "@/api/keys";
 import { pictureHandler, usersHandler } from "@/api/handlers";
 import { JwtStore } from "@/utils/jwt-store";
+import { HttpError, HttpErrorCode } from "@/shared/api/types";
 
 export interface NavigationItem {
   href: string;
@@ -56,7 +57,10 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
   const queryClient = useQueryClient();
 
   const retryHandler = (_: number, error: unknown): boolean => {
-    return error instanceof Error && error.message !== "Unauthorized" && error.message !== "Not Found";
+    if (!(error instanceof HttpError)) return true;
+    if (error.code === HttpErrorCode.ServerError) return true;
+    if (error.code === HttpErrorCode.ClientError) return false;
+    return true;
   };
 
   const user = useQuery({
