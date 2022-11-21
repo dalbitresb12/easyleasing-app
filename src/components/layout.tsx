@@ -9,8 +9,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, PropsWithChildren } from "react";
 
-import { HttpError, HttpErrorCode } from "@/shared/api/types";
-
 import { pictureHandler, usersHandler } from "@/api/handlers";
 import { queries } from "@/api/keys";
 
@@ -59,28 +57,8 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const retryHandler = (_: number, error: unknown): boolean => {
-    if (!(error instanceof HttpError)) return true;
-    if (error.code === HttpErrorCode.ServerError) return true;
-    if (error.code === HttpErrorCode.ClientError) return false;
-    return true;
-  };
-
-  const user = useQuery({
-    ...queries.users.me,
-    queryFn: usersHandler,
-    retry: retryHandler,
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
-  });
-
-  const picture = useQuery({
-    ...queries.users.picture,
-    queryFn: pictureHandler,
-    retry: retryHandler,
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
-  });
+  const user = useQuery({ ...queries.users.me, queryFn: usersHandler });
+  const picture = useQuery({ ...queries.users.picture, queryFn: pictureHandler });
 
   const logoutHandler = async () => {
     await JwtStore.clear();
