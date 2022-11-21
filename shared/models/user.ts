@@ -16,6 +16,7 @@ export const User = z.object({
   interest_rate_type: z.enum(["nominal", "effective"]).default("nominal").optional(),
   language: z.string().length(2, "Debe ser un código ISO 639-1 válido").default("es").optional(),
   timezone: z.string().default("America/Lima").optional(),
+  dateFormat: z.string().default("DD/MM/YYYY").optional(),
 });
 export type User = z.infer<typeof User>;
 
@@ -31,5 +32,6 @@ export const UpdatableUser = User.pick({
   interest_rate_type: true,
   language: true,
   timezone: true,
+  dateFormat: true,
 }).partial();
 export type UpdatableUser = z.infer<typeof UpdatableUser>;
