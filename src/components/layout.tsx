@@ -15,6 +15,7 @@ import { queries } from "@/api/keys";
 import { JwtStore } from "@/utils/jwt-store";
 
 import { ReactSVGElement } from "../typings/svg";
+import { CircularAvatar } from "./circular-avatar";
 import { MaterialIcon } from "./material-icon";
 
 export interface NavigationItem {
@@ -109,20 +110,11 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
             </nav>
           </div>
           <div className="p-4 flex items-center">
-            <div className="aspect-square rounded-full w-12 h-12 overflow-hidden shrink-0">
-              {(picture.isLoading || picture.isError) && (
-                <div className="bg-sky-700 w-full h-full flex items-center justify-center">
-                  <span className="text-white text-xl">{user.data.preferredName.substring(0, 1)}</span>
-                </div>
-              )}
-              {picture.data && (
-                <img
-                  className="h-full object-cover"
-                  alt={`${user.data.preferredName}'s profile picture`}
-                  src={picture.data}
-                />
-              )}
-            </div>
+            <CircularAvatar
+              picture={picture.data}
+              alt={`foto de perfil de ${user.data.preferredName}`}
+              placeholder={user.data.preferredName}
+            />
             <div className="ml-4 flex flex-col w-full text-xs space-y-1">
               <span className="font-medium text-sky-700">Hi, {user.data.preferredName}</span>
               <Link href="/settings/general">
