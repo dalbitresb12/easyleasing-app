@@ -124,7 +124,9 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
           </div>
         </aside>
       )}
-      <main className={clsx(props.mainClassName, !user.isError && "shadow-md", "w-full h-full")}>{props.children}</main>
+      <main className={clsx(props.mainClassName, !user.isError && "shadow-md", "w-full h-full overflow-y-scroll")}>
+        {props.children}
+      </main>
     </div>
   );
 };
