@@ -85,12 +85,14 @@ export const SettingsInput = <T extends AcceptedValues>(props: Props<T>): ReactE
     }
     if (editable) {
       return (
-        <FormInput
-          type={type}
-          defaultValue={getInputInitialValue(initialValue)}
-          errors={formState.errors.value?.message?.toString()}
-          {...register("value" as FieldPath<SingleValueForm<T>>, { valueAsDate: type === "date" })}
-        />
+        <div className="flex flex-col space-y-1">
+          <FormInput
+            type={type}
+            defaultValue={getInputInitialValue(initialValue)}
+            errors={formState.errors.value?.message?.toString()}
+            {...register("value" as FieldPath<SingleValueForm<T>>, { valueAsDate: type === "date" })}
+          />
+        </div>
       );
     }
     return getDisplayValue(type, initialValue);
