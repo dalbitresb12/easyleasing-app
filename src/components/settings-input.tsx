@@ -66,6 +66,9 @@ export const SettingsInput: FC<Props> = props => {
         />
       );
     }
+    if (type === "password") {
+      return "********";
+    }
     return initialValue;
   };
 
