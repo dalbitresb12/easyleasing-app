@@ -21,11 +21,11 @@ export const SettingsLayout: FC<PropsWithChildren<Props>> = props => {
             href: "/settings/general",
           },
           {
-            label: "Security",
+            label: "Seguridad",
             href: "/settings/security",
           },
           {
-            label: "Defaults",
+            label: "Predeterminados",
             href: "/settings/defaults",
           },
         ]}
