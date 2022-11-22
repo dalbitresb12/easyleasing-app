@@ -1,12 +1,8 @@
 // This is a port in TypeScript of the original implementation made by @amenes12 in JavaScript.
 // All the changes were done on #4, which merged the CLI and JS-based version of this.
 import { irr } from "financial";
-import { z } from "zod";
 
-import { TimeFrequencies, User } from "../models/user";
-
-export type Currencies = z.infer<typeof User.shape.currency>;
-export type InterestRateTypes = z.infer<typeof User.shape.interestRateType>;
+import { Currencies, InterestRateTypes, TimeFrequencies } from "@/shared/models/common";
 
 const locales = ["es-PE", "en-US"];
 
