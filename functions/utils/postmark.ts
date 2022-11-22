@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { User } from "@/shared/models/user";
 
 import type { AppContext } from "../types/appcontext";
+import { createUrlFromRequest } from "./urls";
 
 export type PostmarkHeader = {
   Name: string;
@@ -41,16 +42,6 @@ export type SendEmailResult = {
 
 const applicationJson = "application/json";
 const postmarkTestToken = "POSTMARK_API_TEST";
-
-const createUrlFromRequest = (request: Request, pathname?: string, query?: URLSearchParams): string => {
-  const url = new URL(request.url);
-  url.username = "";
-  url.password = "";
-  url.hash = "";
-  url.pathname = pathname ?? "";
-  url.search = query?.toString() ?? "";
-  return url.toString();
-};
 
 const sendRequest = async (
   endpoint: string,
