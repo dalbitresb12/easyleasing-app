@@ -27,7 +27,6 @@ export const PictureInput: FC = () => {
     handleCancel();
     await queryClient.invalidateQueries({ queryKey: queries.users.me.queryKey });
     queryClient.removeQueries({ queryKey: queries.users.picture.queryKey });
-    console.log("invalidated queries");
   };
 
   const picturePutMutation = useMutation({
