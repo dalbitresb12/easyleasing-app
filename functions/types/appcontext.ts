@@ -13,5 +13,13 @@ export interface AppData extends Record<string, unknown> {
   user: User;
 }
 
-export type AppFunction<Params extends string = string> = PagesFunction<AppEnv, Params, AppData>;
-export type AppContext<Params extends string = string> = EventContext<AppEnv, Params, AppData>;
+export type AppFunction<Params extends string = string, Data extends AppData = AppData> = PagesFunction<
+  AppEnv,
+  Params,
+  Data
+>;
+export type AppContext<Params extends string = string, Data extends AppData = AppData> = EventContext<
+  AppEnv,
+  Params,
+  Data
+>;
