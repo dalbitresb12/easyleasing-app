@@ -1,11 +1,8 @@
-import { z, ZodObject, ZodRawShape } from "zod";
+import { AnyZodObject, z } from "zod";
 
 import { ValidationError } from "@/shared/api/types";
 
-export const parseBody = async <R extends ZodRawShape, T extends ZodObject<R>>(
-  request: Request,
-  model: T,
-): Promise<z.infer<T>> => {
+export const parseBody = async <T extends AnyZodObject>(request: Request, model: T): Promise<z.infer<T>> => {
   const body = await request.json();
   const parsed = model.safeParse(body);
   if (!parsed.success) {
