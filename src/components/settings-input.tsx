@@ -35,6 +35,7 @@ export interface Props<T extends AcceptedValues> {
   type?: HTMLInputStringTypeAttribute;
   zodValidator?: ZodType;
   initialValue?: T;
+  disabled?: boolean;
   editable?: boolean;
   deletable?: boolean;
   hideToolbar?: boolean;
@@ -57,7 +58,18 @@ const getDisplayValue = (type: HTMLInputStringTypeAttribute, value?: AcceptedVal
 };
 
 export const SettingsInput = <T extends AcceptedValues>(props: Props<T>): ReactElement<Props<T>> => {
-  const { label, type = "text", initialValue, hideToolbar, children, onUpdate, onCancel, onDelete, onSave } = props;
+  const {
+    label,
+    type = "text",
+    initialValue,
+    disabled,
+    hideToolbar,
+    children,
+    onUpdate,
+    onCancel,
+    onDelete,
+    onSave,
+  } = props;
   const deletable = props.deletable && typeof onDelete !== "undefined";
 
   const [zodValidator] = useState(
@@ -88,6 +100,7 @@ export const SettingsInput = <T extends AcceptedValues>(props: Props<T>): ReactE
         <div className="flex flex-col space-y-1">
           <FormInput
             type={type}
+            disabled={disabled}
             defaultValue={getInputInitialValue(initialValue)}
             errors={formState.errors.value?.message?.toString()}
             {...register("value" as FieldPath<SingleValueForm<T>>, { valueAsDate: type === "date" })}

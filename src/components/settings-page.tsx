@@ -95,6 +95,7 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
                   <SettingsInput
                     key={key}
                     type={item.type}
+                    disabled={usersMutation.isLoading}
                     zodValidator={item.zodValidator}
                     label={item.label || ""}
                     hideToolbar={item.readonly}
