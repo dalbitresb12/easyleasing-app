@@ -139,3 +139,4 @@ dist
 
 # Wrangler
 .wrangler
+.dev.vars
