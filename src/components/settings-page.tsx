@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FC } from "react";
+import { FC, PropsWithChildren } from "react";
 import { z } from "zod";
 
 import { UpdatableUser } from "@/shared/models/user";
@@ -42,8 +42,8 @@ export interface Props {
   layout: SettingsFormLayout[];
 }
 
-export const SettingsPage: FC<Props> = props => {
-  const { layout } = props;
+export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
+  const { layout, children } = props;
 
   const user = useQuery({ ...queries.users.me, queryFn: usersHandler });
   const picture = useQuery({ ...queries.users.picture, queryFn: pictureHandler });
@@ -86,6 +86,7 @@ export const SettingsPage: FC<Props> = props => {
                   <SettingsInput key={key} label={item.label || ""} initialValue={initialValue} onSave={handleSave} />
                 );
               })}
+              {children}
             </div>
           </>
         );
