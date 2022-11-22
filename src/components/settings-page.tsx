@@ -82,8 +82,13 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
 
                 const value = data[key];
                 const initialValue = typeof value === "boolean" ? value.toString() : value;
-                const handleSave = (value: typeof data[typeof key]) => {
-                  usersMutation.mutate({ [key]: value });
+                const handleSave = async (value: typeof data[typeof key]) => {
+                  try {
+                    await usersMutation.mutateAsync({ [key]: value });
+                    return false;
+                  } catch (_) {
+                    return true;
+                  }
                 };
 
                 return (
