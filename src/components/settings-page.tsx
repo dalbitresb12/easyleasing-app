@@ -2,38 +2,40 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, PropsWithChildren } from "react";
 import { z } from "zod";
 
-import { UpdatableUser } from "@/shared/models/user";
+import { User } from "@/shared/models/user";
 
-import { pictureHandler, usersHandler, usersPatchHandler } from "@/api/handlers";
+import { usersHandler, usersPatchHandler } from "@/api/handlers";
 import { queries } from "@/api/keys";
 
 import { HTMLInputStringTypeAttribute, SettingsInput } from "@/components/settings-input";
 import { SettingsLayout } from "@/components/settings-layout";
 
-const UpdatableUserForm = UpdatableUser.extend({
+const UserForm = User.extend({
   picture: z.string().optional(),
-});
-type UpdatableUserForm = z.infer<typeof UpdatableUserForm>;
+}).partial();
+type UserForm = z.infer<typeof UserForm>;
 
-type UpdatableUserFormShape = typeof UpdatableUserForm.shape;
-type UpdatableUserFormKeys = keyof UpdatableUserFormShape;
+type UserFormShape = typeof UserForm.shape;
+type UserFormKeys = keyof UserFormShape;
 
-type SettingsField<T extends UpdatableUserFormKeys = UpdatableUserFormKeys> = {
+type SettingsField<T extends UserFormKeys = UserFormKeys> = {
   key: T;
 } & (
   | {
       label: string;
       type?: HTMLInputStringTypeAttribute;
+      readonly?: boolean;
       component?: never;
     }
   | {
       label?: never;
       type?: never;
+      readonly?: never;
       component?: FC;
     }
 );
 
-export type SettingsFormLayout<T extends UpdatableUserFormKeys = UpdatableUserFormKeys> = {
+export type SettingsFormLayout<T extends UserFormKeys = UserFormKeys> = {
   title: string;
   description?: string;
   fields: SettingsField<T>[];
@@ -47,9 +49,7 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
   const { layout, children } = props;
 
   const user = useQuery({ ...queries.users.me, queryFn: usersHandler });
-  const picture = useQuery({ ...queries.users.picture, queryFn: pictureHandler });
-
-  const data: UpdatableUserForm = { ...(user.data || {}), picture: picture.data };
+  const data: UserForm = { ...(user.data || {}) };
 
   const queryClient = useQueryClient();
   const usersMutation = useMutation({
@@ -78,7 +78,7 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
                   return <item.component key={key} />;
                 }
 
-                const initialValue = data[key] || "";
+                const initialValue = data[key]?.toString();
                 const handleSave = (value: typeof data[typeof key]) => {
                   usersMutation.mutate({ [key]: value });
                 };
@@ -88,6 +88,7 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
                     key={key}
                     type={item.type}
                     label={item.label || ""}
+                    hideToolbar={item.readonly}
                     initialValue={initialValue}
                     onSave={handleSave}
                   />
