@@ -10,7 +10,9 @@
     "types": ["@cloudflare/workers-types"],
     "baseUrl": "../",
     "paths": {
-      "@/shared/*": ["shared/*"]
+      "@/shared/*": ["shared/*"],
+      "@/types/*": ["functions/types/*"],
+      "@/utils/*": ["functions/utils/*"]
     }
   }
 }
