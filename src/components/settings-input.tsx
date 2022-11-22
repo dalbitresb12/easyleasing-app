@@ -1,5 +1,9 @@
-import { Dispatch, FC, MouseEventHandler, ReactNode, SetStateAction, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Dispatch, MouseEventHandler, ReactElement, ReactNode, SetStateAction, useState } from "react";
+import { SubmitHandler, useForm, FieldPath } from "react-hook-form";
+import { z, ZodType } from "zod";
+
+import { formatDate } from "@/utils/date-formatter";
 
 import { FormInput } from "./form-input";
 
@@ -8,6 +12,8 @@ type MaybePromise<T> = Promise<T> | T;
 type SingleValueForm<T> = {
   value: T;
 };
+
+type AcceptedValues = string | Date;
 
 export type HTMLInputStringTypeAttribute =
   | "text"
@@ -24,30 +30,51 @@ export type HTMLInputStringTypeAttribute =
   | "datetime-local"
   | "search";
 
-export interface Props {
+export interface Props<T extends AcceptedValues> {
   label: string;
   type?: HTMLInputStringTypeAttribute;
-  initialValue?: string;
+  zodValidator?: ZodType;
+  initialValue?: T;
   editable?: boolean;
   deletable?: boolean;
   hideToolbar?: boolean;
   children?: ReactNode | ((ctx: { editable: boolean; setEditable: Dispatch<SetStateAction<boolean>> }) => ReactNode);
-  onUpdate?: (value?: string) => MaybePromise<boolean | void | undefined>;
-  onCancel?: (value?: string) => MaybePromise<boolean | void | undefined>;
-  onDelete?: (value?: string) => MaybePromise<boolean | void | undefined>;
-  onSave?: (value?: string) => MaybePromise<boolean | void | undefined>;
+  onUpdate?: (value?: T) => MaybePromise<boolean | void | undefined>;
+  onCancel?: (value?: T) => MaybePromise<boolean | void | undefined>;
+  onDelete?: (value?: T) => MaybePromise<boolean | void | undefined>;
+  onSave?: (value?: T) => MaybePromise<boolean | void | undefined>;
 }
 
-export const SettingsInput: FC<Props> = props => {
+const getInputInitialValue = (value?: AcceptedValues): string | undefined => {
+  if (value instanceof Date) return value.toISOString();
+  return value;
+};
+
+const getDisplayValue = (type: HTMLInputStringTypeAttribute, value?: AcceptedValues): string | undefined => {
+  if (type === "password") return "********";
+  if (value instanceof Date) return formatDate(value);
+  return value;
+};
+
+export const SettingsInput = <T extends AcceptedValues>(props: Props<T>): ReactElement<Props<T>> => {
   const { label, type = "text", initialValue, hideToolbar, children, onUpdate, onCancel, onDelete, onSave } = props;
   const deletable = props.deletable && typeof onDelete !== "undefined";
 
+  const [zodValidator] = useState(
+    props.zodValidator
+      ? z.object({
+          value: props.zodValidator,
+        })
+      : undefined,
+  );
   const [internalEditable, setEditable] = useState(false);
 
   const shouldUseInternalEditable = () => typeof props.editable === "undefined";
   const editable = typeof props.editable !== "undefined" ? props.editable : internalEditable;
 
-  const { register, handleSubmit, reset, formState } = useForm<SingleValueForm<string>>();
+  const { register, handleSubmit, reset, formState } = useForm<SingleValueForm<T>>({
+    resolver: zodValidator ? zodResolver(zodValidator) : undefined,
+  });
 
   const handleRender = () => {
     if (children) {
@@ -60,16 +87,13 @@ export const SettingsInput: FC<Props> = props => {
       return (
         <FormInput
           type={type}
-          defaultValue={initialValue}
+          defaultValue={getInputInitialValue(initialValue)}
           errors={formState.errors.value?.message?.toString()}
-          {...register("value")}
+          {...register("value" as FieldPath<SingleValueForm<T>>, { valueAsDate: type === "date" })}
         />
       );
     }
-    if (type === "password") {
-      return "********";
-    }
-    return initialValue;
+    return getDisplayValue(type, initialValue);
   };
 
   const handleUpdate: MouseEventHandler<HTMLButtonElement> = async event => {
@@ -95,7 +119,7 @@ export const SettingsInput: FC<Props> = props => {
     reset();
   };
 
-  const onSubmit: SubmitHandler<SingleValueForm<string>> = async (form, event) => {
+  const onSubmit: SubmitHandler<SingleValueForm<T>> = async (form, event) => {
     event?.persist();
     if (onSave && (await onSave(form.value))) return;
     if (!shouldUseInternalEditable()) return;

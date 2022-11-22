@@ -1,5 +1,7 @@
 import { FC } from "react";
 
+import { User } from "@/shared/models/user";
+
 import { SettingsFormLayout, SettingsPage } from "@/components/settings-page";
 
 const layout: SettingsFormLayout[] = [
@@ -11,6 +13,7 @@ const layout: SettingsFormLayout[] = [
         key: "password",
         label: "Contraseña",
         type: "password",
+        zodValidator: User.shape.password,
       },
       {
         key: "lastPasswordUpdate",

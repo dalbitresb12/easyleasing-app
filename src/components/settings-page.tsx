@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FC, PropsWithChildren } from "react";
-import { z } from "zod";
+import { z, ZodType } from "zod";
 
 import { User } from "@/shared/models/user";
 
@@ -24,12 +24,14 @@ type SettingsField<T extends UserFormKeys = UserFormKeys> = {
   | {
       label: string;
       type?: HTMLInputStringTypeAttribute;
+      zodValidator?: ZodType;
       readonly?: boolean;
       component?: never;
     }
   | {
       label?: never;
       type?: never;
+      zodValidator?: never;
       readonly?: never;
       component?: FC;
     }
@@ -78,7 +80,8 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
                   return <item.component key={key} />;
                 }
 
-                const initialValue = data[key]?.toString();
+                const value = data[key];
+                const initialValue = typeof value === "boolean" ? value.toString() : value;
                 const handleSave = (value: typeof data[typeof key]) => {
                   usersMutation.mutate({ [key]: value });
                 };
@@ -87,6 +90,7 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
                   <SettingsInput
                     key={key}
                     type={item.type}
+                    zodValidator={item.zodValidator}
                     label={item.label || ""}
                     hideToolbar={item.readonly}
                     initialValue={initialValue}
