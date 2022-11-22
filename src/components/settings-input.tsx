@@ -14,15 +14,16 @@ export interface Props {
   initialValue?: string;
   editable?: boolean;
   deletable?: boolean;
+  hideToolbar?: boolean;
   children?: ReactNode | ((ctx: { editable: boolean; setEditable: Dispatch<SetStateAction<boolean>> }) => ReactNode);
   onUpdate?: (value?: string) => MaybePromise<boolean | void | undefined>;
   onCancel?: (value?: string) => MaybePromise<boolean | void | undefined>;
   onDelete?: (value?: string) => MaybePromise<boolean | void | undefined>;
-  onSave: (value?: string) => MaybePromise<boolean | void | undefined>;
+  onSave?: (value?: string) => MaybePromise<boolean | void | undefined>;
 }
 
 export const SettingsInput: FC<Props> = props => {
-  const { label, initialValue, children, onUpdate, onCancel, onDelete, onSave } = props;
+  const { label, initialValue, hideToolbar, children, onUpdate, onCancel, onDelete, onSave } = props;
   const deletable = props.deletable && typeof onDelete !== "undefined";
 
   const [internalEditable, setEditable] = useState(false);
@@ -77,7 +78,7 @@ export const SettingsInput: FC<Props> = props => {
 
   const onSubmit: SubmitHandler<SingleValueForm<string>> = async (form, event) => {
     event?.persist();
-    if (await onSave(form.value)) return;
+    if (onSave && (await onSave(form.value))) return;
     if (!shouldUseInternalEditable()) return;
     setEditable(false);
     reset();
@@ -90,7 +91,7 @@ export const SettingsInput: FC<Props> = props => {
       </div>
       <div className="w-full text-slate-900">{handleRender()}</div>
       <div className="w-full space-x-8">
-        {!editable && (
+        {!hideToolbar && !editable && (
           <>
             <button className="text-sky-700 font-medium" onClick={handleUpdate}>
               Update
@@ -102,7 +103,7 @@ export const SettingsInput: FC<Props> = props => {
             )}
           </>
         )}
-        {editable && (
+        {!hideToolbar && editable && (
           <>
             <button type="submit" className="text-sky-700 font-medium">
               Save
