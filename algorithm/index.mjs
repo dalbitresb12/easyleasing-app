@@ -93,22 +93,74 @@ const extraCostValidation = (value, extraCosts) => {
 };
 
 const getInitialFee = (initialFeePercentage, sellingPrice) => {
-  return initialFeePercentage * sellingPrice;
+  return (initialFeePercentage / 100) * sellingPrice;
 };
-
-const getBuyingOptionFee = (answers, sellingValue) => {
-  if (answers.buyingOption === true) {
-    return (answers.buyingOptionPercentage / 100) * sellingValue;
-  }
-  return 0;
+const getNewSellingPrice = (oldSellingPrice, initialFee) => {
+  return oldSellingPrice - initialFee;
 };
 
 const getIgvFee = sellingPrice => {
   return roundMoney((sellingPrice * IGV) / (1 + IGV));
 };
 
-const getPeriods = (loanTime, paymentFrequency) => {
-  return (loanTime * 360) / paymentFrequency;
+const getSellingValue = (sellingPrice, igvFee) => {
+  return sellingPrice - igvFee;
+};
+
+const getBuyingOptionFee = (answers, sellingValue) => {
+  if (answers.buyingOption === true) {
+    return -(answers.buyingOptionPercentage / 100) * sellingValue;
+  }
+  return 0;
+};
+
+const getAnnualPayments = inputs => {
+  return 360 / inputs.paymentFrequency;
+};
+const getPeriods = inputs => {
+  return (inputs.loanTime * 360) / inputs.paymentFrequency;
+};
+
+const getInitialCosts = (inputs, extraCosts) => {
+  let initialCosts = 0;
+  for (const extraCost of extraCosts) {
+    if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
+      initialCosts += extraCost.value;
+    } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
+      initialCosts += (extraCost.value / 100) * inputs.sellingPrice;
+    }
+  }
+
+  return initialCosts;
+};
+
+const getPeriodicalCosts = extraCosts => {
+  let periodicalCosts = 0;
+  for (const extraCost of extraCosts) {
+    if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
+      periodicalCosts += extraCost.value;
+    }
+  }
+
+  return periodicalCosts;
+};
+
+const getInsuranceAmount = (extraCosts, sellingPrice, annualPayments) => {
+  let insuranceAmount = 0;
+  for (const extraCost of extraCosts) {
+    if (extraCost.type === "Periódico" && extraCost.valueType === "Porcentual") {
+      insuranceAmount = -(((extraCost.value / 100) * sellingPrice) / annualPayments);
+    }
+  }
+  return insuranceAmount;
+};
+
+const getDeprecitaion = (sellingValue, periods) => {
+  return -(sellingValue / periods);
+};
+
+const getLeasingAmount = (initialCosts, sellingValue) => {
+  return initialCosts + sellingValue;
 };
 
 const getInterestRatePerPeriod = answers => {
@@ -130,49 +182,33 @@ const tceaCalculation = (tir, cuotasAnuales) => {
 };
 
 const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescuentoWACC) => {
-  const initialFee = getInitialFee(inputs.percentageInitialFee / 100, inputs.sellingPrice);
+  const cuotaInicial = getInitialFee(inputs.percentageInitialFee, inputs.sellingPrice);
+  const nuevoPrecio = getNewSellingPrice(inputs.sellingPrice, cuotaInicial);
+  const montoIgv = getIgvFee(nuevoPrecio);
+  const valorVenta = getSellingValue(nuevoPrecio, montoIgv);
+  const cuotasAnuales = getAnnualPayments(inputs);
+  const periodos = getPeriods(inputs);
 
-  const newSellingPrice = inputs.sellingPrice - initialFee;
+  const montoRecompra = getBuyingOptionFee(inputs, valorVenta);
 
-  const montoIgv = getIgvFee(newSellingPrice);
+  const costosIniciales = getInitialCosts(inputs, extraCosts);
+  const costosPeriodicos = -getPeriodicalCosts(extraCosts);
+  const montoSeguro = getInsuranceAmount(extraCosts, nuevoPrecio, cuotasAnuales);
 
-  const sellingValue = newSellingPrice - montoIgv;
-
-  const cuotasAnuales = 360 / inputs.paymentFrequency;
-  const periodos = getPeriods(inputs.loanTime, inputs.paymentFrequency);
-
-  const montoRecompra = -getBuyingOptionFee(inputs, sellingValue);
-
-  let totalInitialCosts = 0;
-  let periodicCosts = 0;
-  let insuranceAmount = 0;
-
-  for (const extraCost of extraCosts) {
-    if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
-      totalInitialCosts += extraCost.value;
-    } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
-      totalInitialCosts += (extraCost.value / 100) * inputs.sellingPrice;
-    } else if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
-      periodicCosts -= extraCost.value;
-    } else {
-      insuranceAmount = -(((extraCost.value / 100) * newSellingPrice) / cuotasAnuales);
-    }
-  }
-
-  const leasingAmount = totalInitialCosts + sellingValue;
+  const montoLeasing = getLeasingAmount(costosIniciales, valorVenta);
 
   const interesRatePerPeriod = getInterestRatePerPeriod(inputs);
 
   const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaDescuentoKs, 360, inputs.paymentFrequency);
   const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaDescuentoWACC, 360, inputs.paymentFrequency);
 
-  console.log(`\nPrecio de venta del activo: ${inputs.sellingPrice}`);
-  console.log(`Cuota inicial: ${currencyFormatter.format(initialFee)}\n`);
-  console.log(`Nuevo precio de venta: ${currencyFormatter.format(newSellingPrice)}`);
+  console.log(`\nPrecio de venta del activo: ${currencyFormatter.format(inputs.sellingPrice)}`);
+  console.log(`Cuota inicial: ${currencyFormatter.format(cuotaInicial)}\n`);
+  console.log(`Nuevo precio de venta: ${currencyFormatter.format(nuevoPrecio)}`);
   console.log(`Monto IGV: ${currencyFormatter.format(montoIgv)}`);
-  console.log(`Valor de venta del activo: ${currencyFormatter.format(sellingValue)}`);
-  console.log(`Total por costos iniciales: ${currencyFormatter.format(totalInitialCosts)}`);
-  console.log(`Monto del leasing: ${currencyFormatter.format(leasingAmount)}`);
+  console.log(`Valor de venta del activo: ${currencyFormatter.format(valorVenta)}`);
+  console.log(`Total por costos iniciales: ${currencyFormatter.format(costosIniciales)}`);
+  console.log(`Monto del leasing: ${currencyFormatter.format(montoLeasing)}`);
 
   console.log(`\nN° cuotas al año: ${cuotasAnuales}`);
   console.log(`N° periodos de pago: ${periodos}`);
@@ -185,12 +221,12 @@ const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescu
   console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(descuentoWACC)}`);
 
   let tipoPlazo = "";
-  let saldoInicial = leasingAmount;
+  let saldoInicial = montoLeasing;
   let cuota = 0;
   let intereses = 0;
   let amortizacion = 0;
   let saldoFinal = 0;
-  const depreciacion = -(sellingValue / periodos);
+  const depreciacion = getDeprecitaion(valorVenta, periodos);
   let ahorroTributario = 0;
   let montoIGVPeriodico = 0;
   let flujoBruto = 0;
@@ -199,14 +235,14 @@ const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescu
 
   let totalIntereses = 0;
   let totalAmortizacion = 0;
-  let totalCostosPeriodicos = 0;
   let totalSeguro = 0;
+  let totalCostosPeriodicos = 0;
 
   let vnaFlujoBruto = 0;
   let vnaFlujoNeto = 0;
 
-  const flujosBrutos = [leasingAmount];
-  const flujosNetos = [leasingAmount];
+  const flujosBrutos = [montoLeasing];
+  const flujosNetos = [montoLeasing];
 
   for (let periodo = 1; periodo <= periodos; periodo++) {
     console.log(`= = = = = Periodo ${periodo} = = = = =`);
@@ -227,13 +263,10 @@ const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescu
     }
 
     if (tipoPlazo === "Total") {
-      cuota = 0;
-      amortizacion = 0;
       saldoFinal = saldoInicial - intereses;
     } else if (tipoPlazo === "Parcial") {
       cuota = intereses;
-      amortizacion = 0;
-      saldoFinal = saldoInicial + amortizacion;
+      saldoFinal = saldoInicial;
     } else {
       cuota = -(
         (Math.pow(1 + interesRatePerPeriod, periodos - periodo + 1) * saldoInicial * interesRatePerPeriod) /
@@ -247,16 +280,16 @@ const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescu
     console.log(`Intereses: ${currencyFormatter.format(roundMoney(intereses))}`);
     console.log(`Cuota: ${currencyFormatter.format(roundMoney(cuota))}`);
     console.log(`Amortización: ${currencyFormatter.format(roundMoney(amortizacion))}`);
-    console.log(`Monto de seguro contra todo riesgo: ${currencyFormatter.format(roundMoney(insuranceAmount))}`);
-    console.log(`Costos periódicos: ${currencyFormatter.format(roundMoney(periodicCosts))}`);
+    console.log(`Monto de seguro contra todo riesgo: ${currencyFormatter.format(roundMoney(montoSeguro))}`);
+    console.log(`Costos periódicos: ${currencyFormatter.format(roundMoney(costosPeriodicos))}`);
 
-    ahorroTributario = (intereses + insuranceAmount + periodicCosts + depreciacion) * IR;
-    montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts) * IGV;
-    flujoBruto = cuota + insuranceAmount + periodicCosts;
+    ahorroTributario = (intereses + montoSeguro + costosPeriodicos + depreciacion) * IR;
+    montoIGVPeriodico = (cuota + montoSeguro + costosPeriodicos) * IGV;
+    flujoBruto = cuota + montoSeguro + costosPeriodicos;
 
     if (inputs.buyingOption && periodo === periodos) {
-      montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts + montoRecompra) * IGV;
-      flujoBruto = cuota + insuranceAmount + periodicCosts + montoRecompra;
+      montoIGVPeriodico = (cuota + montoSeguro + costosPeriodicos + montoRecompra) * IGV;
+      flujoBruto = cuota + montoSeguro + costosPeriodicos + montoRecompra;
       console.log(`Monto de recompra: ${currencyFormatter.format(roundMoney(montoRecompra))}`);
     }
 
@@ -280,8 +313,8 @@ const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescu
       totalIntereses = totalIntereses + intereses;
     }
 
-    totalCostosPeriodicos += periodicCosts;
-    totalSeguro += insuranceAmount;
+    totalCostosPeriodicos += costosPeriodicos;
+    totalSeguro += montoSeguro;
     saldoInicial = saldoFinal;
 
     flujosBrutos.push(roundMoney(flujoBruto));
@@ -296,8 +329,8 @@ const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescu
   console.log(`Monto total por seguro contra todo riesgo: ${currencyFormatter.format(roundMoney(-totalSeguro))}`);
   console.log(`Desembolso total: ${currencyFormatter.format(roundMoney(-desembolsoTotal))}\n`);
 
-  vnaFlujoBruto = vnaFlujoBruto + leasingAmount;
-  vnaFlujoNeto = vnaFlujoNeto + leasingAmount;
+  vnaFlujoBruto = vnaFlujoBruto + montoLeasing;
+  vnaFlujoNeto = vnaFlujoNeto + montoLeasing;
 
   const tirFlujoBruto = tirCalculation(flujosBrutos);
   const tirFlujoNeto = tirCalculation(flujosNetos);
