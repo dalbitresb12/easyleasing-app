@@ -1,11 +1,11 @@
 ---
-title: "Another pages"
+title: "Another page"
 lastUpdate: "2022-11-22"
 ---
 
-Directory structure is kept when rendering the files. All the available documentation pages will be shown on the tree navigation sidebar.
+Directory structure is **not kept** when rendering the files. All the available documentation pages will be shown on the navigation sidebar.
 
-For images to be rendered correctly, you should always reference the full path from the root of the workspace, starting with `/public`.
+For images to be rendered correctly, you should always reference the full path from the root of the workspace, starting with `/public/`.
 
 ![Photo by Single.Earth on Unsplash](/public/single-earth-FP5tOXT6aMs-unsplash.jpg)
 
