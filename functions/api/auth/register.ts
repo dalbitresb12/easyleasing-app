@@ -32,6 +32,7 @@ export const onRequestPost: AppFunction = async ctx => {
     verified: false,
     createdAt: now,
     updatedAt: now,
+    lastPasswordUpdate: now,
   } as User);
 
   // Send confirmation email

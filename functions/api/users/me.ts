@@ -34,6 +34,7 @@ export const onRequestPatch: AppFunction = async ctx => {
   if (patch.password) {
     const salt = await bcrypt.genSalt(10);
     merged.password = await bcrypt.hash(merged.password, salt);
+    merged.lastPasswordUpdate = new Date();
   }
 
   // Update context

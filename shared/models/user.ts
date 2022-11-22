@@ -16,6 +16,7 @@ export const User = z.object({
     .max(72, "La contraseña debe tener máximo 72 caracteres"),
   createdAt: DateWithParsing,
   updatedAt: DateWithParsing,
+  lastPasswordUpdate: DateWithParsing,
   profilePicture: z.string().uuid().optional(),
   verificationCode: z.string().optional(),
   verified: z.boolean().default(false),
