@@ -6,6 +6,7 @@ import { EditableLeasing, Leasing, SanitizedLeasing } from "@/shared/models/leas
 import { clamp } from "@/shared/utils/numbers";
 
 import { parseBody } from "@/utils/bodyparser";
+import { createUrlFromRequest } from "@/utils/urls";
 
 export const onRequestGet: AppFunction = async ctx => {
   const url = new URL(ctx.request.url);
@@ -53,8 +54,7 @@ export const onRequestPost: AppFunction = async ctx => {
   });
 
   const headers = new Headers();
-  const url = new URL(ctx.request.url);
-  const location = new URL(`/api/leasings/${leasing.id}`, `${url.protocol}/${url.hostname}`);
+  const location = createUrlFromRequest(ctx.request, `/api/leasings/${leasing.id}`);
   headers.set("Location", location.toString());
   const response = SanitizedLeasing.parse(leasing);
   return Response.json(response, { status: 201, headers });
