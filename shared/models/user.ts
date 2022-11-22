@@ -5,6 +5,18 @@ export const DateWithParsing = z.preprocess(arg => {
 }, z.date());
 export type DateWithParsing = z.infer<typeof DateWithParsing>;
 
+export const TimeFrequencies = z.enum([
+  "daily",
+  "biweekly",
+  "monthly",
+  "bimonthly",
+  "quarterly",
+  "four-monthly",
+  "semi-annually",
+  "annually",
+]);
+export type TimeFrequencies = z.infer<typeof TimeFrequencies>;
+
 export const User = z.object({
   uuid: z.string().uuid(),
   fullName: z.string().min(1, "Requerido"),
@@ -20,8 +32,10 @@ export const User = z.object({
   profilePicture: z.string().uuid().optional(),
   verificationCode: z.string().optional(),
   verified: z.boolean().default(false),
-  currency: z.string().length(3, "Debe ser un código ISO 4217 válido").default("PEN"),
-  interest_rate_type: z.enum(["nominal", "effective"]).default("nominal"),
+  currency: z.enum(["PEN", "USD"]).default("PEN"),
+  paymentFrequency: TimeFrequencies.default("monthly"),
+  interestRateType: z.enum(["nominal", "effective"]).default("nominal"),
+  capitalizationType: TimeFrequencies.default("monthly"),
   language: z.string().length(2, "Debe ser un código ISO 639-1 válido").default("es"),
   timezone: z.string().default("America/Lima"),
   dateFormat: z.string().default("DD/MM/YYYY"),
@@ -37,7 +51,7 @@ export const UpdatableUser = User.pick({
   email: true,
   password: true,
   currency: true,
-  interest_rate_type: true,
+  interestRateType: true,
   language: true,
   timezone: true,
   dateFormat: true,
