@@ -16,7 +16,7 @@ jobs:
         node: [16]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node v${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
@@ -38,7 +38,7 @@ jobs:
         node: [16]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node v${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
@@ -60,7 +60,7 @@ jobs:
         node: [16]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node v${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
@@ -81,7 +81,7 @@ jobs:
         node: [16]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node v${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
@@ -102,7 +102,7 @@ jobs:
         node: [16]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: reviewdog/action-actionlint@v1
         with:
           reporter: 'github-check'
