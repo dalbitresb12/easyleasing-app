@@ -28,6 +28,7 @@ type SettingsField<T extends UpdatableUserFormKeys = UpdatableUserFormKeys> = {
     }
   | {
       label?: never;
+      type?: never;
       component?: FC;
     }
 );
@@ -83,7 +84,13 @@ export const SettingsPage: FC<PropsWithChildren<Props>> = props => {
                 };
 
                 return (
-                  <SettingsInput key={key} label={item.label || ""} initialValue={initialValue} onSave={handleSave} />
+                  <SettingsInput
+                    key={key}
+                    type={item.type}
+                    label={item.label || ""}
+                    initialValue={initialValue}
+                    onSave={handleSave}
+                  />
                 );
               })}
               {children}
