@@ -49,13 +49,15 @@ export class HttpClient {
     return options;
   }
 
-  static async request(path: string, method: HttpMethodsWithoutBody): Promise<Response>;
-  static async request<TBody extends JsonRecord = JsonRecord>(
-    path: string,
-    method: HttpMethodsWithBody,
-    model?: never,
-    body?: TBody,
-  ): Promise<Response>;
+  static async rawRequest(path: string, method: HttpMethodsWithoutBody): Promise<Response>;
+  static async rawRequest(path: string, method: HttpMethodsWithBody, body?: BodyInit): Promise<Response>;
+  static async rawRequest(path: string, method: HttpMethods, body?: BodyInit): Promise<Response> {
+    const options = await this.withAuthentication({ method });
+    if (body) options.body = body;
+    const response = await fetch(path, options);
+    return this.handleRawResponse(response);
+  }
+
   static async request<TShape extends ZodRawShape, TModel extends ZodObject<TShape>>(
     path: string,
     method: HttpMethodsWithoutBody,
@@ -70,14 +72,11 @@ export class HttpClient {
     TShape extends ZodRawShape,
     TModel extends ZodObject<TShape>,
     TBody extends JsonRecord = JsonRecord,
-  >(path: string, method: HttpMethods, model?: TModel, body?: TBody): Promise<z.infer<TModel> | Response> {
+  >(path: string, method: HttpMethods, model: TModel, body?: TBody): Promise<z.infer<TModel> | Response> {
     const options = await this.withAuthentication({ method });
     if (body) options.body = JSON.stringify(body);
     const response = await fetch(path, options);
-    if (model) {
-      return this.handleResponse<TShape, TModel>(response, model);
-    }
-    return this.handleRawResponse(response);
+    return this.handleResponse<TShape, TModel>(response, model);
   }
 
   static async getFile(path: string): Promise<string> {
