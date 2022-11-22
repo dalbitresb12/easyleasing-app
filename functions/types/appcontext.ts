@@ -2,7 +2,7 @@ import type { User } from "@/shared/models/user";
 
 export interface AppEnv {
   users: KVNamespace;
-  loan_data: KVNamespace;
+  leasings: KVNamespace;
   uploads: R2Bucket;
   JWT_SECRET: string;
   POSTMARK_SERVER_TOKEN: string;
