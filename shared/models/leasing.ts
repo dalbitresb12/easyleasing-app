@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Currencies, ExpenseType, InterestRateTypes, NumericalType, TimeFrequencies } from "./common";
+import { Currencies, DateWithParsing, ExpenseType, InterestRateTypes, NumericalType, TimeFrequencies } from "./common";
 import { User } from "./user";
 
 export const LeasingExtras = z
@@ -27,7 +27,9 @@ export const LeasingExtras = z
         inclusive: true,
       });
     }
-  });
+  })
+  .innerType();
+export type LeasingExtras = z.infer<typeof LeasingExtras>;
 
 export const Leasing = z
   .object({
@@ -46,10 +48,17 @@ export const Leasing = z
     buybackType: NumericalType.optional(),
     buybackValue: z.number().min(0).optional(),
     extras: z.array(LeasingExtras).default([]),
+    createdAt: DateWithParsing,
+    updatedAt: DateWithParsing,
   })
   .superRefine(({ rateType, capitalizationFrequency }, ctx) => {
-    if (rateType === "effective") return;
-    if (!capitalizationFrequency) {
+    if (rateType === "effective" && capitalizationFrequency) {
+      ctx.addIssue({
+        code: "invalid_type",
+        received: "string",
+        expected: "undefined",
+      });
+    } else if (rateType === "nominal" && !capitalizationFrequency) {
       ctx.addIssue({
         code: "invalid_type",
         received: "undefined",
@@ -58,28 +67,65 @@ export const Leasing = z
     }
   })
   .superRefine(({ buyback, buybackType, buybackValue }, ctx) => {
-    if (!buyback) return;
-    if (!buybackType) {
-      ctx.addIssue({
-        code: "invalid_type",
-        received: "undefined",
-        expected: "string",
-      });
-    }
     const types = Object.values(NumericalType.Values);
-    if (buybackType && !types.includes(buybackType)) {
-      ctx.addIssue({
-        code: "invalid_enum_value",
-        received: buybackType,
-        options: types,
-      });
+    if (buyback) {
+      if (buybackType) {
+        ctx.addIssue({
+          code: "invalid_type",
+          received: "string",
+          expected: "undefined",
+        });
+        if (!buybackValue) {
+          ctx.addIssue({
+            code: "invalid_type",
+            received: "number",
+            expected: "undefined",
+          });
+        }
+      }
+    } else if (!buyback) {
+      if (!buybackType) {
+        ctx.addIssue({
+          code: "invalid_type",
+          received: "undefined",
+          expected: "string",
+        });
+      }
+      if (buybackType && !types.includes(buybackType)) {
+        ctx.addIssue({
+          code: "invalid_enum_value",
+          received: buybackType,
+          options: types,
+        });
+      }
+      if (!buybackValue) {
+        ctx.addIssue({
+          code: "invalid_type",
+          received: "undefined",
+          expected: "number",
+        });
+      }
+      if (buybackValue && buybackType === "percent" && buybackValue > 100) {
+        ctx.addIssue({
+          code: "too_big",
+          type: "number",
+          maximum: 100,
+          inclusive: true,
+        });
+      }
     }
-    if (!buybackValue) {
-      ctx.addIssue({
-        code: "invalid_type",
-        received: "undefined",
-        expected: "number",
-      });
-    }
-  });
+  })
+  .innerType()
+  .innerType();
 export type Leasing = z.infer<typeof Leasing>;
+
+export const SanitizedLeasing = Leasing;
+export type SanitizedLeasing = z.infer<typeof SanitizedLeasing>;
+
+export const EditableLeasing = SanitizedLeasing.omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type EditableLeasing = z.infer<typeof EditableLeasing>;
