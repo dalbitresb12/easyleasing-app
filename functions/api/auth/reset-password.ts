@@ -28,6 +28,7 @@ export const onRequestPost: AppFunction = async ctx => {
   // Update user status in KV
   user.password = hashedPassword;
   user.verified = true;
+  user.lastPasswordUpdate = new Date();
   delete user.verificationCode;
   await ctx.env.users.put(user.email, JSON.stringify(user));
 

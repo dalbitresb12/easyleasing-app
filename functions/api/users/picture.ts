@@ -100,6 +100,7 @@ export const onRequestPut: AppFunction = async ctx => {
   });
 
   ctx.data.user.profilePicture = uploadId;
+  ctx.data.user.updatedAt = new Date();
   await ctx.env.users.put(ctx.data.user.email, JSON.stringify(ctx.data.user));
 
   if (previousPicture) {

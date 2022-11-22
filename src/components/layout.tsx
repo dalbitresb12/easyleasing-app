@@ -9,14 +9,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, PropsWithChildren } from "react";
 
-import { HttpError, HttpErrorCode } from "@/shared/api/types";
-
 import { pictureHandler, usersHandler } from "@/api/handlers";
 import { queries } from "@/api/keys";
 
 import { JwtStore } from "@/utils/jwt-store";
 
 import { ReactSVGElement } from "../typings/svg";
+import { CircularAvatar } from "./circular-avatar";
 import { MaterialIcon } from "./material-icon";
 
 export interface NavigationItem {
@@ -59,28 +58,8 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const retryHandler = (_: number, error: unknown): boolean => {
-    if (!(error instanceof HttpError)) return true;
-    if (error.code === HttpErrorCode.ServerError) return true;
-    if (error.code === HttpErrorCode.ClientError) return false;
-    return true;
-  };
-
-  const user = useQuery({
-    ...queries.users.me,
-    queryFn: usersHandler,
-    retry: retryHandler,
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
-  });
-
-  const picture = useQuery({
-    ...queries.users.picture,
-    queryFn: pictureHandler,
-    retry: retryHandler,
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
-  });
+  const user = useQuery({ ...queries.users.me, queryFn: usersHandler });
+  const picture = useQuery({ ...queries.users.picture, queryFn: pictureHandler });
 
   const logoutHandler = async () => {
     await JwtStore.clear();
@@ -131,20 +110,11 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
             </nav>
           </div>
           <div className="p-4 flex items-center">
-            <div className="aspect-square rounded-full w-12 h-12 overflow-hidden shrink-0">
-              {(picture.isLoading || picture.isError) && (
-                <div className="bg-sky-700 w-full h-full flex items-center justify-center">
-                  <span className="text-white text-xl">{user.data.preferredName.substring(0, 1)}</span>
-                </div>
-              )}
-              {picture.data && (
-                <img
-                  className="h-full object-cover"
-                  alt={`${user.data.preferredName}'s profile picture`}
-                  src={picture.data}
-                />
-              )}
-            </div>
+            <CircularAvatar
+              picture={picture.data}
+              alt={`foto de perfil de ${user.data.preferredName}`}
+              placeholder={user.data.preferredName}
+            />
             <div className="ml-4 flex flex-col w-full text-xs space-y-1">
               <span className="font-medium text-sky-700">Hi, {user.data.preferredName}</span>
               <Link href="/settings/general">
@@ -154,7 +124,9 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
           </div>
         </aside>
       )}
-      <main className={clsx(props.mainClassName, !user.isError && "shadow-md", "w-full h-full")}>{props.children}</main>
+      <main className={clsx(props.mainClassName, !user.isError && "shadow-md", "w-full h-full overflow-y-scroll")}>
+        {props.children}
+      </main>
     </div>
   );
 };

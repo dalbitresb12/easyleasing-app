@@ -24,12 +24,16 @@ export const onRequestPost: AppFunction = async ctx => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.password, salt);
 
+  const now = new Date();
   const user = User.parse({
     ...req,
     uuid: uuid,
     password: hashedPassword,
     verified: false,
-  });
+    createdAt: now,
+    updatedAt: now,
+    lastPasswordUpdate: now,
+  } as User);
 
   // Send confirmation email
   const emailResponse = await sendConfirmationEmail(ctx, user);

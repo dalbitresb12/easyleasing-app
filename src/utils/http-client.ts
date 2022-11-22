@@ -32,6 +32,13 @@ export class HttpClient {
     return await model.parseAsync(body);
   }
 
+  private static handleRawResponse(response: Response): Response {
+    if (!response.ok) {
+      throw new HttpError(response.status, response.statusText);
+    }
+    return response;
+  }
+
   private static async withAuthentication(options: RequestInit): Promise<RequestInit> {
     const token = await JwtStore.get();
     if (token) {
@@ -42,11 +49,19 @@ export class HttpClient {
     return options;
   }
 
+  static async rawRequest(path: string, method: HttpMethodsWithoutBody): Promise<Response>;
+  static async rawRequest(path: string, method: HttpMethodsWithBody, body?: BodyInit): Promise<Response>;
+  static async rawRequest(path: string, method: HttpMethods, body?: BodyInit): Promise<Response> {
+    const options = await this.withAuthentication({ method });
+    if (body) options.body = body;
+    const response = await fetch(path, options);
+    return this.handleRawResponse(response);
+  }
+
   static async request<TShape extends ZodRawShape, TModel extends ZodObject<TShape>>(
     path: string,
     method: HttpMethodsWithoutBody,
     model: TModel,
-    body?: never,
   ): Promise<z.infer<TModel>>;
   static async request<
     TShape extends ZodRawShape,
@@ -57,7 +72,7 @@ export class HttpClient {
     TShape extends ZodRawShape,
     TModel extends ZodObject<TShape>,
     TBody extends JsonRecord = JsonRecord,
-  >(path: string, method: HttpMethods, model: TModel, body?: TBody): Promise<z.infer<TModel>> {
+  >(path: string, method: HttpMethods, model: TModel, body?: TBody): Promise<z.infer<TModel> | Response> {
     const options = await this.withAuthentication({ method });
     if (body) options.body = JSON.stringify(body);
     const response = await fetch(path, options);
