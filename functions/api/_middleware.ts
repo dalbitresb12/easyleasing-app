@@ -69,4 +69,5 @@ export const authentication: AppFunction = async ctx => {
   return await ctx.next();
 };
 
+// TODO: Gracefully handle non-JSON responses with non-500 errors.
 export const onRequest: AppFunction[] = [errorHandler, zodErrorMap, authentication];
