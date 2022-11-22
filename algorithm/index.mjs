@@ -1,5 +1,5 @@
-import inquirer from "inquirer";
 import { irr } from "financial";
+import inquirer from "inquirer";
 
 const currencyFormatter = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
 const inputPercentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 2 });
