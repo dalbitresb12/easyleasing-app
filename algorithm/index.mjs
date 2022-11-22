@@ -58,7 +58,7 @@ const convertirTasaEfectivaEnEfectiva = (tasa, frecuenciaAntigua, frecuenciaNuev
 };
 
 const convertirTasaNominalEnEfectiva = (tasa, m, n) => {
-  Math.pow(1 + tasa / 100 / m, n) - 1;
+  return Math.pow(1 + tasa / 100 / m, n) - 1;
 };
 
 const positiveValidation = value => {
@@ -179,7 +179,7 @@ const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescu
   console.log(`Frecuencia de pago: ${inputs.paymentFrequency} días\n`);
 
   console.log(`Tipo de tasa de interés: ${inputs.interestRateType}`);
-  console.log(`Tasa efectiva del periodo: ${outputPercentageFormatter.format(interesRatePerPeriod * 100)}\n`);
+  console.log(`Tasa efectiva del periodo: ${outputPercentageFormatter.format(interesRatePerPeriod)}\n`);
 
   console.log(`Tasa descuento Ks equivalente: ${outputPercentageFormatter.format(descuentoKs)}`);
   console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(descuentoWACC)}`);
