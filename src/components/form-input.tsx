@@ -5,7 +5,7 @@ import { FieldError } from "react-hook-form";
 export interface Props extends ComponentPropsWithoutRef<"input"> {
   label?: string;
   helper?: string;
-  errors?: FieldError;
+  errors?: FieldError | string;
   unstyled?: boolean;
 }
 
@@ -31,7 +31,7 @@ export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
       )}
       <input ref={ref} id={id} className={styles} {...attrs} />
       {helper && <span className="text-sm">{helper}</span>}
-      {errors && <span className="text-sm text-red-500">{errors.message}</span>}
+      {errors && <span className="text-sm text-red-500">{typeof errors === "string" ? errors : errors.message}</span>}
     </>
   );
 });

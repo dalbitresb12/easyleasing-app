@@ -16,7 +16,12 @@ export const pictureHandler = (): Promise<string> => {
   return HttpClient.getFile(prefix("/picture"));
 };
 
+export const picturePutHandler = async (file: File): Promise<boolean> => {
+  await HttpClient.rawRequest(prefix("/picture"), HttpMethods.PUT, file);
+  return true;
+};
+
 export const pictureDeleteHandler = async (): Promise<boolean> => {
-  await HttpClient.request(prefix("/picture"), HttpMethods.DELETE);
+  await HttpClient.rawRequest(prefix("/picture"), HttpMethods.DELETE);
   return true;
 };
