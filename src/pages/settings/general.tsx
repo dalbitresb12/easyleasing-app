@@ -23,6 +23,7 @@ const layout: SettingsFormLayout[] = [
       {
         label: "Email",
         key: "email",
+        type: "email",
       },
     ],
   },
