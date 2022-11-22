@@ -37,6 +37,9 @@ export const onRequestPatch: AppFunction = async ctx => {
     merged.lastPasswordUpdate = new Date();
   }
 
+  // Change last update
+  merged.updatedAt = new Date();
+
   // Update context
   ctx.data.user = merged;
 
