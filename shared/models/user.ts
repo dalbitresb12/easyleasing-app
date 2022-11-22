@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Currencies, DateWithParsing, InterestRateTypes, TimeFrequencies } from "./common";
 
 export const User = z.object({
+  // TODO: Migrate to just id when we can do KV migrations
   uuid: z.string().uuid(),
   fullName: z.string().min(1, "Requerido"),
   preferredName: z.string().min(1, "Requerido"),
