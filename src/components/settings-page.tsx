@@ -7,7 +7,7 @@ import { UpdatableUser } from "@/shared/models/user";
 import { pictureHandler, usersHandler, usersPatchHandler } from "@/api/handlers";
 import { queries } from "@/api/keys";
 
-import { SettingsInput } from "@/components/settings-input";
+import { HTMLInputStringTypeAttribute, SettingsInput } from "@/components/settings-input";
 import { SettingsLayout } from "@/components/settings-layout";
 
 const UpdatableUserForm = UpdatableUser.extend({
@@ -23,6 +23,7 @@ type SettingsField<T extends UpdatableUserFormKeys = UpdatableUserFormKeys> = {
 } & (
   | {
       label: string;
+      type?: HTMLInputStringTypeAttribute;
       component?: never;
     }
   | {

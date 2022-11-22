@@ -9,8 +9,24 @@ type SingleValueForm<T> = {
   value: T;
 };
 
+export type HTMLInputStringTypeAttribute =
+  | "text"
+  | "password"
+  | "email"
+  | "number"
+  | "color"
+  | "tel"
+  | "url"
+  | "week"
+  | "time"
+  | "month"
+  | "date"
+  | "datetime-local"
+  | "search";
+
 export interface Props {
   label: string;
+  type?: HTMLInputStringTypeAttribute;
   initialValue?: string;
   editable?: boolean;
   deletable?: boolean;
@@ -23,7 +39,7 @@ export interface Props {
 }
 
 export const SettingsInput: FC<Props> = props => {
-  const { label, initialValue, hideToolbar, children, onUpdate, onCancel, onDelete, onSave } = props;
+  const { label, type = "text", initialValue, hideToolbar, children, onUpdate, onCancel, onDelete, onSave } = props;
   const deletable = props.deletable && typeof onDelete !== "undefined";
 
   const [internalEditable, setEditable] = useState(false);
@@ -43,7 +59,7 @@ export const SettingsInput: FC<Props> = props => {
     if (editable) {
       return (
         <FormInput
-          type="text"
+          type={type}
           defaultValue={initialValue}
           errors={formState.errors.value?.message?.toString()}
           {...register("value")}
