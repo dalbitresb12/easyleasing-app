@@ -1,5 +1,5 @@
 import { roundMoney, IGV } from "./utils.mjs";
-import { convertirTasaEfectivaEnEfectiva, convertirTasaNominalEnEfectiva } from "./rate-conversion.mjs";
+import { effectiveRateToEffectiveRate, nominalRateToEffectiveRate } from "./rate-conversion.mjs";
 
 export const getInitialFee = (initialFeePercentage, sellingPrice) => {
   return (initialFeePercentage / 100) * sellingPrice;
@@ -74,11 +74,11 @@ export const getLeasingAmount = (initialCosts, sellingValue) => {
 
 export const getInterestRatePerPeriod = answers => {
   if (answers.interestRateType === "Nominal") {
-    return convertirTasaNominalEnEfectiva(
+    return nominalRateToEffectiveRate(
       answers.interestRate,
       answers.interestRateFrequency / answers.capitalizacion,
       answers.paymentFrequency / answers.capitalizacion,
     );
   }
-  return convertirTasaEfectivaEnEfectiva(answers.interestRate, answers.interestRateFrequency, answers.paymentFrequency);
+  return effectiveRateToEffectiveRate(answers.interestRate, answers.interestRateFrequency, answers.paymentFrequency);
 };
