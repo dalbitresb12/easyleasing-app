@@ -53,6 +53,7 @@ function getFlowWithTaxes(grossFlow, periodicalTaxes) {
 }
 
 export const generatePaymentSchedule = (
+  gracePeriods,
   periods,
   interesRatePerPeriod,
   sellingValue,
@@ -62,60 +63,62 @@ export const generatePaymentSchedule = (
   depreciation,
   buyingOptionFee,
 ) => {
-  const montoLeasing = sellingValue + initialCosts;
-  let saldoInicial = montoLeasing;
-  const tipoPlazo = "";
-  let cuota = 0;
-  let intereses = 0;
-  let amortizacion = 0;
-  let saldoFinal = 0;
-  let ahorroTributario = 0;
-  let montoIGVPeriodico = 0;
-  let flujoBruto = 0;
-  let flujoIGV = 0;
-  let flujoNeto = 0;
+  const leasingAmount = sellingValue + initialCosts;
+  let initialBalance = leasingAmount;
+  let currentGracePeriod = "";
+  let fee = 0;
+  let interest = 0;
+  let amortization = 0;
+  let finalBalance = 0;
+  let taxSavings = 0;
+  let periodicalTaxes = 0;
+  let grossFlow = 0;
+  let flowWithTaxes = 0;
+  let netFlow = 0;
 
   const paymentSchedule = [];
 
   for (let currentPeriod = 1; currentPeriod <= periods; currentPeriod++) {
-    intereses = getInterest(saldoInicial, interesRatePerPeriod);
+    currentGracePeriod = gracePeriods[currentPeriod - 1];
 
-    cuota = frenchFeeCalculation(tipoPlazo, saldoInicial, interesRatePerPeriod, periods, currentPeriod);
-    amortizacion = getAmortization(tipoPlazo, cuota, intereses);
-    saldoFinal = getFinalBalance(tipoPlazo, saldoInicial, intereses, amortizacion);
+    interest = getInterest(initialBalance, interesRatePerPeriod);
 
-    ahorroTributario = getTaxSavings(intereses, insuranceAmount, periodicalCosts, depreciation);
-    montoIGVPeriodico = getPeriodicalTaxes(
-      cuota,
+    fee = frenchFeeCalculation(currentGracePeriod, initialBalance, interesRatePerPeriod, periods, currentPeriod);
+    amortization = getAmortization(currentGracePeriod, fee, interest);
+    finalBalance = getFinalBalance(currentGracePeriod, initialBalance, interest, amortization);
+
+    taxSavings = getTaxSavings(interest, insuranceAmount, periodicalCosts, depreciation);
+    periodicalTaxes = getPeriodicalTaxes(
+      fee,
       insuranceAmount,
       periodicalCosts,
       currentPeriod === periods ? buyingOptionFee : 0,
     );
-    flujoBruto = getGrossFlow(cuota, insuranceAmount, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
+    grossFlow = getGrossFlow(fee, insuranceAmount, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
 
-    flujoIGV = getFlowWithTaxes(flujoBruto, montoIGVPeriodico);
-    flujoNeto = getNetFlow(flujoBruto, ahorroTributario);
+    flowWithTaxes = getFlowWithTaxes(grossFlow, periodicalTaxes);
+    netFlow = getNetFlow(grossFlow, taxSavings);
 
     paymentSchedule.push({
       period: currentPeriod,
-      gracePeriod: tipoPlazo,
-      initialBalance: roundMoney(saldoInicial),
-      interest: roundMoney(intereses),
-      fee: roundMoney(cuota),
-      amortization: roundMoney(amortizacion),
+      gracePeriod: currentGracePeriod,
+      initialBalance: roundMoney(initialBalance),
+      interest: roundMoney(interest),
+      fee: roundMoney(fee),
+      amortization: roundMoney(amortization),
       insuranceAmount: roundMoney(insuranceAmount),
       periodicalCosts: roundMoney(periodicalCosts),
       buyingOptionFee: currentPeriod === periods ? roundMoney(buyingOptionFee) : 0,
-      finalBalance: roundMoney(saldoFinal),
+      finalBalance: roundMoney(finalBalance),
       depreciation: roundMoney(depreciation),
-      taxSavings: roundMoney(ahorroTributario),
-      IGV: roundMoney(montoIGVPeriodico),
-      grossFlow: roundMoney(flujoBruto),
-      flowWithTaxes: roundMoney(flujoIGV),
-      netFlow: roundMoney(flujoNeto),
+      taxSavings: roundMoney(taxSavings),
+      IGV: roundMoney(periodicalTaxes),
+      grossFlow: roundMoney(grossFlow),
+      flowWithTaxes: roundMoney(flowWithTaxes),
+      netFlow: roundMoney(netFlow),
     });
 
-    saldoInicial = saldoFinal;
+    initialBalance = finalBalance;
   }
 
   return paymentSchedule;
