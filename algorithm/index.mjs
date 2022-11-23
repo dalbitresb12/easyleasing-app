@@ -11,7 +11,6 @@ import {
   getBuyingOptionFee,
   getInitialCosts,
   getPeriodicalCosts,
-  getInsuranceAmount,
   getDeprecitaion,
   getInterestRatePerPeriod,
   getLeasingAmount,
@@ -242,8 +241,7 @@ const main = async () => {
 
   const depreciation = getDeprecitaion(sellingValue, periods);
   const initialCosts = getInitialCosts(inputs, extraCosts);
-  const periodicalCosts = -getPeriodicalCosts(extraCosts);
-  const insuranceAmount = getInsuranceAmount(extraCosts, newSellingPrice, annualPayments);
+  const periodicalCosts = getPeriodicalCosts(extraCosts, newSellingPrice, annualPayments);
 
   const leasingAmount = getLeasingAmount(initialCosts, sellingValue);
 
@@ -296,7 +294,6 @@ const main = async () => {
     sellingValue,
     initialCosts,
     periodicalCosts,
-    insuranceAmount,
     depreciation,
     buyingOptionFee,
   );
@@ -311,7 +308,6 @@ const main = async () => {
     console.log(`Interest: ${currencyFormatter.format(payment.interest)}`);
     console.log(`Fee: ${currencyFormatter.format(payment.fee)}`);
     console.log(`Amortization: ${currencyFormatter.format(payment.amortization)}`);
-    console.log(`Insurance Amount: ${currencyFormatter.format(payment.insuranceAmount)}`);
     console.log(`Periodical Costs: ${currencyFormatter.format(payment.periodicalCosts)}`);
     console.log(`Buying Option Fee: ${currencyFormatter.format(payment.buyingOptionFee)}`);
     console.log(`Final Balance: ${currencyFormatter.format(payment.finalBalance)}`);
@@ -327,7 +323,6 @@ const main = async () => {
 
   console.log(`\nInterests: ${currencyFormatter.format(leasingResults.totalInterest)}`);
   console.log(`Capital Amortization: ${currencyFormatter.format(leasingResults.totalAmortization)}`);
-  console.log(`Risk Insurance: ${currencyFormatter.format(leasingResults.totalInsurance)}`);
   console.log(`Monthly Fee: ${currencyFormatter.format(leasingResults.totalPeriodicalCosts)}`);
   console.log(`Buyback: ${currencyFormatter.format(buyingOptionFee)}`);
   console.log(`Total Payment: ${currencyFormatter.format(leasingResults.totalPayment)}`);

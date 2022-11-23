@@ -1,4 +1,7 @@
-export const getLeasingResults = (paymentSchedule, buyingOptionFee) => {
+import { LeasingResult } from "./models/leasing-result";
+import { Payment } from "./models/payment";
+
+export const getLeasingResults = (paymentSchedule: Payment[], buyingOptionFee: number): LeasingResult => {
   let totalInterest = 0;
   let totalPeriodicalCosts = 0;
   let totalAmortization = 0;
@@ -21,7 +24,7 @@ export const getLeasingResults = (paymentSchedule, buyingOptionFee) => {
   };
 };
 
-export const getGrossFlows = (leasingAmount, paymentSchedule) => {
+export const getGrossFlows = (leasingAmount: number, paymentSchedule: Payment[]): number[] => {
   const grossFlows = [leasingAmount];
   for (const payment of paymentSchedule) {
     grossFlows.push(payment.grossFlow);
@@ -30,7 +33,7 @@ export const getGrossFlows = (leasingAmount, paymentSchedule) => {
   return grossFlows;
 };
 
-export const getNetFlows = (leasingAmount, paymentSchedule) => {
+export const getNetFlows = (leasingAmount: number, paymentSchedule: Payment[]): number[] => {
   const netFlows = [leasingAmount];
   for (const payment of paymentSchedule) {
     netFlows.push(payment.netFlow);
