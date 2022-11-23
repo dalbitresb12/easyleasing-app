@@ -23,3 +23,22 @@ Nuestra aplicacion web "EasyLeasing" tiene como proposito brindar una plataforma
 - Tipo de valor: Escoger si el valor es númerico o porcentual
 - Valor: El valor a utilizar
 - Tipo de gasto: Escoger si el gasto sera de un solo pago o periódico
+
+### Paso 3: Resultados
+
+#### Gastos Periódicos
+
+- Cuota mensual: Monto a pagar por periodo
+- Seguro de Riesgo: Monto por periodo a pagar por el seguro de riesgo 
+
+#### Totales
+
+- Intereses: Monto total del interés 
+- Amortización de Capital: Monto total de la amortización de capital
+- Seguro de Riesgo: Monto total a pagar por el seguro de riesgo 
+- Cuota mensual: Monto total de la cuota a pagar
+- Recompra: Monto total de la recompra
+- Pago total
+
+
+
