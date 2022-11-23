@@ -14,20 +14,20 @@ export const leasingsPostHandler = (data: EditableLeasing): Promise<SanitizedLea
 };
 
 export const leasingGetHandler = (id: string): Promise<SanitizedLeasing> => {
-  return HttpClient.get(prefix(id), SanitizedLeasing);
+  return HttpClient.get(prefix(`/${id}`), SanitizedLeasing);
 };
 
 export const leasingPostHandler = (id: string, data: EditableLeasing): Promise<SanitizedLeasing> => {
-  return HttpClient.post(prefix(id), data, SanitizedLeasing);
+  return HttpClient.post(prefix(`/${id}`), data, SanitizedLeasing);
 };
 
 export const leasingPutHandler = leasingPostHandler;
 
 export const leasingPatchHandler = (id: string, data: EditableLeasing): Promise<SanitizedLeasing> => {
-  return HttpClient.patch(prefix(id), data, SanitizedLeasing);
+  return HttpClient.patch(prefix(`/${id}`), data, SanitizedLeasing);
 };
 
 export const leasingDeleteHandler = async (id: string): Promise<boolean> => {
-  await HttpClient.rawRequest(prefix(id), HttpMethods.DELETE);
+  await HttpClient.rawRequest(prefix(`/${id}`), HttpMethods.DELETE);
   return true;
 };
