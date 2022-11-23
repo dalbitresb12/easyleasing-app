@@ -1,4 +1,4 @@
-import { z, ZodError } from "zod";
+import { z, ZodError, ZodIssue } from "zod";
 
 export enum HttpErrorCode {
   NoError,
@@ -14,6 +14,7 @@ export const HttpErrorSchema = z.object({
   message: z.string(),
   code: z.number(),
   status: z.number(),
+  issues: z.any().optional(),
 });
 export type HttpErrorSchema = z.infer<typeof HttpErrorSchema>;
 
@@ -63,11 +64,21 @@ export class ServerError extends HttpError {
 
 // TODO: Include issues in response
 export class ValidationError extends HttpError {
-  issues: ZodError;
+  issues: ZodIssue[];
 
-  constructor(message: string, issues: ZodError) {
-    super(400, message);
+  constructor({ issues }: ZodError) {
+    super(400, "Validation error");
     this.issues = issues;
     this.code = HttpErrorCode.ValidationError;
+  }
+
+  toJSON(): HttpErrorSchema {
+    return {
+      error: this.name,
+      message: this.message,
+      code: this.code,
+      status: this.status,
+      issues: this.issues,
+    };
   }
 }

@@ -17,6 +17,9 @@ export const errorHandler: AppFunction = async ctx => {
         console.log(err);
       }
       return Response.json(response, { status: err.status });
+    } else if (err instanceof SyntaxError && err.message.includes("JSON")) {
+      const response = new HttpError(400, err.message);
+      return Response.json(response.toJSON(), { status: response.status });
     }
 
     // Log to Cloudflare
@@ -69,4 +72,5 @@ export const authentication: AppFunction = async ctx => {
   return await ctx.next();
 };
 
+// TODO: Gracefully handle non-JSON responses with non-500 errors.
 export const onRequest: AppFunction[] = [errorHandler, zodErrorMap, authentication];

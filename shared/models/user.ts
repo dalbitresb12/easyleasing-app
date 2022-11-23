@@ -1,23 +1,9 @@
 import { z } from "zod";
 
-export const DateWithParsing = z.preprocess(arg => {
-  if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
-}, z.date());
-export type DateWithParsing = z.infer<typeof DateWithParsing>;
-
-export const TimeFrequencies = z.enum([
-  "daily",
-  "biweekly",
-  "monthly",
-  "bimonthly",
-  "quarterly",
-  "four-monthly",
-  "semi-annually",
-  "annually",
-]);
-export type TimeFrequencies = z.infer<typeof TimeFrequencies>;
+import { Currencies, DateWithParsing, InterestRateTypes, TimeFrequencies } from "./common";
 
 export const User = z.object({
+  // TODO: Migrate to just id when we can do KV migrations
   uuid: z.string().uuid(),
   fullName: z.string().min(1, "Requerido"),
   preferredName: z.string().min(1, "Requerido"),
@@ -32,9 +18,9 @@ export const User = z.object({
   profilePicture: z.string().uuid().optional(),
   verificationCode: z.string().optional(),
   verified: z.boolean().default(false),
-  currency: z.enum(["PEN", "USD"]).default("PEN"),
+  currency: Currencies.default("PEN"),
   paymentFrequency: TimeFrequencies.default("monthly"),
-  interestRateType: z.enum(["nominal", "effective"]).default("nominal"),
+  interestRateType: InterestRateTypes.default("nominal"),
   capitalizationType: TimeFrequencies.default("monthly"),
   language: z.string().length(2, "Debe ser un código ISO 639-1 válido").default("es"),
   timezone: z.string().default("America/Lima"),

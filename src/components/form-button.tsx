@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { ComponentPropsWithoutRef, forwardRef, PropsWithChildren } from "react";
 
 export interface Props extends Omit<ComponentPropsWithoutRef<"button">, "style"> {
-  style?: "primary" | "text" | "custom";
+  style?: "primary" | "secondary" | "text" | "custom";
   alignment?: "start" | "center" | "end";
   size?: "sm" | "md" | "lg";
   padding?: boolean;
@@ -26,6 +26,8 @@ export const FormButton = forwardRef<HTMLButtonElement, PropsWithChildren<Props>
     transition && "transition-all",
     style === "primary" && "bg-sky-700 text-white hover:bg-sky-800",
     style === "primary" && ring && "focus:ring-sky-700",
+    style === "secondary" && "bg-sky-100 text-sky-700 hover:bg-sky-200",
+    style === "secondary" && ring && "focus:ring-sky-100",
     style === "text" && "text-sky-700 hover:text-sky-900",
     alignment === "start" && "justify-start",
     alignment === "center" && "justify-center",

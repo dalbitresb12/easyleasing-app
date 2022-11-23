@@ -1,5 +1,7 @@
 import { ZodErrorMap, ZodIssueCode, ZodParsedType, setErrorMap } from "zod";
 
+import { capitalize } from "./strings";
+
 const joinValues = <T extends unknown[]>(array: T, separator = " | "): string => {
   return array.map(val => (typeof val === "string" ? `'${val}'` : val)).join(separator);
 };
@@ -8,8 +10,6 @@ const joinValues = <T extends unknown[]>(array: T, separator = " | "): string =>
 const assertNever = (_: never): never => {
   throw new Error();
 };
-
-const capitalize = (value: string): string => `${value.charAt(0).toUpperCase()}${value.substring(1)}`;
 
 const errorMap: ZodErrorMap = (issue, ctx) => {
   let message: string | undefined;

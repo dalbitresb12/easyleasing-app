@@ -32,6 +32,8 @@
   "tailwindCSS.showPixelEquivalents": true,
   "tailwindCSS.experimental.classRegex": [
     // example: <span textClassName="match" />
+    "[\\S]*[cC]lassName=\"([^\"]*)\"",
+    // example: textClassName: "match"
     "[\\S]*[cC]lassName: \"([^\"]*)\"",
     // Headless UI Transition classes
     // example: <Transition enterFrom="match" leaveTo="match" enter="match" />

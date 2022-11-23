@@ -2,7 +2,7 @@ import { HttpError, SendResetPasswordRequest, ServerError, SuccessResponse } fro
 import { User } from "@/shared/models/user";
 
 import type { AppFunction } from "../../types/appcontext";
-import { parseBody } from "../../utils/bodyparser";
+import { parseBody } from "../../utils/model-parser";
 import { sendResetPasswordEmail } from "../../utils/postmark";
 
 export const onRequestPost: AppFunction = async ctx => {

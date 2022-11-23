@@ -4,7 +4,7 @@ import { HttpError, ResetPasswordRequest, SuccessResponse } from "@/shared/api/t
 import { User } from "@/shared/models/user";
 
 import type { AppFunction } from "../../types/appcontext";
-import { parseBody } from "../../utils/bodyparser";
+import { parseBody } from "../../utils/model-parser";
 
 export const onRequestPost: AppFunction = async ctx => {
   const req = await parseBody(ctx.request, ResetPasswordRequest);

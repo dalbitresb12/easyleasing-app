@@ -1,25 +1,36 @@
 import clsx from "clsx";
-import { ComponentPropsWithoutRef, forwardRef, useId } from "react";
+import { ComponentPropsWithoutRef, forwardRef, ReactNode, useId, useRef } from "react";
 import { FieldError } from "react-hook-form";
+
+import { useCombinedRefs } from "@/utils/use-combined-refs";
 
 export interface Props extends ComponentPropsWithoutRef<"input"> {
   label?: string;
   helper?: string;
   errors?: FieldError | string;
   unstyled?: boolean;
+  divClassName?: string;
+  leading?: ReactNode;
+  trailing?: ReactNode;
+  mask?: () => ReactNode;
+  maskClassName?: string;
 }
 
 export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const id = useId();
-  const { className, label, helper, errors, unstyled, ...attrs } = props;
+  const innerRef = useRef<HTMLInputElement>();
+  const combinedRef = useCombinedRefs(ref, innerRef);
+  const { className, label, helper, errors, unstyled, divClassName, leading, trailing, mask, maskClassName, ...attrs } =
+    props;
 
   const styles = clsx(
-    className,
+    divClassName,
+    "relative w-full overflow-hidden",
     label && "mt-1",
-    !unstyled && "block w-full rounded-md shadow-sm sm:text-sm transition-all",
+    !unstyled && "rounded-md shadow-sm transition-all border",
     errors
-      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-      : !unstyled && "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500",
+      ? "border-red-500 focus-within:border-red-500 focus-within:ring-red-500"
+      : !unstyled && "border-gray-300 focus-within:border-sky-700 focus-within:ring-sky-700",
   );
 
   return (
@@ -29,7 +40,24 @@ export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
           {label}
         </label>
       )}
-      <input ref={ref} id={id} className={styles} {...attrs} />
+      <div className={styles}>
+        {leading}
+        {mask && (
+          <span
+            className={clsx(maskClassName, "absolute bg-white sm:text-sm")}
+            onClick={() => combinedRef.current?.focus()}
+          >
+            {mask()}
+          </span>
+        )}
+        <input
+          ref={ref}
+          id={id}
+          className={clsx(className, "block w-full border-0 rounded-md focus:ring-0 sm:text-sm", mask && "text-white")}
+          {...attrs}
+        />
+        {trailing}
+      </div>
       {helper && <span className="text-sm">{helper}</span>}
       {errors && <span className="text-sm text-red-500">{typeof errors === "string" ? errors : errors.message}</span>}
     </>
