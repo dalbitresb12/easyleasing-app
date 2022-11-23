@@ -1,318 +1,33 @@
-import { irr } from "financial";
+// import { irr } from "financial";
 import inquirer from "inquirer";
 
-const currencyFormatter = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
-const inputPercentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 2 });
-const outputPercentageFormatter = new Intl.NumberFormat("es-PE", { style: "percent", minimumFractionDigits: 7 });
-
-const IGV = 0.18;
-const IR = 0.3;
-
-function roundMoney(num) {
-  return Math.round((num + Number.EPSILON) * 100) / 100;
-}
-
-function inDays(frequency) {
-  switch (frequency) {
-    case "Diaria":
-      frequency = 1;
-      break;
-    case "Quincenal":
-      frequency = 15;
-      break;
-    case "Mensual":
-      frequency = 30;
-      break;
-    case "Bimestral":
-      frequency = 60;
-      break;
-    case "Trimestral":
-      frequency = 90;
-      break;
-    case "Cuatrimestral":
-      frequency = 120;
-      break;
-    case "Semestral":
-      frequency = 180;
-      break;
-    case "Anual":
-      frequency = 360;
-      break;
-  }
-  return frequency;
-}
-
-const frequencies = [
-  "Diaria",
-  "Quincenal",
-  "Mensual",
-  "Bimestral",
-  "Trimestral",
-  "Cuatrimestral",
-  "Semestral",
-  "Anual",
-];
-
-const convertirTasaEfectivaEnEfectiva = (tasa, frecuenciaAntigua, frecuenciaNueva) => {
-  return Math.pow(1 + tasa / 100, frecuenciaNueva / frecuenciaAntigua) - 1;
-};
-
-const convertirTasaNominalEnEfectiva = (tasa, m, n) => {
-  return Math.pow(1 + tasa / 100 / m, n) - 1;
-};
-
-const positiveValidation = value => {
-  const parsed = Number(value);
-  if (!Number.isNaN(parsed) && parsed > 0) {
-    return true;
-  }
-  return "Ingrese un valor positivo";
-};
-
-const loanTimeValidation = value => {
-  const parsed = Number(value);
-  if (!Number.isNaN(parsed) && parsed >= 2) {
-    return true;
-  }
-  return "Ingrese un valor mayor a 2";
-};
-
-const percentageValidation = value => {
-  const parsed = Number(value);
-  if (!Number.isNaN(parsed) && parsed > 0 && parsed < 100) {
-    return true;
-  }
-  return "Ingrese un valor porcentual adecuado";
-};
-
-const extraCostValidation = (value, extraCosts) => {
-  if (extraCosts.valueType === "Monetario") {
-    return positiveValidation(value);
-  }
-  return percentageValidation(value);
-};
-
-const getInitialFee = (initialFeePercentage, sellingPrice) => {
-  return initialFeePercentage * sellingPrice;
-};
-
-const getBuyingOptionFee = (answers, sellingValue) => {
-  if (answers.buyingOption === true) {
-    return (answers.buyingOptionPercentage / 100) * sellingValue;
-  }
-  return 0;
-};
-
-const getIgvFee = sellingPrice => {
-  return roundMoney((sellingPrice * IGV) / (1 + IGV));
-};
-
-const getPeriods = (loanTime, paymentFrequency) => {
-  return (loanTime * 360) / paymentFrequency;
-};
-
-const getInterestRatePerPeriod = answers => {
-  if (answers.interestRateType === "Nominal") {
-    return convertirTasaNominalEnEfectiva(
-      answers.interestRate,
-      answers.interestRateFrequency / answers.capitalizacion,
-      answers.paymentFrequency / answers.capitalizacion,
-    );
-  }
-  return convertirTasaEfectivaEnEfectiva(answers.interestRate, answers.interestRateFrequency, answers.paymentFrequency);
-};
-
-const tirCalculation = flujos => {
-  return irr(flujos, 0.01);
-};
-const tceaCalculation = (tir, cuotasAnuales) => {
-  return Math.pow(1 + tir, cuotasAnuales) - 1;
-};
-
-const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescuentoWACC) => {
-  const initialFee = getInitialFee(inputs.percentageInitialFee / 100, inputs.sellingPrice);
-
-  const newSellingPrice = inputs.sellingPrice - initialFee;
-
-  const montoIgv = getIgvFee(newSellingPrice);
-
-  const sellingValue = newSellingPrice - montoIgv;
-
-  const cuotasAnuales = 360 / inputs.paymentFrequency;
-  const periodos = getPeriods(inputs.loanTime, inputs.paymentFrequency);
-
-  const montoRecompra = -getBuyingOptionFee(inputs, sellingValue);
-
-  let totalInitialCosts = 0;
-  let periodicCosts = 0;
-  let insuranceAmount = 0;
-
-  for (const extraCost of extraCosts) {
-    if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
-      totalInitialCosts += extraCost.value;
-    } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
-      totalInitialCosts += (extraCost.value / 100) * inputs.sellingPrice;
-    } else if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
-      periodicCosts -= extraCost.value;
-    } else {
-      insuranceAmount = -(((extraCost.value / 100) * newSellingPrice) / cuotasAnuales);
-    }
-  }
-
-  const leasingAmount = totalInitialCosts + sellingValue;
-
-  const interesRatePerPeriod = getInterestRatePerPeriod(inputs);
-
-  const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaDescuentoKs, 360, inputs.paymentFrequency);
-  const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaDescuentoWACC, 360, inputs.paymentFrequency);
-
-  console.log(`\nPrecio de venta del activo: ${inputs.sellingPrice}`);
-  console.log(`Cuota inicial: ${currencyFormatter.format(initialFee)}\n`);
-  console.log(`Nuevo precio de venta: ${currencyFormatter.format(newSellingPrice)}`);
-  console.log(`Monto IGV: ${currencyFormatter.format(montoIgv)}`);
-  console.log(`Valor de venta del activo: ${currencyFormatter.format(sellingValue)}`);
-  console.log(`Total por costos iniciales: ${currencyFormatter.format(totalInitialCosts)}`);
-  console.log(`Monto del leasing: ${currencyFormatter.format(leasingAmount)}`);
-
-  console.log(`\nN° cuotas al año: ${cuotasAnuales}`);
-  console.log(`N° periodos de pago: ${periodos}`);
-  console.log(`Frecuencia de pago: ${inputs.paymentFrequency} días\n`);
-
-  console.log(`Tipo de tasa de interés: ${inputs.interestRateType}`);
-  console.log(`Tasa efectiva del periodo: ${outputPercentageFormatter.format(interesRatePerPeriod)}\n`);
-
-  console.log(`Tasa descuento Ks equivalente: ${outputPercentageFormatter.format(descuentoKs)}`);
-  console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(descuentoWACC)}`);
-
-  let tipoPlazo = "";
-  let saldoInicial = leasingAmount;
-  let cuota = 0;
-  let intereses = 0;
-  let amortizacion = 0;
-  let saldoFinal = 0;
-  const depreciacion = -(sellingValue / periodos);
-  let ahorroTributario = 0;
-  let montoIGVPeriodico = 0;
-  let flujoBruto = 0;
-  let flujoIGV = 0;
-  let flujoNeto = 0;
-
-  let totalIntereses = 0;
-  let totalAmortizacion = 0;
-  let totalCostosPeriodicos = 0;
-  let totalSeguro = 0;
-
-  let vnaFlujoBruto = 0;
-  let vnaFlujoNeto = 0;
-
-  const flujosBrutos = [leasingAmount];
-  const flujosNetos = [leasingAmount];
-
-  for (let periodo = 1; periodo <= periodos; periodo++) {
-    console.log(`= = = = = Periodo ${periodo} = = = = =`);
-
-    intereses = -(interesRatePerPeriod * saldoInicial);
-
-    if (periodo < periodos) {
-      const input = await inquirer.prompt({
-        name: "plazoDeGracia",
-        type: "list",
-        message: `Escoja el tipo de plazo de gracia: `,
-        choices: ["Total", "Parcial", "Sin plazo de gracia"],
-      });
-
-      tipoPlazo = input.plazoDeGracia;
-    } else {
-      tipoPlazo = "Sin plazo de gracia";
-    }
-
-    if (tipoPlazo === "Total") {
-      cuota = 0;
-      amortizacion = 0;
-      saldoFinal = saldoInicial - intereses;
-    } else if (tipoPlazo === "Parcial") {
-      cuota = intereses;
-      amortizacion = 0;
-      saldoFinal = saldoInicial + amortizacion;
-    } else {
-      cuota = -(
-        (Math.pow(1 + interesRatePerPeriod, periodos - periodo + 1) * saldoInicial * interesRatePerPeriod) /
-        (Math.pow(1 + interesRatePerPeriod, periodos - periodo + 1) - 1)
-      );
-      amortizacion = cuota - intereses;
-      saldoFinal = saldoInicial + amortizacion;
-    }
-
-    console.log(`\nSaldo inicial: ${currencyFormatter.format(roundMoney(saldoInicial))}`);
-    console.log(`Intereses: ${currencyFormatter.format(roundMoney(intereses))}`);
-    console.log(`Cuota: ${currencyFormatter.format(roundMoney(cuota))}`);
-    console.log(`Amortización: ${currencyFormatter.format(roundMoney(amortizacion))}`);
-    console.log(`Monto de seguro contra todo riesgo: ${currencyFormatter.format(roundMoney(insuranceAmount))}`);
-    console.log(`Costos periódicos: ${currencyFormatter.format(roundMoney(periodicCosts))}`);
-
-    ahorroTributario = (intereses + insuranceAmount + periodicCosts + depreciacion) * IR;
-    montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts) * IGV;
-    flujoBruto = cuota + insuranceAmount + periodicCosts;
-
-    if (inputs.buyingOption && periodo === periodos) {
-      montoIGVPeriodico = (cuota + insuranceAmount + periodicCosts + montoRecompra) * IGV;
-      flujoBruto = cuota + insuranceAmount + periodicCosts + montoRecompra;
-      console.log(`Monto de recompra: ${currencyFormatter.format(roundMoney(montoRecompra))}`);
-    }
-
-    flujoIGV = flujoBruto + montoIGVPeriodico;
-    flujoNeto = flujoBruto - ahorroTributario;
-
-    vnaFlujoBruto += flujoBruto / Math.pow(1 + descuentoKs, periodo);
-    vnaFlujoNeto += flujoNeto / Math.pow(1 + descuentoWACC, periodo);
-
-    console.log(`Saldo final: ${currencyFormatter.format(roundMoney(saldoFinal))}`);
-    console.log(`Depreciación: ${currencyFormatter.format(roundMoney(depreciacion))}`);
-    console.log(`Ahorro tributario: ${currencyFormatter.format(roundMoney(ahorroTributario))}`);
-    console.log(`IGV: ${currencyFormatter.format(roundMoney(montoIGVPeriodico))}`);
-    console.log(`Flujo Bruto: ${currencyFormatter.format(roundMoney(flujoBruto))}`);
-    console.log(`Flujo con IGV: ${currencyFormatter.format(roundMoney(flujoIGV))}`);
-    console.log(`Flujo Neto: ${currencyFormatter.format(roundMoney(flujoNeto))}\n`);
-
-    totalAmortizacion = totalAmortizacion + amortizacion;
-
-    if (!(tipoPlazo === "Total")) {
-      totalIntereses = totalIntereses + intereses;
-    }
-
-    totalCostosPeriodicos += periodicCosts;
-    totalSeguro += insuranceAmount;
-    saldoInicial = saldoFinal;
-
-    flujosBrutos.push(roundMoney(flujoBruto));
-    flujosNetos.push(roundMoney(flujoNeto));
-  }
-
-  const desembolsoTotal = totalIntereses + totalAmortizacion + totalSeguro + totalCostosPeriodicos + montoRecompra;
-
-  console.log(`Monto total por intereses: ${currencyFormatter.format(roundMoney(-totalIntereses))}`);
-  console.log(`Monto total amortizado: ${currencyFormatter.format(roundMoney(-totalAmortizacion))}`);
-  console.log(`Monto total por costos periódicos: ${currencyFormatter.format(roundMoney(-totalCostosPeriodicos))}`);
-  console.log(`Monto total por seguro contra todo riesgo: ${currencyFormatter.format(roundMoney(-totalSeguro))}`);
-  console.log(`Desembolso total: ${currencyFormatter.format(roundMoney(-desembolsoTotal))}\n`);
-
-  vnaFlujoBruto = vnaFlujoBruto + leasingAmount;
-  vnaFlujoNeto = vnaFlujoNeto + leasingAmount;
-
-  const tirFlujoBruto = tirCalculation(flujosBrutos);
-  const tirFlujoNeto = tirCalculation(flujosNetos);
-
-  const tceaFlujoBruto = tceaCalculation(tirFlujoBruto, cuotasAnuales);
-  const tceaFlujoNeto = tceaCalculation(tirFlujoNeto, cuotasAnuales);
-
-  console.log("= = = = = Indicadores de Rentabilidad = = = = =");
-  console.log(`TCEA Flujo Bruto: ${outputPercentageFormatter.format(tceaFlujoBruto)}`);
-  console.log(`TCEA Flujo Neto: ${outputPercentageFormatter.format(tceaFlujoNeto)}`);
-  console.log(`VAN Flujo Bruto: ${currencyFormatter.format(roundMoney(vnaFlujoBruto))}`);
-  console.log(`VAN Flujo Neto: ${currencyFormatter.format(roundMoney(vnaFlujoNeto))}`);
-  console.log(`TIR Flujo Bruto: ${outputPercentageFormatter.format(tirFlujoBruto)}`);
-  console.log(`TIR Flujo Neto: ${outputPercentageFormatter.format(tirFlujoNeto)}`);
-};
+import {
+  getInitialFee,
+  getIgvFee,
+  getNewSellingPrice,
+  getSellingValue,
+  getAnnualPayments,
+  getPeriods,
+  getBuyingOptionFee,
+  getInitialCosts,
+  getPeriodicalCosts,
+  getInsuranceAmount,
+  getDeprecitaion,
+  getInterestRatePerPeriod,
+  getLeasingAmount,
+} from "./initial-data.mjs";
+import { getLeasingResults, getGrossFlows, getNetFlows } from "./leasing-results.mjs";
+import { generatePaymentSchedule } from "./payment-calculations.mjs";
+import { tceaCalculation, tirCalculation, vnaCalculation } from "./profitability-indicator.mjs";
+import { effectiveRateToEffectiveRate } from "./rate-conversion.mjs";
+import {
+  inDays,
+  frequencies,
+  currencyFormatter,
+  inputPercentageFormatter,
+  outputPercentageFormatter,
+} from "./utils.mjs";
+import { positiveValidation, percentageValidation, extraCostValidation, loanTimeValidation } from "./validations.mjs";
 
 const main = async () => {
   const inputs = await inquirer.prompt([
@@ -486,8 +201,8 @@ const main = async () => {
     } while (extraCosts[extraCosts.length - 1].keepAdding);
   }
 
-  const tasaIndicadorBruto = await inquirer.prompt({
-    name: "descuentoKs",
+  const grossIndicator = await inquirer.prompt({
+    name: "ksRate",
     type: "input",
     message: "Tasa de descuento Ks: ",
     validate: percentageValidation,
@@ -501,8 +216,8 @@ const main = async () => {
     transformer: input => inputPercentageFormatter.format(input / 100),
   });
 
-  const tasaIndicadorNeto = await inquirer.prompt({
-    name: "descuentoWACC",
+  const netIndicator = await inquirer.prompt({
+    name: "waccRate",
     type: "input",
     message: "Tasa de descuento WACC: ",
     validate: percentageValidation,
@@ -516,8 +231,122 @@ const main = async () => {
     transformer: input => inputPercentageFormatter.format(input / 100),
   });
 
-  // Cronograma de pagos
-  getPaymentSchedule(inputs, extraCosts, tasaIndicadorBruto.descuentoKs, tasaIndicadorNeto.descuentoWACC);
+  const initialFee = getInitialFee(inputs.percentageInitialFee, inputs.sellingPrice);
+  const newSellingPrice = getNewSellingPrice(inputs.sellingPrice, initialFee);
+  const igvFee = getIgvFee(newSellingPrice);
+  const sellingValue = getSellingValue(newSellingPrice, igvFee);
+  const annualPayments = getAnnualPayments(inputs.paymentFrequency);
+  const periods = getPeriods(inputs.loanTime, inputs.paymentFrequency);
+
+  const buyingOptionFee = getBuyingOptionFee(inputs.buyingOption, inputs.buyingOptionPercentage, sellingValue);
+
+  const depreciation = getDeprecitaion(sellingValue, periods);
+  const initialCosts = getInitialCosts(inputs, extraCosts);
+  const periodicalCosts = -getPeriodicalCosts(extraCosts);
+  const insuranceAmount = getInsuranceAmount(extraCosts, newSellingPrice, annualPayments);
+
+  const leasingAmount = getLeasingAmount(initialCosts, sellingValue);
+
+  const interesRatePerPeriod = getInterestRatePerPeriod(inputs);
+
+  const ksRate = effectiveRateToEffectiveRate(grossIndicator.ksRate, 360, inputs.paymentFrequency);
+  const waccRate = effectiveRateToEffectiveRate(netIndicator.waccRate, 360, inputs.paymentFrequency);
+
+  const gracePeriods = [];
+
+  for (let period = 1; period < periods; period++) {
+    const gracePeriod = await inquirer.prompt({
+      name: "type",
+      type: "list",
+      message: `Escoja el tipo de plazo de gracia: `,
+      choices: ["Total", "Parcial", "Sin plazo de gracia"],
+    });
+
+    gracePeriods.push(gracePeriod.type);
+  }
+
+  // Last period without grace by default
+  gracePeriods.push("Sin plazo de gracia");
+
+  /* *** RESULTS ***  */
+  console.log(`Payment Frequency: ${inputs.paymentFrequency} days\n`);
+  console.log(`Net Price: ${currencyFormatter.format(sellingValue)}`);
+  console.log(`Leasing Amount: ${currencyFormatter.format(leasingAmount)}`);
+  console.log(`Equivalent Interest Rate: ${outputPercentageFormatter.format(interesRatePerPeriod)}\n`);
+  console.log(`Total Installments: ${periods} installments`);
+
+  /* *** (OPTIONAL) ***  */
+  console.log(`\nSelling Price: ${currencyFormatter.format(inputs.sellingPrice)}`);
+  console.log(`Initial Fee: ${currencyFormatter.format(initialFee)}\n`);
+  console.log(`New Selling Price: ${currencyFormatter.format(newSellingPrice)}`);
+  console.log(`IGV Fee: ${currencyFormatter.format(igvFee)}`);
+  console.log(`Initial Costs: ${currencyFormatter.format(initialCosts)}`);
+  console.log(`Buying Option Fee: ${currencyFormatter.format(buyingOptionFee)}`);
+  console.log(`\nAnnual installments: ${annualPayments} installments`);
+
+  console.log(`Tasa descuento Ks equivalente: ${outputPercentageFormatter.format(ksRate)}`);
+  console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(waccRate)}`);
+
+  /* *** PAYMENT SCHEDULE (TABLE) *** */
+
+  const paymentSchedule = generatePaymentSchedule(
+    gracePeriods,
+    periods,
+    interesRatePerPeriod,
+    sellingValue,
+    initialCosts,
+    periodicalCosts,
+    insuranceAmount,
+    depreciation,
+    buyingOptionFee,
+  );
+
+  const grossFlows = getGrossFlows(leasingAmount, paymentSchedule);
+  const netFlows = getNetFlows(leasingAmount, paymentSchedule);
+
+  for (const payment of paymentSchedule) {
+    console.log(`\nN° ${payment.period}`);
+    console.log(`Grace Period: ${payment.gracePeriod}`);
+    console.log(`Initial Balance: ${currencyFormatter.format(payment.initialBalance)}`);
+    console.log(`Interest: ${currencyFormatter.format(payment.interest)}`);
+    console.log(`Fee: ${currencyFormatter.format(payment.fee)}`);
+    console.log(`Amortization: ${currencyFormatter.format(payment.amortization)}`);
+    console.log(`Insurance Amount: ${currencyFormatter.format(payment.insuranceAmount)}`);
+    console.log(`Periodical Costs: ${currencyFormatter.format(payment.periodicalCosts)}`);
+    console.log(`Buying Option Fee: ${currencyFormatter.format(payment.buyingOptionFee)}`);
+    console.log(`Final Balance: ${currencyFormatter.format(payment.finalBalance)}`);
+    console.log(`Depreciation: ${currencyFormatter.format(payment.depreciation)}`);
+    console.log(`Tax Savings: ${currencyFormatter.format(payment.taxSavings)}`);
+    console.log(`Taxes: ${currencyFormatter.format(payment.IGV)}`);
+    console.log(`Gross Flow: ${currencyFormatter.format(payment.grossFlow)}`);
+    console.log(`Flow w/Taxes: ${currencyFormatter.format(payment.flowWithTaxes)}`);
+    console.log(`Net Flow: ${currencyFormatter.format(payment.netFlow)}`);
+  }
+
+  const leasingResults = getLeasingResults(paymentSchedule, buyingOptionFee);
+
+  console.log(`\nInterests: ${currencyFormatter.format(leasingResults.totalInterest)}`);
+  console.log(`Capital Amortization: ${currencyFormatter.format(leasingResults.totalAmortization)}`);
+  console.log(`Risk Insurance: ${currencyFormatter.format(leasingResults.totalInsurance)}`);
+  console.log(`Monthly Fee: ${currencyFormatter.format(leasingResults.totalPeriodicalCosts)}`);
+  console.log(`Buyback: ${currencyFormatter.format(buyingOptionFee)}`);
+  console.log(`Total Payment: ${currencyFormatter.format(leasingResults.totalPayment)}`);
+
+  /* *** PROFITABILITY RATIOS *** */
+
+  const grossFlowsVna = vnaCalculation(grossFlows, ksRate);
+  const netFlowsVna = vnaCalculation(netFlows, waccRate);
+
+  const grossFlowsTir = tirCalculation(grossFlows);
+  const netFlowsTir = tirCalculation(netFlows);
+
+  const grossFlowsTcea = tceaCalculation(grossFlowsTir, annualPayments);
+  const netFlowsTcea = tceaCalculation(netFlowsTir, annualPayments);
+
+  console.log(`Gross Cash Flow, TCEA: ${outputPercentageFormatter.format(grossFlowsTcea)}`);
+  console.log(`Net Cash Flow, TCEA: ${outputPercentageFormatter.format(netFlowsTcea)}`);
+  console.log(`Gross Cash Flow, VNA: ${currencyFormatter.format(grossFlowsVna)}`);
+  console.log(`Net Cash Flow, VNA: ${currencyFormatter.format(netFlowsVna)}`);
 };
 
 main();
