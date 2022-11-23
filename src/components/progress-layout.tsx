@@ -13,7 +13,7 @@ const steps: ProgressBarStep[] = [
   },
   {
     label: "Resultados",
-    href: "/leasings/",
+    href: "/leasings",
     startsWith: true,
   },
 ];

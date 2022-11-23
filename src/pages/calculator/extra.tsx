@@ -41,7 +41,7 @@ const ExtraCalculatorPage: FC = () => {
       : {
           mutationFn: (data: PartialEditableLeasing) => leasingPatchHandler(id, data),
           onSuccess: () => {
-            router.push({ pathname: "/leasings", query: { id } });
+            router.push({ pathname: "/leasings/details", query: { id } });
           },
         },
   );
