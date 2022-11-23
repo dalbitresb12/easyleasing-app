@@ -1,16 +1,16 @@
 import { z } from "zod";
 
-import { Leasing } from "@/shared/models/leasing";
+import { LeasingModel } from "@/shared/models/leasing";
 
 import { PaginatedResponse } from "../common/paginated-response";
 
-export const ListLeasingsMetadata = Leasing.pick({
+export const ListLeasingsMetadata = LeasingModel.pick({
   name: true,
 });
 export type ListLeasingsMetadata = z.infer<typeof ListLeasingsMetadata>;
 
 export const ListLeasingsResponse = PaginatedResponse(
-  Leasing.pick({
+  LeasingModel.pick({
     id: true,
     name: true,
   }),

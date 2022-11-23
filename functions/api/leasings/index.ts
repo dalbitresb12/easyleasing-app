@@ -2,7 +2,7 @@ import { AppFunction } from "@/types/appcontext";
 import { v4 as uuidv4 } from "uuid";
 
 import { ListLeasingsMetadata, ListLeasingsResponse } from "@/shared/api/types";
-import { EditableLeasing, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
+import { EditableLeasingModel, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
 import { clamp } from "@/shared/utils/numbers";
 
 import { parseBody } from "@/utils/bodyparser";
@@ -35,7 +35,7 @@ export const onRequestGet: AppFunction = async ctx => {
 };
 
 export const onRequestPost: AppFunction = async ctx => {
-  const req = await parseBody(ctx.request, EditableLeasing);
+  const req = await parseBody(ctx.request, EditableLeasingModel);
 
   const userId = ctx.data.user.uuid;
 

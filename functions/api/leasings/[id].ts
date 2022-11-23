@@ -2,7 +2,7 @@ import { AppData, AppFunction } from "@/types/appcontext";
 import { z } from "zod";
 
 import { HttpError } from "@/shared/api/types";
-import { EditableLeasing, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
+import { EditableLeasingModel, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
 
 import { parseBody } from "@/utils/bodyparser";
 import { firstOrValue } from "@/utils/params";
@@ -35,7 +35,7 @@ const getHandler: LeasingFunction = ctx => {
 
 const postHandler: LeasingFunction = async ctx => {
   const leasing = ctx.data.leasing;
-  const patch = await parseBody(ctx.request, EditableLeasing);
+  const patch = await parseBody(ctx.request, EditableLeasingModel);
   const merged = {
     ...patch,
     id: leasing.id,
@@ -56,7 +56,7 @@ const putHandler: LeasingFunction = postHandler;
 
 const patchHandler: LeasingFunction = async ctx => {
   const leasing = ctx.data.leasing;
-  const patch = await parseBody(ctx.request, EditableLeasing.partial());
+  const patch = await parseBody(ctx.request, EditableLeasingModel.partial());
   const merged = { ...leasing, ...patch };
 
   merged.updatedAt = new Date();
