@@ -3,7 +3,6 @@ import { Payment } from "./models/payment";
 
 export const getLeasingResults = (paymentSchedule: Payment[], buyingOptionFee: number): LeasingResult => {
   let totalInterest = 0;
-  let totalInsurance = 0;
   let totalPeriodicalCosts = 0;
   let totalAmortization = 0;
 
@@ -13,15 +12,13 @@ export const getLeasingResults = (paymentSchedule: Payment[], buyingOptionFee: n
       totalInterest += payment.interest;
     }
     totalPeriodicalCosts += payment.periodicalCosts;
-    totalInsurance += payment.insuranceAmount;
   }
 
-  const totalPayment = totalInterest + totalAmortization + totalInsurance + totalPeriodicalCosts + buyingOptionFee;
+  const totalPayment = totalInterest + totalAmortization + totalPeriodicalCosts + buyingOptionFee;
 
   return {
     totalInterest: totalInterest,
     totalAmortization: totalAmortization,
-    totalInsurance: totalInsurance,
     totalPeriodicalCosts: totalPeriodicalCosts,
     totalPayment: totalPayment,
   };

@@ -5,7 +5,6 @@ export interface Payment {
   interest: number;
   fee: number;
   amortization: number;
-  insuranceAmount: number;
   periodicalCosts: number;
   buyingOptionFee: number;
   finalBalance: number;
