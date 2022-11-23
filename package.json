@@ -17,7 +17,6 @@
     "postinstall": "husky install",
     "wrangler": "wrangler",
     "lint": "concurrently -s -n lint: 'yarn:lint:*(!fix)'",
-    "lint:ts": "concurrently -s -n lint:ts 'yarn:lint:ts:*'",
     "lint:ts:root": "tsc --noemit -p .",
     "lint:ts:functions": "tsc --noemit -p functions/",
     "lint:eslint": "eslint --cache --ext .js,.jsx,.ts,.tsx .",
