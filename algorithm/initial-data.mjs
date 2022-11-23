@@ -43,25 +43,17 @@ export const getInitialCosts = (inputs, extraCosts) => {
   return initialCosts;
 };
 
-export const getPeriodicalCosts = extraCosts => {
+export const getPeriodicalCosts = (extraCosts, sellingPrice, annualPayments) => {
   let periodicalCosts = 0;
   for (const extraCost of extraCosts) {
     if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
       periodicalCosts -= extraCost.value;
+    } else if (extraCost.type === "Periódico" && extraCost.valueType === "Porcentual") {
+      periodicalCosts -= ((extraCost.value / 100) * sellingPrice) / annualPayments;
     }
   }
 
   return periodicalCosts;
-};
-
-export const getInsuranceAmount = (extraCosts, sellingPrice, annualPayments) => {
-  let insuranceAmount = 0;
-  for (const extraCost of extraCosts) {
-    if (extraCost.type === "Periódico" && extraCost.valueType === "Porcentual") {
-      insuranceAmount = -(((extraCost.value / 100) * sellingPrice) / annualPayments);
-    }
-  }
-  return insuranceAmount;
 };
 
 export const getDeprecitaion = (sellingValue, periods) => {

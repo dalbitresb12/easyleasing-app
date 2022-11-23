@@ -32,16 +32,16 @@ function getFinalBalance(gracePeriod, initialBalance, interest, amortization) {
   return initialBalance + amortization;
 }
 
-function getTaxSavings(interest, insurance, periodicalCosts, depreciation) {
-  return (interest + insurance + periodicalCosts + depreciation) * IR;
+function getTaxSavings(interest, periodicalCosts, depreciation) {
+  return (interest + periodicalCosts + depreciation) * IR;
 }
 
-function getPeriodicalTaxes(fee, insurance, periodicalCosts, buyingOptionFee) {
-  return (fee + insurance + periodicalCosts + buyingOptionFee) * IGV;
+function getPeriodicalTaxes(fee, periodicalCosts, buyingOptionFee) {
+  return (fee + periodicalCosts + buyingOptionFee) * IGV;
 }
 
-function getGrossFlow(fee, insurance, periodicalCosts, buyingOptionFee) {
-  return fee + insurance + periodicalCosts + buyingOptionFee;
+function getGrossFlow(fee, periodicalCosts, buyingOptionFee) {
+  return fee + periodicalCosts + buyingOptionFee;
 }
 
 function getNetFlow(grossFlow, taxSavings) {
@@ -59,7 +59,6 @@ export const generatePaymentSchedule = (
   sellingValue,
   initialCosts,
   periodicalCosts,
-  insuranceAmount,
   depreciation,
   buyingOptionFee,
 ) => {
@@ -87,14 +86,9 @@ export const generatePaymentSchedule = (
     amortization = getAmortization(currentGracePeriod, fee, interest);
     finalBalance = getFinalBalance(currentGracePeriod, initialBalance, interest, amortization);
 
-    taxSavings = getTaxSavings(interest, insuranceAmount, periodicalCosts, depreciation);
-    periodicalTaxes = getPeriodicalTaxes(
-      fee,
-      insuranceAmount,
-      periodicalCosts,
-      currentPeriod === periods ? buyingOptionFee : 0,
-    );
-    grossFlow = getGrossFlow(fee, insuranceAmount, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
+    taxSavings = getTaxSavings(interest, periodicalCosts, depreciation);
+    periodicalTaxes = getPeriodicalTaxes(fee, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
+    grossFlow = getGrossFlow(fee, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
 
     flowWithTaxes = getFlowWithTaxes(grossFlow, periodicalTaxes);
     netFlow = getNetFlow(grossFlow, taxSavings);
@@ -106,7 +100,6 @@ export const generatePaymentSchedule = (
       interest: interest,
       fee: fee,
       amortization: amortization,
-      insuranceAmount: insuranceAmount,
       periodicalCosts: periodicalCosts,
       buyingOptionFee: currentPeriod === periods ? buyingOptionFee : 0,
       finalBalance: finalBalance,
