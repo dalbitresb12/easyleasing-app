@@ -41,7 +41,7 @@ export const ListboxInput = <T,>(props: Props<T>): ReactElement => {
   const selectedOption = transform(value);
 
   return (
-    <Listbox name={name} value={value} onChange={onChange} by={by}>
+    <Listbox name={name} value={value || null} onChange={onChange} by={by}>
       <div className="relative h-full">
         <Listbox.Button className={className}>
           <span className={clsx("block truncate", !selectedOption && "text-gray-400")}>
