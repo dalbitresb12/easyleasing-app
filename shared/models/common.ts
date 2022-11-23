@@ -19,12 +19,16 @@ export const TimeFrequencies = z.enum([
   "annually",
 ]);
 export type TimeFrequencies = z.infer<typeof TimeFrequencies>;
+export const TimeFrequenciesValues = Object.values(TimeFrequencies.Values);
 
 export const InterestRateTypes = z.enum(["nominal", "effective"]);
 export type InterestRateTypes = z.infer<typeof InterestRateTypes>;
+export const InterestRateTypesValues = Object.values(InterestRateTypes.Values);
 
 export const NumericalType = z.enum(["number", "percent"]);
 export type NumericalType = z.infer<typeof NumericalType>;
+export const NumericalTypeValues = Object.values(NumericalType.Values);
 
 export const ExpenseType = z.enum(["one-time", "recurrent"]);
 export type ExpenseType = z.infer<typeof ExpenseType>;
+export const ExpenseTypeValues = Object.values(ExpenseType.Values);

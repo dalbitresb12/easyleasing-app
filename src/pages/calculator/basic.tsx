@@ -5,7 +5,7 @@ import { FC, useEffect } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { TimeFrequencies } from "@/shared/models/common";
+import { InterestRateTypesValues, NumericalTypeValues, TimeFrequenciesValues } from "@/shared/models/common";
 import { leasingBuybackValidation, LeasingModel, leasingRateTypeValidation } from "@/shared/models/leasing";
 import { capitalize } from "@/shared/utils/strings";
 
@@ -18,6 +18,9 @@ import { FormInput } from "@/components/form-input";
 import { ListboxInput } from "@/components/listbox-input";
 import { ProgressLayout } from "@/components/progress-layout";
 import { SwitchInput } from "@/components/switch-input";
+
+const LeasingTimeUnit = z.enum(["months", "years"]);
+const LeasingTimeUnitValues = Object.values(LeasingTimeUnit.Values);
 
 const BasicCalculatorForm = LeasingModel.pick({
   name: true,
@@ -34,7 +37,7 @@ const BasicCalculatorForm = LeasingModel.pick({
   buybackValue: true,
 })
   .extend({
-    leasingTimeUnit: z.enum(["months", "years"]).optional(),
+    leasingTimeUnit: LeasingTimeUnit.optional(),
   })
   .superRefine(leasingRateTypeValidation)
   .superRefine(leasingBuybackValidation);
@@ -49,12 +52,16 @@ const BasicCalculatorPage: FC = () => {
     watch,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<BasicCalculatorForm>({
     resolver: zodResolver(BasicCalculatorForm),
     defaultValues: {
       buyback: false,
       currency: "PEN",
+      paymentFrequency: "monthly",
+      leasingTimeUnit: "years",
+      rateType: "effective",
+      rateFrequency: "monthly",
     },
   });
 
@@ -62,21 +69,42 @@ const BasicCalculatorPage: FC = () => {
   const buyback = watch("buyback");
 
   useEffect(() => {
-    if (!buyback) {
+    if (user.isSuccess && !isDirty) {
+      setValue("currency", user.data.currency);
+      setValue("paymentFrequency", user.data.paymentFrequency);
+      setValue("rateType", user.data.interestRateType);
+      if (user.data.interestRateType === "nominal") {
+        setValue("capitalizationFrequency", user.data.capitalizationType);
+      }
+    }
+  }, [
+    isDirty,
+    setValue,
+    user.isSuccess,
+    user.data?.paymentFrequency,
+    user.data?.currency,
+    user.data?.interestRateType,
+    user.data?.capitalizationType,
+  ]);
+
+  useEffect(() => {
+    if (!buyback && !user.isInitialLoading) {
       setValue("buybackType", undefined);
       setValue("buybackValue", undefined);
     }
-  }, [buyback, setValue]);
+  }, [buyback, setValue, user.isInitialLoading]);
 
   useEffect(() => {
-    if (rateType === "effective") setValue("capitalizationFrequency", undefined);
-  }, [rateType, setValue]);
+    if (rateType === "effective" && !user.isInitialLoading) {
+      setValue("capitalizationFrequency", undefined);
+    }
+  }, [rateType, setValue, user.isInitialLoading]);
 
   const onSubmit: SubmitHandler<BasicCalculatorForm> = form => {
     console.log(form);
   };
 
-  if (user.isLoading) {
+  if (user.isInitialLoading) {
     return null;
   }
 
@@ -122,7 +150,7 @@ const BasicCalculatorPage: FC = () => {
                 <ListboxInput
                   name={name}
                   value={value}
-                  options={Object.values(TimeFrequencies.Values).map(i => ({ key: i, value: i }))}
+                  options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
                   transform={capitalize}
                   onChange={onChange}
                 />
@@ -142,7 +170,19 @@ const BasicCalculatorPage: FC = () => {
                 />
               </div>
               <div className="flex flex-col space-y-1 w-28 shrink">
-                <FormInput type="text" errors={errors.leasingTimeUnit} {...register("leasingTimeUnit")} />
+                <Controller
+                  control={control}
+                  name="leasingTimeUnit"
+                  render={({ field: { value, name, onChange } }) => (
+                    <ListboxInput
+                      name={name}
+                      value={value}
+                      options={LeasingTimeUnitValues.map(i => ({ key: i, value: i }))}
+                      transform={v => capitalize(v || "")}
+                      onChange={onChange}
+                    />
+                  )}
+                />
               </div>
             </div>
           )}
@@ -151,11 +191,18 @@ const BasicCalculatorPage: FC = () => {
           {id => (
             <div className="w-full flex space-x-1">
               <div className="flex flex-col space-y-1 w-48 shrink">
-                <FormInput
-                  type="text"
-                  errors={errors.rateType}
-                  defaultValue={user.data?.interestRateType}
-                  {...register("rateType")}
+                <Controller
+                  control={control}
+                  name="rateType"
+                  render={({ field: { value, name, onChange } }) => (
+                    <ListboxInput
+                      name={name}
+                      value={value}
+                      options={InterestRateTypesValues.map(i => ({ key: i, value: i }))}
+                      transform={capitalize}
+                      onChange={onChange}
+                    />
+                  )}
                 />
               </div>
               <div className="flex flex-col space-y-1 w-full">
@@ -167,24 +214,40 @@ const BasicCalculatorPage: FC = () => {
                 />
               </div>
               <div className="flex flex-col space-y-1 w-64 shrink">
-                <FormInput type="text" errors={errors.rateFrequency} {...register("rateFrequency")} />
+                <Controller
+                  control={control}
+                  name="rateFrequency"
+                  render={({ field: { value, name, onChange } }) => (
+                    <ListboxInput
+                      name={name}
+                      value={value}
+                      options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
+                      transform={capitalize}
+                      onChange={onChange}
+                    />
+                  )}
+                />
               </div>
             </div>
           )}
         </CalculatorInput>
         {rateType === "nominal" && (
           <CalculatorInput label="Capitalización" description="Solo utilizado para tasas nominales">
-            {id => (
-              <div className="flex flex-col space-y-1">
-                <FormInput
-                  id={id}
-                  type="text"
-                  errors={errors.capitalizationFrequency}
-                  defaultValue={user.data?.capitalizationType}
-                  {...register("capitalizationFrequency")}
-                />
-              </div>
-            )}
+            <div className="flex flex-col space-y-1">
+              <Controller
+                control={control}
+                name="capitalizationFrequency"
+                render={({ field: { value, name, onChange } }) => (
+                  <ListboxInput
+                    name={name}
+                    value={value}
+                    options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
+                    transform={v => capitalize(v || "")}
+                    onChange={onChange}
+                  />
+                )}
+              />
+            </div>
           </CalculatorInput>
         )}
         <CalculatorInput label="Recompra" description="¿Vas a mantener este ítem?">
@@ -202,11 +265,18 @@ const BasicCalculatorPage: FC = () => {
               {buyback && (
                 <div className="w-full flex space-x-1">
                   <div className="flex flex-col space-y-1 w-48 shrink">
-                    <FormInput
-                      className="w-full"
-                      type="text"
-                      errors={errors.buybackType}
-                      {...register("buybackType")}
+                    <Controller
+                      control={control}
+                      name="buybackType"
+                      render={({ field: { value, name, onChange } }) => (
+                        <ListboxInput
+                          name={name}
+                          value={value}
+                          options={NumericalTypeValues.map(i => ({ key: i, value: i }))}
+                          transform={v => capitalize(v || "")}
+                          onChange={onChange}
+                        />
+                      )}
                     />
                   </div>
                   <div className="flex flex-col space-y-1 w-full">

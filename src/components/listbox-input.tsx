@@ -16,6 +16,7 @@ export interface Props<T> {
   name?: string;
   value: T;
   options: ListboxOption<T>[];
+  placeholder?: string;
   onChange: (value: T) => void;
   transform: (value: T) => string;
   by?: (a: T, b: T) => boolean;
@@ -23,7 +24,7 @@ export interface Props<T> {
 }
 
 export const ListboxInput = <T,>(props: Props<T>): ReactElement => {
-  const { name, value, options, onChange, transform, by } = props;
+  const { name, value, options, placeholder = "Selecciona una opción...", onChange, transform, by } = props;
 
   const className = clsx(
     props.className,
@@ -32,16 +33,20 @@ export const ListboxInput = <T,>(props: Props<T>): ReactElement => {
   );
 
   const optionsClassName = clsx(
-    "absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg",
+    "absolute max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg",
     "ring-1 ring-black ring-opacity-5 z-20",
     "focus:outline-none sm:text-sm",
   );
 
+  const selectedOption = transform(value);
+
   return (
     <Listbox name={name} value={value} onChange={onChange} by={by}>
-      <div className="relative mt-1">
+      <div className="relative">
         <Listbox.Button className={className}>
-          <span className="block truncate">{transform(value)}</span>
+          <span className={clsx("block truncate", !selectedOption && "text-gray-400")}>
+            {selectedOption || placeholder}
+          </span>
           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
             <MaterialIcon icon={UnfoldMoreIcon} />
           </span>
