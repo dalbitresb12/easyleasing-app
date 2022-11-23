@@ -7,6 +7,7 @@ export type DateWithParsing = z.infer<typeof DateWithParsing>;
 
 export const Currencies = z.enum(["PEN", "USD"]);
 export type Currencies = z.infer<typeof Currencies>;
+export const CurrenciesValues = Object.values(Currencies.Values);
 
 export const TimeFrequencies = z.enum([
   "daily",

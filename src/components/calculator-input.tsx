@@ -17,7 +17,7 @@ export const CalculatorInput: FC<Props> = props => {
 
   return (
     <div className="flex py-4 space-x-4">
-      <div className="w-96 max-w-sm shrink text-slate-800">
+      <div className="w-96 max-w-sm text-slate-800">
         <label htmlFor={id} className="font-medium flex flex-col space-y-1">
           <span>{label}</span>
           {description && <span className="text-xs font-light">{description}</span>}

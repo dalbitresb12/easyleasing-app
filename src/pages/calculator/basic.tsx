@@ -1,15 +1,28 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { FC, useEffect } from "react";
+import { useRouter } from "next/router";
+import { FC, useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { InterestRateTypesValues, NumericalTypeValues, TimeFrequenciesValues } from "@/shared/models/common";
-import { leasingBuybackValidation, LeasingModel, leasingRateTypeValidation } from "@/shared/models/leasing";
+import {
+  CurrenciesValues,
+  InterestRateTypesValues,
+  NumericalTypeValues,
+  TimeFrequenciesValues,
+} from "@/shared/models/common";
+import {
+  EditableLeasing,
+  leasingBuybackValidation,
+  LeasingModel,
+  leasingRateTypeValidation,
+} from "@/shared/models/leasing";
+import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/algorithm";
 import { capitalize } from "@/shared/utils/strings";
 
 import { usersHandler } from "@/api/handlers";
+import { leasingsPostHandler } from "@/api/handlers/leasings";
 import { queries } from "@/api/keys";
 
 import { CalculatorInput } from "@/components/calculator-input";
@@ -44,7 +57,21 @@ const BasicCalculatorForm = LeasingModel.pick({
 type BasicCalculatorForm = z.infer<typeof BasicCalculatorForm>;
 
 const BasicCalculatorPage: FC = () => {
+  const router = useRouter();
+  const [currencyFormatter, setCurrencyFormatter] = useState<Intl.NumberFormat>();
+
   const user = useQuery({ ...queries.users.me, queryFn: usersHandler });
+  const mutation = useMutation({
+    mutationFn: leasingsPostHandler,
+    onSuccess: leasing => {
+      router.push({
+        pathname: "/calculator/extra",
+        query: {
+          id: leasing.id,
+        },
+      });
+    },
+  });
 
   const {
     register,
@@ -65,12 +92,17 @@ const BasicCalculatorPage: FC = () => {
     },
   });
 
+  const sellingPrice = watch("sellingPrice");
+  const currency = watch("currency");
   const rateType = watch("rateType");
   const buyback = watch("buyback");
+  const buybackType = watch("buybackType");
+  const buybackValue = watch("buybackValue");
 
   useEffect(() => {
     if (user.isSuccess && !isDirty) {
       setValue("currency", user.data.currency);
+      setCurrencyFormatter(createCurrencyFormatter(user.data.currency));
       setValue("paymentFrequency", user.data.paymentFrequency);
       setValue("rateType", user.data.interestRateType);
       if (user.data.interestRateType === "nominal") {
@@ -100,8 +132,16 @@ const BasicCalculatorPage: FC = () => {
     }
   }, [rateType, setValue, user.isInitialLoading]);
 
+  useEffect(() => {
+    setCurrencyFormatter(createCurrencyFormatter(currency));
+  }, [currency]);
+
   const onSubmit: SubmitHandler<BasicCalculatorForm> = form => {
-    console.log(form);
+    if (form.leasingTimeUnit === "years") {
+      form.leasingTime = form.leasingTime * 12;
+    }
+    delete form.leasingTimeUnit;
+    mutation.mutate(form as EditableLeasing);
   };
 
   if (user.isInitialLoading) {
@@ -131,17 +171,38 @@ const BasicCalculatorPage: FC = () => {
         </CalculatorInput>
         <CalculatorInput label="Precio de venta" description="¿Cuánto cuesta este ítem?">
           {id => (
-            <div className="flex flex-col space-y-1">
-              <FormInput
-                id={id}
-                type="number"
-                errors={errors.sellingPrice}
-                {...register("sellingPrice", { valueAsNumber: true })}
-              />
+            <div className="w-full flex space-x-1">
+              <div className="flex flex-col space-y-1 w-full">
+                <FormInput
+                  id={id}
+                  type="number"
+                  errors={errors.sellingPrice}
+                  mask={() => {
+                    return currencyFormatter?.format(Number.isNaN(sellingPrice) ? 0 : sellingPrice) ?? sellingPrice;
+                  }}
+                  maskClassName="py-2 px-3"
+                  {...register("sellingPrice", { valueAsNumber: true })}
+                />
+              </div>
+              <div className="flex flex-col w-28 shrink">
+                <Controller
+                  control={control}
+                  name="currency"
+                  render={({ field: { value, name, onChange } }) => (
+                    <ListboxInput
+                      name={name}
+                      value={value}
+                      options={CurrenciesValues.map(i => ({ key: i, value: i }))}
+                      transform={v => v}
+                      onChange={onChange}
+                    />
+                  )}
+                />
+              </div>
             </div>
           )}
         </CalculatorInput>
-        <CalculatorInput label="Frencuencia de pagos" description="¿Cada cuánto estarás pagando?">
+        <CalculatorInput label="Frecuencia de pagos" description="¿Cada cuánto estarás pagando?">
           <div className="flex flex-col space-y-1">
             <Controller
               control={control}
@@ -169,7 +230,7 @@ const BasicCalculatorPage: FC = () => {
                   {...register("leasingTime", { valueAsNumber: true })}
                 />
               </div>
-              <div className="flex flex-col space-y-1 w-28 shrink">
+              <div className="flex flex-col w-28 shrink">
                 <Controller
                   control={control}
                   name="leasingTimeUnit"
@@ -284,6 +345,16 @@ const BasicCalculatorPage: FC = () => {
                       id={id}
                       type="number"
                       errors={errors.buybackValue}
+                      disabled={!buybackType}
+                      mask={() => {
+                        if (!buybackType) return "";
+                        const value = Number.isNaN(buybackValue) ? 0 : buybackValue ?? 0;
+                        if (buybackType === "percent") {
+                          return percentFormatter.format(value);
+                        }
+                        return currencyFormatter?.format(value) ?? buybackValue;
+                      }}
+                      maskClassName="py-2 px-3"
                       {...register("buybackValue", { valueAsNumber: true })}
                     />
                   </div>
