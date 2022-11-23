@@ -23,10 +23,10 @@ export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
     divClassName,
     "relative w-full overflow-hidden",
     label && "mt-1",
-    !unstyled && "rounded-md shadow-sm transition-all",
+    !unstyled && "rounded-md shadow-sm transition-all border",
     errors
-      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-      : !unstyled && "border border-gray-300 focus-within:border-sky-700 focus-within:ring-sky-700",
+      ? "border-red-500 focus-within:border-red-500 focus-within:ring-red-500"
+      : !unstyled && "border-gray-300 focus-within:border-sky-700 focus-within:ring-sky-700",
   );
 
   return (
