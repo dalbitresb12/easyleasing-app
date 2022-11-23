@@ -1,4 +1,5 @@
-const IGV = 0.18;
+import { ExtraCost } from "./models/extra-cost";
+import { IGV } from "./peruvian-taxes";
 
 export const getInitialFee = (initialFeePercentage: number, sellingPrice: number): number => {
   return (initialFeePercentage / 100) * sellingPrice;
@@ -34,6 +35,44 @@ export const getPeriods = (loanTime: number, paymentFrequency: number) => {
   return (loanTime * 360) / paymentFrequency;
 };
 
+export const getInitialCosts = (sellingPrice: number, extraCosts: ExtraCost[]): number => {
+  let initialCosts = 0;
+  for (const extraCost of extraCosts) {
+    if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
+      initialCosts += extraCost.value;
+    } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
+      initialCosts += (extraCost.value / 100) * sellingPrice;
+    }
+  }
+
+  return initialCosts;
+};
+
+export const getPeriodicalCosts = (extraCosts: ExtraCost[]): number => {
+  let periodicalCosts = 0;
+  for (const extraCost of extraCosts) {
+    if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
+      periodicalCosts += extraCost.value;
+    }
+  }
+
+  return periodicalCosts;
+};
+
+export const getInsuranceAmount = (extraCosts: ExtraCost[], sellingPrice: number, annualPayments: number): number => {
+  let insuranceAmount = 0;
+  for (const extraCost of extraCosts) {
+    if (extraCost.type === "Periódico" && extraCost.valueType === "Porcentual") {
+      insuranceAmount = -(((extraCost.value / 100) * sellingPrice) / annualPayments);
+    }
+  }
+  return insuranceAmount;
+};
+
 export const getDeprecitaion = (sellingValue: number, periods: number): number => {
   return -(sellingValue / periods);
+};
+
+export const getLeasingAmount = (initialCosts: number, sellingValue: number): number => {
+  return initialCosts + sellingValue;
 };
