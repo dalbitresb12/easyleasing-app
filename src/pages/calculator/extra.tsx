@@ -1,18 +1,18 @@
 import AddIcon from "@material-symbols/svg-400/rounded/add.svg";
 import DeleteIcon from "@material-symbols/svg-400/rounded/delete.svg";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { ExpenseTypeValues, NumericalTypeValues } from "@/shared/models/common";
-import { leasingExtrasValueValidation, LeasingModel } from "@/shared/models/leasing";
+import { leasingExtrasValueValidation, LeasingModel, PartialEditableLeasing } from "@/shared/models/leasing";
 import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/algorithm";
 import { capitalize } from "@/shared/utils/strings";
 
-import { leasingGetHandler } from "@/api/handlers/leasings";
+import { leasingGetHandler, leasingPatchHandler } from "@/api/handlers/leasings";
 import { queries } from "@/api/keys";
 
 import { FormButton } from "@/components/form-button";
@@ -35,6 +35,16 @@ const ExtraCalculatorPage: FC = () => {
   const id = takeFirstQuery(router.query.id);
 
   const leasing = useQuery(!id ? {} : { ...queries.leasings.getById(id), queryFn: () => leasingGetHandler(id) });
+  const mutation = useMutation(
+    !id
+      ? {}
+      : {
+          mutationFn: (data: PartialEditableLeasing) => leasingPatchHandler(id, data),
+          onSuccess: () => {
+            router.push({ pathname: "/leasings", query: { id } });
+          },
+        },
+  );
 
   useEffect(() => {
     if (leasing.data?.currency) {
@@ -42,7 +52,7 @@ const ExtraCalculatorPage: FC = () => {
     }
   }, [leasing.data?.currency]);
 
-  const { control, register, watch } = useForm<ExtraCalculatorForm>({
+  const { control, register, watch, handleSubmit } = useForm<ExtraCalculatorForm>({
     defaultValues: {
       extras: [
         {
@@ -56,7 +66,22 @@ const ExtraCalculatorPage: FC = () => {
   });
   const { fields, append, remove } = useFieldArray({ control, name: "extras" });
 
+  useEffect(() => {
+    if (fields.length === 0) {
+      append({
+        name: "",
+        valueType: "number",
+        value: 0,
+        expenseType: "one-time",
+      });
+    }
+  }, [append, fields.length]);
+
   const extras = watch("extras");
+
+  const onSubmit: SubmitHandler<ExtraCalculatorForm> = form => {
+    mutation.mutate(form);
+  };
 
   if (!router.isReady) return <span>Loading...</span>;
 
@@ -73,7 +98,11 @@ const ExtraCalculatorPage: FC = () => {
           Si necesitas algún detalle extra a considerar, puedes añadirlo aquí.
         </span>
       </div>
-      <form className="border-t border-slate-200 divide-y divide-slate-200 text-sm" noValidate>
+      <form
+        className="border-t border-slate-200 divide-y divide-slate-200 text-sm"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+      >
         <div className="flex py-4 space-x-4">
           <div className="flex flex-col space-y-1 w-full">
             <span className="text-sm font-medium text-slate-700">Nombre</span>

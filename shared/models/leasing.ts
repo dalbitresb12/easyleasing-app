@@ -179,3 +179,4 @@ export const PartialEditableLeasing = EditableLeasingModel.partial()
   .superRefine(leasingRateTypeValidation)
   .superRefine(leasingBuybackValidation)
   .superRefine(({ extras }, ctx) => leasingExtrasValueValidation(extras, ctx));
+export type PartialEditableLeasing = z.infer<typeof PartialEditableLeasing>;

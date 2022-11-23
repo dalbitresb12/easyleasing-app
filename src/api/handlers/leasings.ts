@@ -1,5 +1,5 @@
 import { ListLeasingsResponse } from "@/shared/api/types";
-import { EditableLeasing, SanitizedLeasing } from "@/shared/models/leasing";
+import { EditableLeasing, SanitizedLeasing, PartialEditableLeasing } from "@/shared/models/leasing";
 
 import { HttpClient, HttpMethods } from "@/utils/http-client";
 
@@ -23,7 +23,7 @@ export const leasingPostHandler = (id: string, data: EditableLeasing): Promise<S
 
 export const leasingPutHandler = leasingPostHandler;
 
-export const leasingPatchHandler = (id: string, data: EditableLeasing): Promise<SanitizedLeasing> => {
+export const leasingPatchHandler = (id: string, data: PartialEditableLeasing): Promise<SanitizedLeasing> => {
   return HttpClient.patch(prefix(`/${id}`), data, SanitizedLeasing);
 };
 
