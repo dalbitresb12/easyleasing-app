@@ -16,9 +16,9 @@ import {
   getPeriods,
   getBuyingOptionFee,
   getInitialCosts,
-  // getPeriodicalCosts,
-  //  getInsuranceAmount,
-  // getDeprecitaion,
+  getPeriodicalCosts,
+  getInsuranceAmount,
+  getDeprecitaion,
   getInterestRatePerPeriod,
   getLeasingAmount,
 } from "./initial-data.mjs";
@@ -28,6 +28,7 @@ import {
 import { effectiveRateToEffectiveRate, nominalRateToEffectiveRate } from "./rate-conversion.mjs";
 
 import { positiveValidation, percentageValidation, extraCostValidation, loanTimeValidation } from "./validations.mjs";
+import { generatePaymentSchedule } from "./payment-calculations.mjs";
 
 /* 
 function calcGrossVna() {}
@@ -395,10 +396,10 @@ const main = async () => {
 
   const buyingOptionFee = getBuyingOptionFee(inputs.buyingOption, inputs.buyingOptionPercentage, sellingValue);
 
-  // const depreciacion = getDeprecitaion(valorVenta, periodos);
+  const depreciation = getDeprecitaion(sellingValue, periods);
   const initialCosts = getInitialCosts(inputs, extraCosts);
-  // const costosPeriodicos = -getPeriodicalCosts(extraCosts);
-  // const montoSeguro = getInsuranceAmount(extraCosts, nuevoPrecio, cuotasAnuales);
+  const periodicalCosts = -getPeriodicalCosts(extraCosts);
+  const insuranceAmount = getInsuranceAmount(extraCosts, newSellingPrice, annualPayments);
 
   const leasingAmount = getLeasingAmount(initialCosts, sellingValue);
 
@@ -442,8 +443,38 @@ const main = async () => {
   console.log(`Tasa descuento Ks equivalente: ${outputPercentageFormatter.format(ksRate)}`);
   console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(waccRate)}`);
 
-  // Cronograma de pagos
-  // await getPaymentSchedule(inputs, extraCosts, tasaIndicadorBruto.descuentoKs, tasaIndicadorNeto.descuentoWACC);
+  /* *** PAYMENT SCHEDULE (TABLE) *** */
+
+  const paymentSchedule = generatePaymentSchedule(
+    gracePeriods,
+    periods,
+    interesRatePerPeriod,
+    sellingValue,
+    initialCosts,
+    periodicalCosts,
+    insuranceAmount,
+    depreciation,
+    buyingOptionFee,
+  );
+
+  for (const payment of paymentSchedule) {
+    console.log(`\nN° ${payment.period}`);
+    console.log(`Grace Period: ${payment.gracePeriod}`);
+    console.log(`Initial Balance: ${currencyFormatter.format(payment.initialBalance)}`);
+    console.log(`Interest: ${currencyFormatter.format(payment.interest)}`);
+    console.log(`Fee: ${currencyFormatter.format(payment.fee)}`);
+    console.log(`Amortization: ${currencyFormatter.format(payment.amortization)}`);
+    console.log(`Insurance Amount: ${currencyFormatter.format(payment.insuranceAmount)}`);
+    console.log(`Periodical Costs: ${currencyFormatter.format(payment.periodicalCosts)}`);
+    console.log(`Buying Option Fee: ${currencyFormatter.format(payment.buyingOptionFee)}`);
+    console.log(`Final Balance: ${currencyFormatter.format(payment.finalBalance)}`);
+    console.log(`Depreciation: ${currencyFormatter.format(payment.depreciation)}`);
+    console.log(`Tax Savings: ${currencyFormatter.format(payment.taxSavings)}`);
+    console.log(`Taxes: ${currencyFormatter.format(payment.IGV)}`);
+    console.log(`Gross Flow: ${currencyFormatter.format(payment.grossFlow)}`);
+    console.log(`Flow w/Taxes: ${currencyFormatter.format(payment.flowWithTaxes)}`);
+    console.log(`Net Flow: ${currencyFormatter.format(payment.netFlow)}`);
+  }
 };
 
 main();
