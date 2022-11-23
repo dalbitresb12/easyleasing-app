@@ -94,6 +94,20 @@ jobs:
           reporter: 'github-check'
           filter_mode: 'nofilter'
           fail_on_error: true
+  markdownlint:
+    name: 'markdownlint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: reviewdog/action-markdownlint@v0
+        with:
+          reporter: 'github-check'
+          filter_mode: 'nofilter'
+          fail_on_error: true
   actionlint:
     name: 'actionlint (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
