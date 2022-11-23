@@ -4,7 +4,7 @@ import { ServerError } from "@/shared/api/types";
 import { SanitizedUser, UpdatableUser } from "@/shared/models/user";
 
 import type { AppFunction } from "../../types/appcontext";
-import { parseBody } from "../../utils/bodyparser";
+import { parseBody } from "../../utils/model-parser";
 import { sendConfirmationEmail } from "../../utils/postmark";
 
 export const onRequestGet: AppFunction = ctx => Response.json(SanitizedUser.parse(ctx.data.user));

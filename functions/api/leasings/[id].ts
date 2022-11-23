@@ -4,7 +4,7 @@ import { z } from "zod";
 import { HttpError } from "@/shared/api/types";
 import { EditableLeasingModel, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
 
-import { parseBody } from "@/utils/bodyparser";
+import { parseBody } from "@/utils/model-parser";
 import { firstOrValue } from "@/utils/params";
 
 type Params = "id";

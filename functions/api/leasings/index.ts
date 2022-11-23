@@ -5,7 +5,7 @@ import { ListLeasingsMetadata, ListLeasingsResponse } from "@/shared/api/types";
 import { EditableLeasingModel, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
 import { clamp } from "@/shared/utils/numbers";
 
-import { parseBody } from "@/utils/bodyparser";
+import { assertModel, parseBody } from "@/utils/model-parser";
 import { createUrlFromRequest } from "@/utils/urls";
 
 export const onRequestGet: AppFunction = async ctx => {
@@ -40,13 +40,16 @@ export const onRequestPost: AppFunction = async ctx => {
   const userId = ctx.data.user.uuid;
 
   const now = new Date();
-  const leasing = Leasing.parse({
-    ...req,
-    id: uuidv4(),
-    userId: userId,
-    createdAt: now,
-    updatedAt: now,
-  } as Leasing);
+  const leasing = await assertModel(
+    {
+      ...req,
+      id: uuidv4(),
+      userId: userId,
+      createdAt: now,
+      updatedAt: now,
+    } as Leasing,
+    Leasing,
+  );
 
   // TODO: Check for duplicate key. Shouldn't happen, but who knows?
   await ctx.env.leasings.put(`${userId}-${leasing.id}`, JSON.stringify(leasing), {
