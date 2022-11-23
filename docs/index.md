@@ -40,5 +40,13 @@ Nuestra aplicacion web "EasyLeasing" tiene como proposito brindar una plataforma
 - Recompra: Monto total de la recompra
 - Pago total
 
+#### Indicadores Rentables
+
+Éxito o fracaso de la inversión
+
+- Flujo de caja bruta: TCEA (Porcentaje)
+- Flujo de caja bruta: VAN  (Numerico)
+- Flujo de caja neta: TCEA (Porcentaje)
+- Flujo de caja neta: VAN  (Numerico)
 
 
