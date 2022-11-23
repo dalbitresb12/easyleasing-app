@@ -2,7 +2,7 @@ import { AppData, AppFunction } from "@/types/appcontext";
 import { z } from "zod";
 
 import { HttpError } from "@/shared/api/types";
-import { EditableLeasingModel, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
+import { EditableLeasing, Leasing, PartialEditableLeasing, SanitizedLeasing } from "@/shared/models/leasing";
 
 import { parseBody } from "@/utils/model-parser";
 import { firstOrValue } from "@/utils/params";
@@ -35,7 +35,7 @@ const getHandler: LeasingFunction = ctx => {
 
 const postHandler: LeasingFunction = async ctx => {
   const leasing = ctx.data.leasing;
-  const patch = await parseBody(ctx.request, EditableLeasingModel);
+  const patch = await parseBody(ctx.request, EditableLeasing);
   const merged = {
     ...patch,
     id: leasing.id,
@@ -56,8 +56,17 @@ const putHandler: LeasingFunction = postHandler;
 
 const patchHandler: LeasingFunction = async ctx => {
   const leasing = ctx.data.leasing;
-  const patch = await parseBody(ctx.request, EditableLeasingModel.partial());
+  const patch = await parseBody(ctx.request, PartialEditableLeasing);
   const merged = { ...leasing, ...patch };
+
+  if (merged.rateType === "effective") {
+    delete merged.capitalizationFrequency;
+  }
+
+  if (!merged.buyback) {
+    delete merged.buybackType;
+    delete merged.buybackValue;
+  }
 
   merged.updatedAt = new Date();
 
