@@ -28,6 +28,7 @@
     "lint:fix:prettier": "prettier --write ."
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.4",
     "@hookform/resolvers": "^2.9.10",
     "@lukemorales/query-key-factory": "^1.0.3",
     "@material-symbols/svg-400": "^0.2.15",
