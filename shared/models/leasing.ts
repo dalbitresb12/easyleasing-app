@@ -26,6 +26,7 @@ export const leasingExtrasValueValidation: SuperRefineFn<Optional<MaybeArray<Lea
       type: "number",
       maximum: 100,
       inclusive: true,
+      path: ["value"],
     });
   }
   if (value < 0) {
@@ -34,6 +35,7 @@ export const leasingExtrasValueValidation: SuperRefineFn<Optional<MaybeArray<Lea
       type: "number",
       minimum: 0,
       inclusive: true,
+      path: ["value"],
     });
   }
 };
@@ -62,12 +64,14 @@ export const leasingRateTypeValidation: SuperRefineFn<LeasingRateTypeValidationP
       code: "invalid_type",
       received: "string",
       expected: "undefined",
+      path: ["capitalizationFrequency"],
     });
   } else if (rateType === "nominal" && !capitalizationFrequency) {
     ctx.addIssue({
       code: "invalid_type",
       received: "undefined",
       expected: "string",
+      path: ["capitalizationFrequency"],
     });
   }
 };
@@ -83,51 +87,52 @@ export const leasingBuybackValidation: SuperRefineFn<LeasingBuybackValidationPar
 ) => {
   if (typeof buyback === "undefined") return;
   const types = Object.values(NumericalType.Values);
-  if (buyback) {
-    if (buybackType) {
-      ctx.addIssue({
-        code: "invalid_type",
-        received: "string",
-        expected: "undefined",
-      });
-      if (!buybackValue) {
-        ctx.addIssue({
-          code: "invalid_type",
-          received: "number",
-          expected: "undefined",
-        });
-      }
-    }
-  } else if (!buyback) {
-    if (!buybackType) {
-      ctx.addIssue({
-        code: "invalid_type",
-        received: "undefined",
-        expected: "string",
-      });
-    }
-    if (buybackType && !types.includes(buybackType)) {
-      ctx.addIssue({
-        code: "invalid_enum_value",
-        received: buybackType,
-        options: types,
-      });
-    }
-    if (!buybackValue) {
-      ctx.addIssue({
-        code: "invalid_type",
-        received: "undefined",
-        expected: "number",
-      });
-    }
-    if (buybackValue && buybackType === "percent" && buybackValue > 100) {
-      ctx.addIssue({
-        code: "too_big",
-        type: "number",
-        maximum: 100,
-        inclusive: true,
-      });
-    }
+  if (buyback && !buybackType) {
+    ctx.addIssue({
+      code: "invalid_type",
+      received: "undefined",
+      expected: "string",
+      path: ["buybackType"],
+    });
+  } else if (buyback && buybackType && !types.includes(buybackType)) {
+    ctx.addIssue({
+      code: "invalid_enum_value",
+      received: buybackType,
+      options: types,
+      path: ["buybackType"],
+    });
+  }
+  if (buyback && !buybackValue) {
+    ctx.addIssue({
+      code: "invalid_type",
+      received: "undefined",
+      expected: "number",
+      path: ["buybackValue"],
+    });
+  } else if (buyback && buybackType === "percent" && buybackValue && buybackValue > 100) {
+    ctx.addIssue({
+      code: "too_big",
+      type: "number",
+      maximum: 100,
+      inclusive: true,
+      path: ["buybackValue"],
+    });
+  }
+  if (!buyback && buybackType) {
+    ctx.addIssue({
+      code: "invalid_type",
+      received: "string",
+      expected: "undefined",
+      path: ["buybackType"],
+    });
+  }
+  if (!buyback && buybackValue) {
+    ctx.addIssue({
+      code: "invalid_type",
+      received: "number",
+      expected: "undefined",
+      path: ["buybackType"],
+    });
   }
 };
 
