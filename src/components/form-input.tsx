@@ -1,6 +1,8 @@
 import clsx from "clsx";
-import { ComponentPropsWithoutRef, forwardRef, ReactNode, useId } from "react";
+import { ComponentPropsWithoutRef, forwardRef, ReactNode, useId, useRef } from "react";
 import { FieldError } from "react-hook-form";
+
+import { useCombinedRefs } from "@/utils/use-combined-refs";
 
 export interface Props extends ComponentPropsWithoutRef<"input"> {
   label?: string;
@@ -16,6 +18,8 @@ export interface Props extends ComponentPropsWithoutRef<"input"> {
 
 export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const id = useId();
+  const innerRef = useRef<HTMLInputElement>();
+  const combinedRef = useCombinedRefs(ref, innerRef);
   const { className, label, helper, errors, unstyled, divClassName, leading, trailing, mask, maskClassName, ...attrs } =
     props;
 
@@ -38,7 +42,14 @@ export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
       )}
       <div className={styles}>
         {leading}
-        {mask && <span className={clsx(maskClassName, "absolute bg-white sm:text-sm")}>{mask()}</span>}
+        {mask && (
+          <span
+            className={clsx(maskClassName, "absolute bg-white sm:text-sm")}
+            onClick={() => combinedRef.current?.focus()}
+          >
+            {mask()}
+          </span>
+        )}
         <input
           ref={ref}
           id={id}
