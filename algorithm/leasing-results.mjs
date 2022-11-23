@@ -25,3 +25,21 @@ export const getLeasingResults = (paymentSchedule, buyingOptionFee) => {
     totalPayment: roundMoney(totalPayment),
   };
 };
+
+export const getGrossFlows = (leasingAmount, paymentSchedule) => {
+  const grossFlows = [leasingAmount];
+  for (const payment of paymentSchedule) {
+    grossFlows.push(payment.grossFlow);
+  }
+
+  return grossFlows;
+};
+
+export const getNetFlows = (leasingAmount, paymentSchedule) => {
+  const netFlows = [leasingAmount];
+  for (const payment of paymentSchedule) {
+    netFlows.push(payment.netFlow);
+  }
+
+  return netFlows;
+};
