@@ -1,5 +1,3 @@
-import { roundMoney } from "./utils.mjs";
-
 export const getLeasingResults = (paymentSchedule, buyingOptionFee) => {
   let totalInterest = 0;
   let totalInsurance = 0;
@@ -18,11 +16,11 @@ export const getLeasingResults = (paymentSchedule, buyingOptionFee) => {
   const totalPayment = totalInterest + totalAmortization + totalInsurance + totalPeriodicalCosts + buyingOptionFee;
 
   return {
-    totalInterest: roundMoney(totalInterest),
-    totalAmortization: roundMoney(totalAmortization),
-    totalInsurance: roundMoney(totalInsurance),
-    totalPeriodicalCosts: roundMoney(totalPeriodicalCosts),
-    totalPayment: roundMoney(totalPayment),
+    totalInterest: totalInterest,
+    totalAmortization: totalAmortization,
+    totalInsurance: totalInsurance,
+    totalPeriodicalCosts: totalPeriodicalCosts,
+    totalPayment: totalPayment,
   };
 };
 

@@ -1,4 +1,4 @@
-import { roundMoney, IGV, IR } from "./utils.mjs";
+import { IGV, IR } from "./utils.mjs";
 
 const getInterest = (initialBalance, interestRate) => {
   return -(initialBalance * interestRate);
@@ -102,20 +102,20 @@ export const generatePaymentSchedule = (
     paymentSchedule.push({
       period: currentPeriod,
       gracePeriod: currentGracePeriod,
-      initialBalance: roundMoney(initialBalance),
-      interest: roundMoney(interest),
-      fee: roundMoney(fee),
-      amortization: roundMoney(amortization),
-      insuranceAmount: roundMoney(insuranceAmount),
-      periodicalCosts: roundMoney(periodicalCosts),
-      buyingOptionFee: currentPeriod === periods ? roundMoney(buyingOptionFee) : 0,
-      finalBalance: roundMoney(finalBalance),
-      depreciation: roundMoney(depreciation),
-      taxSavings: roundMoney(taxSavings),
-      IGV: roundMoney(periodicalTaxes),
-      grossFlow: roundMoney(grossFlow),
-      flowWithTaxes: roundMoney(flowWithTaxes),
-      netFlow: roundMoney(netFlow),
+      initialBalance: initialBalance,
+      interest: interest,
+      fee: fee,
+      amortization: amortization,
+      insuranceAmount: insuranceAmount,
+      periodicalCosts: periodicalCosts,
+      buyingOptionFee: currentPeriod === periods ? buyingOptionFee : 0,
+      finalBalance: finalBalance,
+      depreciation: depreciation,
+      taxSavings: taxSavings,
+      IGV: periodicalTaxes,
+      grossFlow: grossFlow,
+      flowWithTaxes: flowWithTaxes,
+      netFlow: netFlow,
     });
 
     initialBalance = finalBalance;
