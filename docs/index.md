@@ -8,3 +8,11 @@ Nuestra aplicacion web "EasyLeasing" tiene como proposito brindar una plataforma
 ## Saved
 
 ## Calculator
+### Paso 1: Información General
+
+- Nombre: Referencia de como se guardará el leasing
+- Precio de venta: El monto a pagar por el producto
+- Frecuencia de pagos: Cada cuanto tiempo se pagará 
+- Duración del leasing: Años o meses que tomará pagarlo
+- Tasa de interés: Escoger si la tasa será nominal o efectiva
+- Capitalización: Si en caso la tasa de interés es nominal, escoger el tipo de capitalización
