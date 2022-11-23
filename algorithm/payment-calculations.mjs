@@ -79,18 +79,6 @@ export const generatePaymentSchedule = (
 
   for (let currentPeriod = 1; currentPeriod <= periods; currentPeriod++) {
     intereses = getInterest(saldoInicial, interesRatePerPeriod);
-    /* if (currentPeriod < periods) {
-      const input = await inquirer.prompt({
-        name: "plazoDeGracia",
-        type: "list",
-        message: `Escoja el tipo de plazo de gracia: `,
-        choices: ["Total", "Parcial", "Sin plazo de gracia"],
-      });
-
-      tipoPlazo = input.plazoDeGracia;
-    } else {
-      tipoPlazo = "Sin plazo de gracia";
-    } */
 
     cuota = frenchFeeCalculation(tipoPlazo, saldoInicial, interesRatePerPeriod, periods, currentPeriod);
     amortizacion = getAmortization(tipoPlazo, cuota, intereses);
