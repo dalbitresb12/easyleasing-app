@@ -242,7 +242,7 @@ const main = async () => {
 
   const depreciation = getDeprecitaion(sellingValue, periods);
   const initialCosts = getInitialCosts(inputs, extraCosts);
-  const periodicalCosts = -getPeriodicalCosts(extraCosts);
+  const periodicalCosts = getPeriodicalCosts(extraCosts);
   const insuranceAmount = getInsuranceAmount(extraCosts, newSellingPrice, annualPayments);
 
   const leasingAmount = getLeasingAmount(initialCosts, sellingValue);

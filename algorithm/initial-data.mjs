@@ -47,7 +47,7 @@ export const getPeriodicalCosts = extraCosts => {
   let periodicalCosts = 0;
   for (const extraCost of extraCosts) {
     if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
-      periodicalCosts += extraCost.value;
+      periodicalCosts -= extraCost.value;
     }
   }
 
