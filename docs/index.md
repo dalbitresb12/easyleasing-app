@@ -16,3 +16,5 @@ Nuestra aplicacion web "EasyLeasing" tiene como proposito brindar una plataforma
 - Duración del leasing: Años o meses que tomará pagarlo
 - Tasa de interés: Escoger si la tasa será nominal o efectiva
 - Capitalización: Si en caso la tasa de interés es nominal, escoger el tipo de capitalización
+
+### Paso 2: Infromación Extra
