@@ -32,7 +32,7 @@ const navigation: NavigationItem[] = [
     icon: BookmarkIcon,
   },
   {
-    href: "/calculator",
+    href: "/calculator/basic",
     label: "Calculator",
     icon: CalculateIcon,
   },
