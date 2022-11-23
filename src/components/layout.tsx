@@ -28,23 +28,23 @@ export interface NavigationItem {
 const navigation: NavigationItem[] = [
   {
     href: "/saved",
-    label: "Saved",
+    label: "Guardados",
     icon: BookmarkIcon,
   },
   {
     href: "/calculator/basic",
-    label: "Calculator",
+    label: "Calculadora",
     icon: CalculateIcon,
   },
   {
     activeRoute: "/settings",
     href: "/settings/general",
-    label: "Settings",
+    label: "Ajustes",
     icon: SettingsIcon,
   },
   {
     href: "/help",
-    label: "Help",
+    label: "Ayuda",
     icon: HelpIcon,
   },
 ];
@@ -104,7 +104,7 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
                   onClick={logoutHandler}
                 >
                   <MaterialIcon icon={LogoutIcon} className="text-xl mr-2 text-slate-400" />
-                  <span className="text-sm font-medium text-slate-600">Logout</span>
+                  <span className="text-sm font-medium text-slate-600">Salir</span>
                 </li>
               </ul>
             </nav>
