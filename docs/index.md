@@ -18,3 +18,8 @@ Nuestra aplicacion web "EasyLeasing" tiene como proposito brindar una plataforma
 - Capitalización: Si en caso la tasa de interés es nominal, escoger el tipo de capitalización
 
 ### Paso 2: Infromación Extra
+
+- Nombre: Referencia de como se guardará la información extra
+- Tipo de valor: Escoger si el valor es númerico o porcentual
+- Valor: El valor a utilizar
+- Tipo de gasto: Escoger si el gasto sera de un solo pago o periódico
