@@ -1,12 +1,6 @@
 // import { irr } from "financial";
 import inquirer from "inquirer";
-import {
-  inDays,
-  frequencies,
-  currencyFormatter,
-  inputPercentageFormatter,
-  outputPercentageFormatter,
-} from "./utils.mjs";
+
 import {
   getInitialFee,
   getIgvFee,
@@ -22,13 +16,18 @@ import {
   getInterestRatePerPeriod,
   getLeasingAmount,
 } from "./initial-data.mjs";
-
-import { effectiveRateToEffectiveRate } from "./rate-conversion.mjs";
-
-import { positiveValidation, percentageValidation, extraCostValidation, loanTimeValidation } from "./validations.mjs";
-import { generatePaymentSchedule } from "./payment-calculations.mjs";
 import { getLeasingResults, getGrossFlows, getNetFlows } from "./leasing-results.mjs";
+import { generatePaymentSchedule } from "./payment-calculations.mjs";
 import { tceaCalculation, tirCalculation, vnaCalculation } from "./profitability-indicator.mjs";
+import { effectiveRateToEffectiveRate } from "./rate-conversion.mjs";
+import {
+  inDays,
+  frequencies,
+  currencyFormatter,
+  inputPercentageFormatter,
+  outputPercentageFormatter,
+} from "./utils.mjs";
+import { positiveValidation, percentageValidation, extraCostValidation, loanTimeValidation } from "./validations.mjs";
 
 const main = async () => {
   const inputs = await inquirer.prompt([

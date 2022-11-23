@@ -1,5 +1,5 @@
-import { roundMoney, IGV } from "./utils.mjs";
 import { effectiveRateToEffectiveRate, nominalRateToEffectiveRate } from "./rate-conversion.mjs";
+import { roundMoney, IGV } from "./utils.mjs";
 
 export const getInitialFee = (initialFeePercentage, sellingPrice) => {
   return (initialFeePercentage / 100) * sellingPrice;
