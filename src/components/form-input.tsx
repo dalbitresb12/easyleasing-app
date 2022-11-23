@@ -19,7 +19,7 @@ export const FormInput = forwardRef<HTMLInputElement, Props>((props, ref) => {
     !unstyled && "block w-full rounded-md shadow-sm sm:text-sm transition-all",
     errors
       ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-      : !unstyled && "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500",
+      : !unstyled && "border-gray-300 focus:border-sky-700 focus:ring-sky-700",
   );
 
   return (
