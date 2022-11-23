@@ -25,7 +25,7 @@ import {
 
 // import { generatePaymentSchedule } from "./payment-calculations.mjs";
 
-import { convertirTasaEfectivaEnEfectiva } from "./rate-conversion.mjs";
+import { effectiveRateToEffectiveRate, nominalRateToEffectiveRate } from "./rate-conversion.mjs";
 
 import { positiveValidation, percentageValidation, extraCostValidation, loanTimeValidation } from "./validations.mjs";
 
@@ -35,12 +35,7 @@ function calcGrossVna() {}
 function calcNetVna() {}
 
 
-const tirCalculation = flujos => {
-  return irr(flujos, 0.01);
-};
-const tceaCalculation = (tir, cuotasAnuales) => {
-  return Math.pow(1 + tir, cuotasAnuales) - 1;
-};
+
 
 const getPaymentSchedule = async (inputs, extraCosts, tasaDescuentoKs, tasaDescuentoWACC) => {
   // Initial data
@@ -361,8 +356,8 @@ const main = async () => {
     } while (extraCosts[extraCosts.length - 1].keepAdding);
   }
 
-  const tasaIndicadorBruto = await inquirer.prompt({
-    name: "descuentoKs",
+  const grossIndicator = await inquirer.prompt({
+    name: "ksRate",
     type: "input",
     message: "Tasa de descuento Ks: ",
     validate: percentageValidation,
@@ -376,8 +371,8 @@ const main = async () => {
     transformer: input => inputPercentageFormatter.format(input / 100),
   });
 
-  const tasaIndicadorNeto = await inquirer.prompt({
-    name: "descuentoWACC",
+  const netIndicator = await inquirer.prompt({
+    name: "waccRate",
     type: "input",
     message: "Tasa de descuento WACC: ",
     validate: percentageValidation,
@@ -391,49 +386,30 @@ const main = async () => {
     transformer: input => inputPercentageFormatter.format(input / 100),
   });
 
-  const cuotaInicial = getInitialFee(inputs.percentageInitialFee, inputs.sellingPrice);
-  const nuevoPrecio = getNewSellingPrice(inputs.sellingPrice, cuotaInicial);
-  const montoIgv = getIgvFee(nuevoPrecio);
-  const valorVenta = getSellingValue(nuevoPrecio, montoIgv);
-  const cuotasAnuales = getAnnualPayments(inputs.paymentFrequency);
-  const periodos = getPeriods(inputs.loanTime, inputs.paymentFrequency);
+  const initialFee = getInitialFee(inputs.percentageInitialFee, inputs.sellingPrice);
+  const newSellingPrice = getNewSellingPrice(inputs.sellingPrice, initialFee);
+  const igvFee = getIgvFee(newSellingPrice);
+  const sellingValue = getSellingValue(newSellingPrice, igvFee);
+  const annualPayments = getAnnualPayments(inputs.paymentFrequency);
+  const periods = getPeriods(inputs.loanTime, inputs.paymentFrequency);
 
-  const montoRecompra = getBuyingOptionFee(inputs.buyingOption, inputs.buyingOptionPercentage, valorVenta);
+  const buyingOptionFee = getBuyingOptionFee(inputs.buyingOption, inputs.buyingOptionPercentage, sellingValue);
 
   // const depreciacion = getDeprecitaion(valorVenta, periodos);
-  const costosIniciales = getInitialCosts(inputs, extraCosts);
+  const initialCosts = getInitialCosts(inputs, extraCosts);
   // const costosPeriodicos = -getPeriodicalCosts(extraCosts);
   // const montoSeguro = getInsuranceAmount(extraCosts, nuevoPrecio, cuotasAnuales);
 
-  const montoLeasing = getLeasingAmount(costosIniciales, valorVenta);
+  const leasingAmount = getLeasingAmount(initialCosts, sellingValue);
 
   const interesRatePerPeriod = getInterestRatePerPeriod(inputs);
 
-  const descuentoKs = convertirTasaEfectivaEnEfectiva(tasaIndicadorBruto.descuentoKs, 360, inputs.paymentFrequency);
-  const descuentoWACC = convertirTasaEfectivaEnEfectiva(tasaIndicadorNeto.descuentoWACC, 360, inputs.paymentFrequency);
-
-  console.log(`\nPrecio de venta del activo: ${currencyFormatter.format(inputs.sellingPrice)}`);
-  console.log(`Cuota inicial: ${currencyFormatter.format(cuotaInicial)}\n`);
-  console.log(`Nuevo precio de venta: ${currencyFormatter.format(nuevoPrecio)}`);
-  console.log(`Monto IGV: ${currencyFormatter.format(montoIgv)}`);
-  console.log(`Valor de venta del activo: ${currencyFormatter.format(valorVenta)}`);
-  console.log(`Total por costos iniciales: ${currencyFormatter.format(costosIniciales)}`);
-  console.log(`Monto del leasing: ${currencyFormatter.format(montoLeasing)}`);
-  console.log(`Recompra: ${currencyFormatter.format(montoRecompra)}`);
-
-  console.log(`\nN° cuotas al año: ${cuotasAnuales}`);
-  console.log(`N° periodos de pago: ${periodos}`);
-  console.log(`Frecuencia de pago: ${inputs.paymentFrequency} días\n`);
-
-  console.log(`Tipo de tasa de interés: ${inputs.interestRateType}`);
-  console.log(`Tasa efectiva del periodo: ${outputPercentageFormatter.format(interesRatePerPeriod)}\n`);
-
-  console.log(`Tasa descuento Ks equivalente: ${outputPercentageFormatter.format(descuentoKs)}`);
-  console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(descuentoWACC)}`);
+  const ksRate = effectiveRateToEffectiveRate(grossIndicator.ksRate, 360, inputs.paymentFrequency);
+  const waccRate = nominalRateToEffectiveRate(netIndicator.waccRate, 360, inputs.paymentFrequency);
 
   const gracePeriods = [];
 
-  for (let period = 1; period < periodos; period++) {
+  for (let period = 1; period < periods; period++) {
     const gracePeriod = await inquirer.prompt({
       name: "type",
       type: "list",
@@ -444,8 +420,27 @@ const main = async () => {
     gracePeriods.push(gracePeriod.type);
   }
 
-  // Último periodo es sin plazo de gracia por defecto
+  // Last period without grace by default
   gracePeriods.push("Sin plazo de gracia");
+
+  /* *** RESULTS ***  */
+  console.log(`Payment Frequency: ${inputs.paymentFrequency} days\n`);
+  console.log(`Net Price: ${currencyFormatter.format(sellingValue)}`);
+  console.log(`Leasing Amount: ${currencyFormatter.format(leasingAmount)}`);
+  console.log(`Equivalent Interest Rate: ${outputPercentageFormatter.format(interesRatePerPeriod)}\n`);
+  console.log(`Total Installments: ${periods} installments`);
+
+  /* *** (OPTIONAL) ***  */
+  console.log(`\nSelling Price: ${currencyFormatter.format(inputs.sellingPrice)}`);
+  console.log(`Initial Fee: ${currencyFormatter.format(initialFee)}\n`);
+  console.log(`New Selling Price: ${currencyFormatter.format(newSellingPrice)}`);
+  console.log(`IGV Fee: ${currencyFormatter.format(igvFee)}`);
+  console.log(`Initial Costs: ${currencyFormatter.format(initialCosts)}`);
+  console.log(`Buying Option Fee: ${currencyFormatter.format(buyingOptionFee)}`);
+  console.log(`\nAnnual installments: ${annualPayments} installments`);
+
+  console.log(`Tasa descuento Ks equivalente: ${outputPercentageFormatter.format(ksRate)}`);
+  console.log(`Tasa descuento WACC equivalente: ${outputPercentageFormatter.format(waccRate)}`);
 
   // Cronograma de pagos
   // await getPaymentSchedule(inputs, extraCosts, tasaIndicadorBruto.descuentoKs, tasaIndicadorNeto.descuentoWACC);

@@ -1,7 +1,7 @@
-export const convertirTasaEfectivaEnEfectiva = (tasa, frecuenciaAntigua, frecuenciaNueva) => {
-  return Math.pow(1 + tasa / 100, frecuenciaNueva / frecuenciaAntigua) - 1;
+export const effectiveRateToEffectiveRate = (rate, oldFrequency, newFrequency) => {
+  return Math.pow(1 + rate / 100, newFrequency / oldFrequency) - 1;
 };
 
-export const convertirTasaNominalEnEfectiva = (tasa, m, n) => {
-  return Math.pow(1 + tasa / 100 / m, n) - 1;
+export const nominalRateToEffectiveRate = (rate, m, n) => {
+  return Math.pow(1 + rate / 100 / m, n) - 1;
 };
