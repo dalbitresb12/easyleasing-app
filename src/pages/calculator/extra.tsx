@@ -9,7 +9,7 @@ import { z } from "zod";
 
 import { ExpenseTypeValues, NumericalTypeValues } from "@/shared/models/common";
 import { leasingExtrasValueValidation, LeasingModel, PartialEditableLeasing } from "@/shared/models/leasing";
-import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/algorithm";
+import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/numbers";
 import { capitalize } from "@/shared/utils/strings";
 
 import { leasingGetHandler, leasingPatchHandler } from "@/api/handlers/leasings";

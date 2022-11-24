@@ -1,4 +1,5 @@
-import { Payment } from "./models/payment";
+import type { GracePeriod } from "./models/grace-period";
+import type { Payment } from "./models/payment";
 import { IR, IGV } from "./peruvian-taxes";
 
 const getInterest = (initialBalance: number, interestRate: number): number => {
@@ -6,15 +7,15 @@ const getInterest = (initialBalance: number, interestRate: number): number => {
 };
 
 const frenchFeeCalculation = (
-  gracePeriod: string,
+  gracePeriod: GracePeriod,
   initialBalance: number,
   rate: number,
   periods: number,
   currentPeriod: number,
 ): number => {
-  if (gracePeriod === "Parcial") {
+  if (gracePeriod === "partial") {
     return getInterest(initialBalance, rate);
-  } else if (gracePeriod === "Sin plazo de gracia") {
+  } else if (gracePeriod === "no") {
     return -(
       (Math.pow(1 + rate, periods - currentPeriod + 1) * initialBalance * rate) /
       (Math.pow(1 + rate, periods - currentPeriod + 1) - 1)
@@ -23,22 +24,22 @@ const frenchFeeCalculation = (
   return 0;
 };
 
-const getAmortization = (gracePeriod: string, fee: number, interest: number): number => {
-  if (gracePeriod === "Sin plazo de gracia") {
+const getAmortization = (gracePeriod: GracePeriod, fee: number, interest: number): number => {
+  if (gracePeriod === "no") {
     return fee - interest;
   }
   return 0;
 };
 
 const getFinalBalance = (
-  gracePeriod: string,
+  gracePeriod: GracePeriod,
   initialBalance: number,
   interest: number,
   amortization: number,
 ): number => {
-  if (gracePeriod === "Total") {
+  if (gracePeriod === "total") {
     return initialBalance - interest;
-  } else if (gracePeriod === "Parcial") {
+  } else if (gracePeriod === "partial") {
     return initialBalance;
   }
   return initialBalance + amortization;
@@ -65,7 +66,7 @@ const getFlowWithTaxes = (grossFlow: number, periodicalTaxes: number): number =>
 };
 
 export const generatePaymentSchedule = (
-  gracePeriods: string[],
+  gracePeriods: GracePeriod[],
   periods: number,
   interesRatePerPeriod: number,
   sellingValue: number,
@@ -76,33 +77,23 @@ export const generatePaymentSchedule = (
 ): Payment[] => {
   const leasingAmount = sellingValue + initialCosts;
   let initialBalance = leasingAmount;
-  let currentGracePeriod = "";
-  let fee = 0;
-  let interest = 0;
-  let amortization = 0;
-  let finalBalance = 0;
-  let taxSavings = 0;
-  let periodicalTaxes = 0;
-  let grossFlow = 0;
-  let flowWithTaxes = 0;
-  let netFlow = 0;
   const paymentSchedule = [] as Payment[];
 
   for (let currentPeriod = 1; currentPeriod <= periods; currentPeriod++) {
-    currentGracePeriod = gracePeriods[currentPeriod - 1];
+    const currentGracePeriod = gracePeriods[currentPeriod - 1];
 
-    interest = getInterest(initialBalance, interesRatePerPeriod);
+    const interest = getInterest(initialBalance, interesRatePerPeriod);
 
-    fee = frenchFeeCalculation(currentGracePeriod, initialBalance, interesRatePerPeriod, periods, currentPeriod);
-    amortization = getAmortization(currentGracePeriod, fee, interest);
-    finalBalance = getFinalBalance(currentGracePeriod, initialBalance, interest, amortization);
+    const fee = frenchFeeCalculation(currentGracePeriod, initialBalance, interesRatePerPeriod, periods, currentPeriod);
+    const amortization = getAmortization(currentGracePeriod, fee, interest);
+    const finalBalance = getFinalBalance(currentGracePeriod, initialBalance, interest, amortization);
 
-    taxSavings = getTaxSavings(interest, periodicalCosts, depreciation);
-    periodicalTaxes = getPeriodicalTaxes(fee, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
-    grossFlow = getGrossFlow(fee, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
+    const taxSavings = getTaxSavings(interest, periodicalCosts, depreciation);
+    const periodicalTaxes = getPeriodicalTaxes(fee, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
+    const grossFlow = getGrossFlow(fee, periodicalCosts, currentPeriod === periods ? buyingOptionFee : 0);
 
-    flowWithTaxes = getFlowWithTaxes(grossFlow, periodicalTaxes);
-    netFlow = getNetFlow(grossFlow, taxSavings);
+    const flowWithTaxes = getFlowWithTaxes(grossFlow, periodicalTaxes);
+    const netFlow = getNetFlow(grossFlow, taxSavings);
 
     paymentSchedule.push({
       period: currentPeriod,

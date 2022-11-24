@@ -38,9 +38,9 @@ export const getPeriods = (loanTime: number, paymentFrequency: number) => {
 export const getInitialCosts = (sellingPrice: number, extraCosts: ExtraCost[]): number => {
   let initialCosts = 0;
   for (const extraCost of extraCosts) {
-    if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
+    if (extraCost.type === "one-time" && extraCost.valueType === "number") {
       initialCosts += extraCost.value;
-    } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
+    } else if (extraCost.type === "one-time" && extraCost.valueType === "percent") {
       initialCosts += (extraCost.value / 100) * sellingPrice;
     }
   }
@@ -51,9 +51,9 @@ export const getInitialCosts = (sellingPrice: number, extraCosts: ExtraCost[]): 
 export const getPeriodicalCosts = (extraCosts: ExtraCost[], sellingPrice: number, annualPayments: number): number => {
   let periodicalCosts = 0;
   for (const extraCost of extraCosts) {
-    if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
+    if (extraCost.type === "recurrent" && extraCost.valueType === "number") {
       periodicalCosts -= extraCost.value;
-    } else if (extraCost.type === "Periódico" && extraCost.valueType === "Porcentual") {
+    } else if (extraCost.type === "recurrent" && extraCost.valueType === "percent") {
       periodicalCosts -= ((extraCost.value / 100) * sellingPrice) / annualPayments;
     }
   }
