@@ -51,7 +51,7 @@ const ExtraCalculatorPage: FC = () => {
           mutationFn: (data: PartialEditableLeasing) => leasingPatchHandler(id, data),
           onSuccess: response => {
             queryClient.setQueryData(queries.leasings.getById(id).queryKey, response);
-            router.push({ pathname: "/leasings/details", query: { id } });
+            router.push({ pathname: "/calculator/periods", query: { id } });
           },
         },
   );
@@ -210,11 +210,11 @@ const ExtraCalculatorPage: FC = () => {
         <div className="w-full py-4 flex justify-end space-x-2">
           <Link href="/saved">
             <FormButton type="button" style="secondary" className="max-w-fit">
-              Cancel
+              Cancelar
             </FormButton>
           </Link>
           <FormButton type="submit" className="max-w-fit">
-            Next
+            Siguiente
           </FormButton>
         </div>
       </form>

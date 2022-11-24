@@ -12,6 +12,10 @@ const steps: ProgressBarStep[] = [
     href: "/calculator/extra",
   },
   {
+    label: "Periodos de gracia",
+    href: "/calculator/periods",
+  },
+  {
     label: "Resultados",
     href: "/leasings",
     startsWith: true,
