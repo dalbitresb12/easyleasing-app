@@ -32,9 +32,6 @@ import { ListboxInput } from "@/components/listbox-input";
 import { ProgressLayout } from "@/components/progress-layout";
 import { SwitchInput } from "@/components/switch-input";
 
-const LeasingTimeUnit = z.enum(["months", "years"]);
-const LeasingTimeUnitValues = Object.values(LeasingTimeUnit.Values);
-
 const BasicCalculatorForm = LeasingModel.pick({
   name: true,
   sellingPrice: true,
@@ -49,9 +46,6 @@ const BasicCalculatorForm = LeasingModel.pick({
   buybackType: true,
   buybackValue: true,
 })
-  .extend({
-    leasingTimeUnit: LeasingTimeUnit.optional(),
-  })
   .superRefine(leasingRateTypeValidation)
   .superRefine(leasingBuybackValidation);
 type BasicCalculatorForm = z.infer<typeof BasicCalculatorForm>;
@@ -86,7 +80,6 @@ const BasicCalculatorPage: FC = () => {
       buyback: false,
       currency: "PEN",
       paymentFrequency: "monthly",
-      leasingTimeUnit: "years",
       rateType: "effective",
       rateFrequency: "monthly",
     },
@@ -137,10 +130,6 @@ const BasicCalculatorPage: FC = () => {
   }, [currency]);
 
   const onSubmit: SubmitHandler<BasicCalculatorForm> = form => {
-    if (form.leasingTimeUnit === "years") {
-      form.leasingTime = form.leasingTime * 12;
-    }
-    delete form.leasingTimeUnit;
     mutation.mutate(form as EditableLeasing);
   };
 
@@ -219,32 +208,15 @@ const BasicCalculatorPage: FC = () => {
             />
           </div>
         </CalculatorInput>
-        <CalculatorInput label="Duración del leasing" description="¿Cuánto tiempo tomará pagarlo?">
+        <CalculatorInput label="Duración del leasing" description="¿Cuántos años tomará pagarlo?">
           {id => (
-            <div className="w-full flex space-x-1">
-              <div className="flex flex-col space-y-1 w-full">
-                <FormInput
-                  id={id}
-                  type="number"
-                  errors={errors.leasingTime}
-                  {...register("leasingTime", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="flex flex-col w-28 shrink">
-                <Controller
-                  control={control}
-                  name="leasingTimeUnit"
-                  render={({ field: { value, name, onChange } }) => (
-                    <ListboxInput
-                      name={name}
-                      value={value}
-                      options={LeasingTimeUnitValues.map(i => ({ key: i, value: i }))}
-                      transform={v => capitalize(v || "")}
-                      onChange={onChange}
-                    />
-                  )}
-                />
-              </div>
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.leasingTime}
+                {...register("leasingTime", { valueAsNumber: true })}
+              />
             </div>
           )}
         </CalculatorInput>
