@@ -322,7 +322,7 @@ const BasicCalculatorPage: FC = () => {
                         if (!buybackType) return "";
                         const value = Number.isNaN(buybackValue) ? 0 : buybackValue ?? 0;
                         if (buybackType === "percent") {
-                          return percentFormatter.format(value);
+                          return percentFormatter.format(value / 100);
                         }
                         return currencyFormatter?.format(value) ?? buybackValue;
                       }}
