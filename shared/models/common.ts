@@ -84,3 +84,15 @@ const expenseTypeLocalization: Record<ExpenseType, string> = {
 export const localizeExpenseType = (value: ExpenseType): string => {
   return expenseTypeLocalization[value];
 };
+
+export const GracePeriod = z.enum(["total", "partial", "no"]);
+export type GracePeriod = z.infer<typeof GracePeriod>;
+const gradePeriodLocalization: Record<GracePeriod, string> = {
+  total: "Total",
+  partial: "Parcial",
+  no: "Sin plazo de gracia",
+};
+
+export const localizeGracePeriod = (gracePeriod: GracePeriod) => {
+  return gradePeriodLocalization[gracePeriod];
+};

@@ -1,4 +1,4 @@
-import type { GracePeriod } from "./grace-period";
+import type { GracePeriod } from "@/shared/models/common";
 
 export interface Payment {
   period: number;

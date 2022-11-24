@@ -1,4 +1,4 @@
-import type { GracePeriod } from "./models/grace-period";
+import type { GracePeriod } from "../models/common";
 import type { Payment } from "./models/payment";
 import { IR, IGV } from "./peruvian-taxes";
 
