@@ -1,6 +1,6 @@
 import AddIcon from "@material-symbols/svg-400/rounded/add.svg";
 import DeleteIcon from "@material-symbols/svg-400/rounded/delete.svg";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
@@ -41,13 +41,16 @@ const ExtraCalculatorPage: FC = () => {
   const router = useRouter();
   const id = takeFirstQuery(router.query.id);
 
+  const queryClient = useQueryClient();
+
   const leasing = useQuery(!id ? {} : { ...queries.leasings.getById(id), queryFn: () => leasingGetHandler(id) });
   const mutation = useMutation(
     !id
       ? {}
       : {
           mutationFn: (data: PartialEditableLeasing) => leasingPatchHandler(id, data),
-          onSuccess: () => {
+          onSuccess: response => {
+            queryClient.setQueryData(queries.leasings.getById(id).queryKey, response);
             router.push({ pathname: "/leasings/details", query: { id } });
           },
         },
