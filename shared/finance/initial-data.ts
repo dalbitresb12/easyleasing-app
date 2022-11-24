@@ -1,5 +1,7 @@
-import { ExtraCost } from "./models/extra-cost";
+import { assertFrequencyToDays, InterestRateTypes, TimeFrequencies } from "../models/common";
+import { LeasingExtras } from "../models/leasing";
 import { IGV } from "./peruvian-taxes";
+import { effectiveToEffectiveRate, nominalRateToEffectiveRate } from "./rate-conversion";
 
 export const getInitialFee = (initialFeePercentage: number, sellingPrice: number): number => {
   return (initialFeePercentage / 100) * sellingPrice;
@@ -28,19 +30,21 @@ export const getBuyingOptionFee = (
   return 0;
 };
 
-export const getAnnualPayments = (paymentFrequency: number) => {
+export const getAnnualPayments = (paymentFrequency: TimeFrequencies | number) => {
+  paymentFrequency = assertFrequencyToDays(paymentFrequency);
   return 360 / paymentFrequency;
 };
-export const getPeriods = (loanTime: number, paymentFrequency: number) => {
+export const getPeriods = (loanTime: number, paymentFrequency: TimeFrequencies | number) => {
+  paymentFrequency = assertFrequencyToDays(paymentFrequency);
   return (loanTime * 360) / paymentFrequency;
 };
 
-export const getInitialCosts = (sellingPrice: number, extraCosts: ExtraCost[]): number => {
+export const getInitialCosts = (sellingPrice: number, extraCosts: LeasingExtras[]): number => {
   let initialCosts = 0;
   for (const extraCost of extraCosts) {
-    if (extraCost.type === "Inicial" && extraCost.valueType === "Monetario") {
+    if (extraCost.expenseType === "one-time" && extraCost.valueType === "number") {
       initialCosts += extraCost.value;
-    } else if (extraCost.type === "Inicial" && extraCost.valueType === "Porcentual") {
+    } else if (extraCost.expenseType === "one-time" && extraCost.valueType === "percent") {
       initialCosts += (extraCost.value / 100) * sellingPrice;
     }
   }
@@ -48,12 +52,16 @@ export const getInitialCosts = (sellingPrice: number, extraCosts: ExtraCost[]): 
   return initialCosts;
 };
 
-export const getPeriodicalCosts = (extraCosts: ExtraCost[], sellingPrice: number, annualPayments: number): number => {
+export const getPeriodicalCosts = (
+  extraCosts: LeasingExtras[],
+  sellingPrice: number,
+  annualPayments: number,
+): number => {
   let periodicalCosts = 0;
   for (const extraCost of extraCosts) {
-    if (extraCost.type === "Periódico" && extraCost.valueType === "Monetario") {
+    if (extraCost.expenseType === "recurrent" && extraCost.valueType === "number") {
       periodicalCosts -= extraCost.value;
-    } else if (extraCost.type === "Periódico" && extraCost.valueType === "Porcentual") {
+    } else if (extraCost.expenseType === "recurrent" && extraCost.valueType === "percent") {
       periodicalCosts -= ((extraCost.value / 100) * sellingPrice) / annualPayments;
     }
   }
@@ -61,10 +69,33 @@ export const getPeriodicalCosts = (extraCosts: ExtraCost[], sellingPrice: number
   return periodicalCosts;
 };
 
-export const getDeprecitaion = (sellingValue: number, periods: number): number => {
+export const getDepreciation = (sellingValue: number, periods: number): number => {
   return -(sellingValue / periods);
 };
 
 export const getLeasingAmount = (initialCosts: number, sellingValue: number): number => {
   return initialCosts + sellingValue;
+};
+
+export const getInterestRatePerPeriod = (
+  type: InterestRateTypes,
+  rate: number,
+  frequency: TimeFrequencies | number,
+  paymentFrequency: TimeFrequencies | number,
+  capitalization?: TimeFrequencies | number,
+): number => {
+  frequency = assertFrequencyToDays(frequency);
+  paymentFrequency = assertFrequencyToDays(paymentFrequency);
+  capitalization = capitalization ? assertFrequencyToDays(capitalization) : undefined;
+  if (type === "nominal") {
+    if (!capitalization) throw new Error("Capitalization is required when `type` is set to `nominal`.");
+    const m = frequency / capitalization;
+    const n = frequency / capitalization;
+    return nominalRateToEffectiveRate(rate, m, n);
+  }
+  return effectiveToEffectiveRate(rate, frequency, paymentFrequency);
+};
+
+export const getExtraValueByPercentage = (percent: number, price: number): number => {
+  return (percent / 100) * price;
 };

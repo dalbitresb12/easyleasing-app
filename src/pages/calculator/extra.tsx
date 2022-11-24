@@ -7,9 +7,16 @@ import { FC, useEffect, useState } from "react";
 import { Controller, SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { ExpenseTypeValues, NumericalTypeValues } from "@/shared/models/common";
+import {
+  ExpenseType,
+  ExpenseTypeValues,
+  localizeExpenseType,
+  localizeNumericalType,
+  NumericalType,
+  NumericalTypeValues,
+} from "@/shared/models/common";
 import { leasingExtrasValueValidation, LeasingModel, PartialEditableLeasing } from "@/shared/models/leasing";
-import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/algorithm";
+import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/numbers";
 import { capitalize } from "@/shared/utils/strings";
 
 import { leasingGetHandler, leasingPatchHandler } from "@/api/handlers/leasings";
@@ -139,7 +146,7 @@ const ExtraCalculatorPage: FC = () => {
                     name={name}
                     value={value}
                     options={NumericalTypeValues.map(i => ({ key: i, value: i }))}
-                    transform={capitalize}
+                    transform={v => capitalize(v ? localizeNumericalType(v as NumericalType) : "")}
                     onChange={onChange}
                   />
                 )}
@@ -153,7 +160,7 @@ const ExtraCalculatorPage: FC = () => {
                   value = Number.isNaN(value) ? 0 : value ?? 0;
                   const type = extras[index].valueType;
                   if (type === "percent") {
-                    return percentFormatter.format(value);
+                    return percentFormatter.format(value / 100);
                   }
                   return currencyFormatter?.format(value) ?? value;
                 }}
@@ -170,7 +177,7 @@ const ExtraCalculatorPage: FC = () => {
                     name={name}
                     value={value}
                     options={ExpenseTypeValues.map(i => ({ key: i, value: i }))}
-                    transform={capitalize}
+                    transform={v => capitalize(v ? localizeExpenseType(v as ExpenseType) : "")}
                     onChange={onChange}
                   />
                 )}

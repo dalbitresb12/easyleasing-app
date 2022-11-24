@@ -19,7 +19,7 @@ export const onRequestGet: AppFunction = async ctx => {
   const mapped = results.keys.map(item => {
     const { name: key, metadata } = item;
     const id = key.substring(37);
-    return { id, name: metadata?.name };
+    return { id, ...(metadata || {}) };
   });
 
   const response = ListLeasingsResponse.parse({
@@ -53,7 +53,12 @@ export const onRequestPost: AppFunction = async ctx => {
 
   // TODO: Check for duplicate key. Shouldn't happen, but who knows?
   await ctx.env.leasings.put(`${userId}-${leasing.id}`, JSON.stringify(leasing), {
-    metadata: { name: leasing.name },
+    metadata: {
+      name: leasing.name,
+      createdAt: leasing.createdAt,
+      sellingPrice: leasing.sellingPrice,
+      currency: leasing.currency,
+    },
   });
 
   const headers = new Headers();

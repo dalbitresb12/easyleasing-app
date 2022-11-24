@@ -1,6 +1,8 @@
+import type { GracePeriod } from "@/shared/models/common";
+
 export interface Payment {
   period: number;
-  gracePeriod: string;
+  gracePeriod: GracePeriod;
   initialBalance: number;
   interest: number;
   fee: number;

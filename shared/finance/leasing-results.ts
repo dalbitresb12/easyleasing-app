@@ -8,7 +8,7 @@ export const getLeasingResults = (paymentSchedule: Payment[], buyingOptionFee: n
 
   for (const payment of paymentSchedule) {
     totalAmortization += payment.amortization;
-    if (!(payment.gracePeriod === "Total")) {
+    if (!(payment.gracePeriod === "total")) {
       totalInterest += payment.interest;
     }
     totalPeriodicalCosts += payment.periodicalCosts;
@@ -25,19 +25,9 @@ export const getLeasingResults = (paymentSchedule: Payment[], buyingOptionFee: n
 };
 
 export const getGrossFlows = (leasingAmount: number, paymentSchedule: Payment[]): number[] => {
-  const grossFlows = [leasingAmount];
-  for (const payment of paymentSchedule) {
-    grossFlows.push(payment.grossFlow);
-  }
-
-  return grossFlows;
+  return [leasingAmount, ...paymentSchedule.map(item => item.grossFlow)];
 };
 
 export const getNetFlows = (leasingAmount: number, paymentSchedule: Payment[]): number[] => {
-  const netFlows = [leasingAmount];
-  for (const payment of paymentSchedule) {
-    netFlows.push(payment.netFlow);
-  }
-
-  return netFlows;
+  return [leasingAmount, ...paymentSchedule.map(item => item.netFlow)];
 };

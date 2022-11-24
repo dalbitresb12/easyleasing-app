@@ -8,8 +8,14 @@ import { z } from "zod";
 
 import {
   CurrenciesValues,
+  InterestRateTypes,
   InterestRateTypesValues,
+  localizeInterestRateType,
+  localizeNumericalType,
+  localizeTimeFrequency,
+  NumericalType,
   NumericalTypeValues,
+  TimeFrequencies,
   TimeFrequenciesValues,
 } from "@/shared/models/common";
 import {
@@ -18,7 +24,7 @@ import {
   LeasingModel,
   leasingRateTypeValidation,
 } from "@/shared/models/leasing";
-import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/algorithm";
+import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/numbers";
 import { capitalize } from "@/shared/utils/strings";
 
 import { usersHandler } from "@/api/handlers";
@@ -32,12 +38,10 @@ import { ListboxInput } from "@/components/listbox-input";
 import { ProgressLayout } from "@/components/progress-layout";
 import { SwitchInput } from "@/components/switch-input";
 
-const LeasingTimeUnit = z.enum(["months", "years"]);
-const LeasingTimeUnitValues = Object.values(LeasingTimeUnit.Values);
-
 const BasicCalculatorForm = LeasingModel.pick({
   name: true,
   sellingPrice: true,
+  percentageInitialFee: true,
   currency: true,
   paymentFrequency: true,
   leasingTime: true,
@@ -48,10 +52,9 @@ const BasicCalculatorForm = LeasingModel.pick({
   buyback: true,
   buybackType: true,
   buybackValue: true,
+  ksRate: true,
+  waccRate: true,
 })
-  .extend({
-    leasingTimeUnit: LeasingTimeUnit.optional(),
-  })
   .superRefine(leasingRateTypeValidation)
   .superRefine(leasingBuybackValidation);
 type BasicCalculatorForm = z.infer<typeof BasicCalculatorForm>;
@@ -83,21 +86,28 @@ const BasicCalculatorPage: FC = () => {
   } = useForm<BasicCalculatorForm>({
     resolver: zodResolver(BasicCalculatorForm),
     defaultValues: {
-      buyback: false,
+      percentageInitialFee: 0,
       currency: "PEN",
       paymentFrequency: "monthly",
-      leasingTimeUnit: "years",
-      rateType: "effective",
+      rateValue: 0,
       rateFrequency: "monthly",
+      rateType: "effective",
+      buyback: false,
+      ksRate: 0,
+      waccRate: 0,
     },
   });
 
   const sellingPrice = watch("sellingPrice");
+  const percentageInitialFee = watch("percentageInitialFee");
   const currency = watch("currency");
+  const rateValue = watch("rateValue");
   const rateType = watch("rateType");
   const buyback = watch("buyback");
   const buybackType = watch("buybackType");
   const buybackValue = watch("buybackValue");
+  const ksRate = watch("ksRate");
+  const waccRate = watch("waccRate");
 
   useEffect(() => {
     if (user.isSuccess && !isDirty) {
@@ -137,10 +147,6 @@ const BasicCalculatorPage: FC = () => {
   }, [currency]);
 
   const onSubmit: SubmitHandler<BasicCalculatorForm> = form => {
-    if (form.leasingTimeUnit === "years") {
-      form.leasingTime = form.leasingTime * 12;
-    }
-    delete form.leasingTimeUnit;
     mutation.mutate(form as EditableLeasing);
   };
 
@@ -202,6 +208,20 @@ const BasicCalculatorPage: FC = () => {
             </div>
           )}
         </CalculatorInput>
+        <CalculatorInput label="Cuota inicial" description="¿Qué porcentaje pagará por adelantado?">
+          {id => (
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.percentageInitialFee}
+                mask={() => percentFormatter.format(percentageInitialFee / 100)}
+                maskClassName="py-2 px-3"
+                {...register("percentageInitialFee", { valueAsNumber: true })}
+              />
+            </div>
+          )}
+        </CalculatorInput>
         <CalculatorInput label="Frecuencia de pagos" description="¿Cada cuánto estarás pagando?">
           <div className="flex flex-col space-y-1">
             <Controller
@@ -212,39 +232,22 @@ const BasicCalculatorPage: FC = () => {
                   name={name}
                   value={value}
                   options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
-                  transform={capitalize}
+                  transform={v => capitalize(localizeTimeFrequency(v as TimeFrequencies))}
                   onChange={onChange}
                 />
               )}
             />
           </div>
         </CalculatorInput>
-        <CalculatorInput label="Duración del leasing" description="¿Cuánto tiempo tomará pagarlo?">
+        <CalculatorInput label="Duración del leasing" description="¿Cuántos años tomará pagarlo?">
           {id => (
-            <div className="w-full flex space-x-1">
-              <div className="flex flex-col space-y-1 w-full">
-                <FormInput
-                  id={id}
-                  type="number"
-                  errors={errors.leasingTime}
-                  {...register("leasingTime", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="flex flex-col w-28 shrink">
-                <Controller
-                  control={control}
-                  name="leasingTimeUnit"
-                  render={({ field: { value, name, onChange } }) => (
-                    <ListboxInput
-                      name={name}
-                      value={value}
-                      options={LeasingTimeUnitValues.map(i => ({ key: i, value: i }))}
-                      transform={v => capitalize(v || "")}
-                      onChange={onChange}
-                    />
-                  )}
-                />
-              </div>
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.leasingTime}
+                {...register("leasingTime", { valueAsNumber: true })}
+              />
             </div>
           )}
         </CalculatorInput>
@@ -260,7 +263,7 @@ const BasicCalculatorPage: FC = () => {
                       name={name}
                       value={value}
                       options={InterestRateTypesValues.map(i => ({ key: i, value: i }))}
-                      transform={capitalize}
+                      transform={v => capitalize(localizeInterestRateType(v as InterestRateTypes))}
                       onChange={onChange}
                     />
                   )}
@@ -271,6 +274,8 @@ const BasicCalculatorPage: FC = () => {
                   id={id}
                   type="number"
                   errors={errors.rateValue}
+                  mask={() => percentFormatter.format(rateValue / 100)}
+                  maskClassName="py-2 px-3"
                   {...register("rateValue", { valueAsNumber: true })}
                 />
               </div>
@@ -283,7 +288,7 @@ const BasicCalculatorPage: FC = () => {
                       name={name}
                       value={value}
                       options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
-                      transform={capitalize}
+                      transform={v => capitalize(localizeTimeFrequency(v as TimeFrequencies))}
                       onChange={onChange}
                     />
                   )}
@@ -303,7 +308,7 @@ const BasicCalculatorPage: FC = () => {
                     name={name}
                     value={value}
                     options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
-                    transform={v => capitalize(v || "")}
+                    transform={v => capitalize(v ? localizeTimeFrequency(v as TimeFrequencies) : "")}
                     onChange={onChange}
                   />
                 )}
@@ -334,7 +339,7 @@ const BasicCalculatorPage: FC = () => {
                           name={name}
                           value={value}
                           options={NumericalTypeValues.map(i => ({ key: i, value: i }))}
-                          transform={v => capitalize(v || "")}
+                          transform={v => capitalize(v ? localizeNumericalType(v as NumericalType) : "")}
                           onChange={onChange}
                         />
                       )}
@@ -350,7 +355,7 @@ const BasicCalculatorPage: FC = () => {
                         if (!buybackType) return "";
                         const value = Number.isNaN(buybackValue) ? 0 : buybackValue ?? 0;
                         if (buybackType === "percent") {
-                          return percentFormatter.format(value);
+                          return percentFormatter.format(value / 100);
                         }
                         return currencyFormatter?.format(value) ?? buybackValue;
                       }}
@@ -360,6 +365,34 @@ const BasicCalculatorPage: FC = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </CalculatorInput>
+        <CalculatorInput label="Tasa de descuento KS">
+          {id => (
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.ksRate}
+                mask={() => percentFormatter.format(ksRate / 100)}
+                maskClassName="py-2 px-3"
+                {...register("ksRate", { valueAsNumber: true })}
+              />
+            </div>
+          )}
+        </CalculatorInput>
+        <CalculatorInput label="Tasa de descuento WACC">
+          {id => (
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.waccRate}
+                mask={() => percentFormatter.format(waccRate / 100)}
+                maskClassName="py-2 px-3"
+                {...register("waccRate", { valueAsNumber: true })}
+              />
             </div>
           )}
         </CalculatorInput>

@@ -116,9 +116,9 @@ export const Layout: FC<PropsWithChildren<Props>> = props => {
               placeholder={user.data.preferredName}
             />
             <div className="ml-4 flex flex-col w-full text-xs space-y-1">
-              <span className="font-medium text-sky-700">Hi, {user.data.preferredName}</span>
+              <span className="font-medium text-sky-700">Hola, {user.data.preferredName}</span>
               <Link href="/settings/general">
-                <span className="text-slate-600">View profile</span>
+                <span className="text-slate-600">Ver perfil</span>
               </Link>
             </div>
           </div>

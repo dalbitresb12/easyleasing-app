@@ -13,15 +13,25 @@ export interface Props {
   divClassName?: string;
 }
 
+const isActive = (pathname: string, { href, startsWith }: ProgressBarStep) => {
+  return startsWith ? pathname.startsWith(href) : pathname === href;
+};
+
 export const ProgressBar: FC<Props> = props => {
   const { steps, divClassName } = props;
   const router = useRouter();
+
+  const current = steps.reduce<number>((acc, value, index) => {
+    const active = isActive(router.pathname, value);
+    if (active) return index;
+    return acc;
+  }, -1);
 
   return (
     <div className={clsx(divClassName, "w-full flex space-x-4")}>
       {steps.map((step, index) => {
         const { href, label, startsWith } = step;
-        const active = startsWith ? router.pathname.startsWith(href) : router.pathname === href;
+        const active = index < current || (startsWith ? router.pathname.startsWith(href) : router.pathname === href);
         return (
           <div
             key={href}
