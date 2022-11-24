@@ -8,8 +8,14 @@ import { z } from "zod";
 
 import {
   CurrenciesValues,
+  InterestRateTypes,
   InterestRateTypesValues,
+  localizeInterestRateType,
+  localizeNumericalType,
+  localizeTimeFrequency,
+  NumericalType,
   NumericalTypeValues,
+  TimeFrequencies,
   TimeFrequenciesValues,
 } from "@/shared/models/common";
 import {
@@ -226,7 +232,7 @@ const BasicCalculatorPage: FC = () => {
                   name={name}
                   value={value}
                   options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
-                  transform={capitalize}
+                  transform={v => capitalize(localizeTimeFrequency(v as TimeFrequencies))}
                   onChange={onChange}
                 />
               )}
@@ -257,7 +263,7 @@ const BasicCalculatorPage: FC = () => {
                       name={name}
                       value={value}
                       options={InterestRateTypesValues.map(i => ({ key: i, value: i }))}
-                      transform={capitalize}
+                      transform={v => capitalize(localizeInterestRateType(v as InterestRateTypes))}
                       onChange={onChange}
                     />
                   )}
@@ -282,7 +288,7 @@ const BasicCalculatorPage: FC = () => {
                       name={name}
                       value={value}
                       options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
-                      transform={capitalize}
+                      transform={v => capitalize(localizeTimeFrequency(v as TimeFrequencies))}
                       onChange={onChange}
                     />
                   )}
@@ -302,7 +308,7 @@ const BasicCalculatorPage: FC = () => {
                     name={name}
                     value={value}
                     options={TimeFrequenciesValues.map(i => ({ key: i, value: i }))}
-                    transform={v => capitalize(v || "")}
+                    transform={v => capitalize(v ? localizeTimeFrequency(v as TimeFrequencies) : "")}
                     onChange={onChange}
                   />
                 )}
@@ -333,7 +339,7 @@ const BasicCalculatorPage: FC = () => {
                           name={name}
                           value={value}
                           options={NumericalTypeValues.map(i => ({ key: i, value: i }))}
-                          transform={v => capitalize(v || "")}
+                          transform={v => capitalize(v ? localizeNumericalType(v as NumericalType) : "")}
                           onChange={onChange}
                         />
                       )}
