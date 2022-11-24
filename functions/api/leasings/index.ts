@@ -2,6 +2,7 @@ import { AppFunction } from "@/types/appcontext";
 import { v4 as uuidv4 } from "uuid";
 
 import { ListLeasingsMetadata, ListLeasingsResponse } from "@/shared/api/types";
+import { getPeriods } from "@/shared/finance/initial-data";
 import { EditableLeasingModel, Leasing, SanitizedLeasing } from "@/shared/models/leasing";
 import { clamp } from "@/shared/utils/numbers";
 
@@ -50,6 +51,11 @@ export const onRequestPost: AppFunction = async ctx => {
     } as Leasing,
     Leasing,
   );
+
+  if (leasing.gracePeriods.length === 0) {
+    const periods = getPeriods(leasing.leasingTime, leasing.paymentFrequency);
+    leasing.gracePeriods = Array(periods).fill("no");
+  }
 
   // TODO: Check for duplicate key. Shouldn't happen, but who knows?
   await ctx.env.leasings.put(`${userId}-${leasing.id}`, JSON.stringify(leasing), {
