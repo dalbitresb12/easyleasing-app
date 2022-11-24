@@ -19,7 +19,8 @@
       "@/shared/*": ["shared/*"],
       "@/api/*": ["src/api/*"],
       "@/components/*": ["src/components/*"],
-      "@/utils/*": ["src/utils/*"]
+      "@/utils/*": ["src/utils/*"],
+      "@/finance/*": ["shared/finance/*"]
     }
   },
   "include": ["src/typings/*.d.ts", "next-env.d.ts", "**/*.ts", "**/*.tsx"],

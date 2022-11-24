@@ -69,7 +69,7 @@ export const getPeriodicalCosts = (
   return periodicalCosts;
 };
 
-export const getDeprecitaion = (sellingValue: number, periods: number): number => {
+export const getDepreciation = (sellingValue: number, periods: number): number => {
   return -(sellingValue / periods);
 };
 
@@ -77,26 +77,13 @@ export const getLeasingAmount = (initialCosts: number, sellingValue: number): nu
   return initialCosts + sellingValue;
 };
 
-export function getInterestRatePerPeriod(
-  type: Extract<InterestRateTypes, "effective">,
-  rate: number,
-  frequency: TimeFrequencies | number,
-  paymentFrequency: TimeFrequencies | number,
-): number;
-export function getInterestRatePerPeriod(
-  type: Extract<InterestRateTypes, "nominal">,
-  rate: number,
-  frequency: TimeFrequencies | number,
-  paymentFrequency: TimeFrequencies | number,
-  capitalization: TimeFrequencies | number,
-): number;
-export function getInterestRatePerPeriod(
+export const getInterestRatePerPeriod = (
   type: InterestRateTypes,
   rate: number,
   frequency: TimeFrequencies | number,
   paymentFrequency: TimeFrequencies | number,
   capitalization?: TimeFrequencies | number,
-): number {
+): number => {
   frequency = assertFrequencyToDays(frequency);
   paymentFrequency = assertFrequencyToDays(paymentFrequency);
   capitalization = capitalization ? assertFrequencyToDays(capitalization) : undefined;
@@ -107,4 +94,8 @@ export function getInterestRatePerPeriod(
     return nominalRateToEffectiveRate(rate, m, n);
   }
   return effectiveToEffectiveRate(rate, frequency, paymentFrequency);
-}
+};
+
+export const getExtraValueByPercentage = (percent: number, price: number): number => {
+  return (percent / 100) * price;
+};

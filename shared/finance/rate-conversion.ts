@@ -1,4 +1,12 @@
-export const effectiveToEffectiveRate = (rate: number, oldFrequency: number, newFrequency: number): number => {
+import { assertFrequencyToDays, TimeFrequencies } from "../models/common";
+
+export const effectiveToEffectiveRate = (
+  rate: number,
+  oldFrequency: TimeFrequencies | number,
+  newFrequency: TimeFrequencies | number,
+): number => {
+  oldFrequency = assertFrequencyToDays(oldFrequency);
+  newFrequency = assertFrequencyToDays(newFrequency);
   return Math.pow(1 + rate / 100, newFrequency / oldFrequency) - 1;
 };
 
