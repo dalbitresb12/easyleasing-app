@@ -153,7 +153,7 @@ const ExtraCalculatorPage: FC = () => {
                   value = Number.isNaN(value) ? 0 : value ?? 0;
                   const type = extras[index].valueType;
                   if (type === "percent") {
-                    return percentFormatter.format(value);
+                    return percentFormatter.format(value / 100);
                   }
                   return currencyFormatter?.format(value) ?? value;
                 }}

@@ -110,8 +110,7 @@ const LeasingsDetailsPage: FC = () => {
   return (
     <SearchBarLayout>
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-slate-800">Resultados</h2>
-        <span className="text-sm text-slate-500">Utiliza estos datos con responsabilidad.</span>
+        <h2 className="text-3xl font-bold text-slate-800">{leasing.name}</h2>
       </div>
       <DividedTable>
         <DividedTableItem label="Frecuencia de pagos">
@@ -127,7 +126,7 @@ const LeasingsDetailsPage: FC = () => {
         <DividedTableItem label="Monto del leasing">{formatCurrency(leasingAmount)}</DividedTableItem>
       </DividedTable>
       <div className="mb-4 mt-8">
-        <h2 className="text-2xl font-bold text-slate-800">Costos periódicos</h2>
+        <h2 className="text-2xl font-medium text-slate-800">Costos periódicos</h2>
         <span className="text-sm text-slate-500">Todo lo que será pagado en cada periodo lo podrás ver aquí.</span>
       </div>
       <DividedTable>
@@ -148,7 +147,7 @@ const LeasingsDetailsPage: FC = () => {
           })}
       </DividedTable>
       <div className="mb-4 mt-8">
-        <h2 className="text-2xl font-bold text-slate-800">Totales</h2>
+        <h2 className="text-2xl font-medium text-slate-800">Totales</h2>
         <span className="text-sm text-slate-500">Subtotales de todo lo que tendrás que pagar.</span>
       </div>
       <DividedTable>
@@ -163,7 +162,7 @@ const LeasingsDetailsPage: FC = () => {
         <DividedTableItem label="Desembolso">{formatCurrency(Math.abs(leasingResults.totalPayment))}</DividedTableItem>
       </DividedTable>
       <div className="mb-4 mt-8">
-        <h2 className="text-2xl font-bold text-slate-800">Indicadores de rentabilidad</h2>
+        <h2 className="text-2xl font-medium text-slate-800">Indicadores de rentabilidad</h2>
         <span className="text-sm text-slate-500">Medidas de beneficio o pérdida como resultado de la operación.</span>
       </div>
       <DividedTable className="mb-4">

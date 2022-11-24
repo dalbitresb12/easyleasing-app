@@ -35,6 +35,7 @@ import { SwitchInput } from "@/components/switch-input";
 const BasicCalculatorForm = LeasingModel.pick({
   name: true,
   sellingPrice: true,
+  percentageInitialFee: true,
   currency: true,
   paymentFrequency: true,
   leasingTime: true,
@@ -45,6 +46,8 @@ const BasicCalculatorForm = LeasingModel.pick({
   buyback: true,
   buybackType: true,
   buybackValue: true,
+  ksRate: true,
+  waccRate: true,
 })
   .superRefine(leasingRateTypeValidation)
   .superRefine(leasingBuybackValidation);
@@ -77,20 +80,28 @@ const BasicCalculatorPage: FC = () => {
   } = useForm<BasicCalculatorForm>({
     resolver: zodResolver(BasicCalculatorForm),
     defaultValues: {
-      buyback: false,
+      percentageInitialFee: 0,
       currency: "PEN",
       paymentFrequency: "monthly",
-      rateType: "effective",
+      rateValue: 0,
       rateFrequency: "monthly",
+      rateType: "effective",
+      buyback: false,
+      ksRate: 0,
+      waccRate: 0,
     },
   });
 
   const sellingPrice = watch("sellingPrice");
+  const percentageInitialFee = watch("percentageInitialFee");
   const currency = watch("currency");
+  const rateValue = watch("rateValue");
   const rateType = watch("rateType");
   const buyback = watch("buyback");
   const buybackType = watch("buybackType");
   const buybackValue = watch("buybackValue");
+  const ksRate = watch("ksRate");
+  const waccRate = watch("waccRate");
 
   useEffect(() => {
     if (user.isSuccess && !isDirty) {
@@ -191,6 +202,20 @@ const BasicCalculatorPage: FC = () => {
             </div>
           )}
         </CalculatorInput>
+        <CalculatorInput label="Cuota inicial" description="¿Qué porcentaje pagará por adelantado?">
+          {id => (
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.percentageInitialFee}
+                mask={() => percentFormatter.format(percentageInitialFee / 100)}
+                maskClassName="py-2 px-3"
+                {...register("percentageInitialFee", { valueAsNumber: true })}
+              />
+            </div>
+          )}
+        </CalculatorInput>
         <CalculatorInput label="Frecuencia de pagos" description="¿Cada cuánto estarás pagando?">
           <div className="flex flex-col space-y-1">
             <Controller
@@ -243,6 +268,8 @@ const BasicCalculatorPage: FC = () => {
                   id={id}
                   type="number"
                   errors={errors.rateValue}
+                  mask={() => percentFormatter.format(rateValue / 100)}
+                  maskClassName="py-2 px-3"
                   {...register("rateValue", { valueAsNumber: true })}
                 />
               </div>
@@ -332,6 +359,34 @@ const BasicCalculatorPage: FC = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </CalculatorInput>
+        <CalculatorInput label="Tasa de descuento KS">
+          {id => (
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.ksRate}
+                mask={() => percentFormatter.format(ksRate / 100)}
+                maskClassName="py-2 px-3"
+                {...register("ksRate", { valueAsNumber: true })}
+              />
+            </div>
+          )}
+        </CalculatorInput>
+        <CalculatorInput label="Tasa de descuento WACC">
+          {id => (
+            <div className="flex flex-col space-y-1 w-full">
+              <FormInput
+                id={id}
+                type="number"
+                errors={errors.waccRate}
+                mask={() => percentFormatter.format(waccRate / 100)}
+                maskClassName="py-2 px-3"
+                {...register("waccRate", { valueAsNumber: true })}
+              />
             </div>
           )}
         </CalculatorInput>
