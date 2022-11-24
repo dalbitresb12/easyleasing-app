@@ -1,4 +1,4 @@
-import { ExtraCost } from "./models/extra-cost";
+import { LeasingExtras } from "../models/leasing";
 import { IGV } from "./peruvian-taxes";
 
 export const getInitialFee = (initialFeePercentage: number, sellingPrice: number): number => {
@@ -35,12 +35,12 @@ export const getPeriods = (loanTime: number, paymentFrequency: number) => {
   return (loanTime * 360) / paymentFrequency;
 };
 
-export const getInitialCosts = (sellingPrice: number, extraCosts: ExtraCost[]): number => {
+export const getInitialCosts = (sellingPrice: number, extraCosts: LeasingExtras[]): number => {
   let initialCosts = 0;
   for (const extraCost of extraCosts) {
-    if (extraCost.type === "one-time" && extraCost.valueType === "number") {
+    if (extraCost.expenseType === "one-time" && extraCost.valueType === "number") {
       initialCosts += extraCost.value;
-    } else if (extraCost.type === "one-time" && extraCost.valueType === "percent") {
+    } else if (extraCost.expenseType === "one-time" && extraCost.valueType === "percent") {
       initialCosts += (extraCost.value / 100) * sellingPrice;
     }
   }
@@ -48,12 +48,16 @@ export const getInitialCosts = (sellingPrice: number, extraCosts: ExtraCost[]): 
   return initialCosts;
 };
 
-export const getPeriodicalCosts = (extraCosts: ExtraCost[], sellingPrice: number, annualPayments: number): number => {
+export const getPeriodicalCosts = (
+  extraCosts: LeasingExtras[],
+  sellingPrice: number,
+  annualPayments: number,
+): number => {
   let periodicalCosts = 0;
   for (const extraCost of extraCosts) {
-    if (extraCost.type === "recurrent" && extraCost.valueType === "number") {
+    if (extraCost.expenseType === "recurrent" && extraCost.valueType === "number") {
       periodicalCosts -= extraCost.value;
-    } else if (extraCost.type === "recurrent" && extraCost.valueType === "percent") {
+    } else if (extraCost.expenseType === "recurrent" && extraCost.valueType === "percent") {
       periodicalCosts -= ((extraCost.value / 100) * sellingPrice) / annualPayments;
     }
   }
