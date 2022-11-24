@@ -1,5 +1,7 @@
+import { assertFrequencyToDays, InterestRateTypes, TimeFrequencies } from "../models/common";
 import { LeasingExtras } from "../models/leasing";
 import { IGV } from "./peruvian-taxes";
+import { effectiveToEffectiveRate, nominalRateToEffectiveRate } from "./rate-conversion";
 
 export const getInitialFee = (initialFeePercentage: number, sellingPrice: number): number => {
   return (initialFeePercentage / 100) * sellingPrice;
@@ -28,10 +30,12 @@ export const getBuyingOptionFee = (
   return 0;
 };
 
-export const getAnnualPayments = (paymentFrequency: number) => {
+export const getAnnualPayments = (paymentFrequency: TimeFrequencies | number) => {
+  paymentFrequency = assertFrequencyToDays(paymentFrequency);
   return 360 / paymentFrequency;
 };
-export const getPeriods = (loanTime: number, paymentFrequency: number) => {
+export const getPeriods = (loanTime: number, paymentFrequency: TimeFrequencies | number) => {
+  paymentFrequency = assertFrequencyToDays(paymentFrequency);
   return (loanTime * 360) / paymentFrequency;
 };
 
@@ -72,3 +76,35 @@ export const getDeprecitaion = (sellingValue: number, periods: number): number =
 export const getLeasingAmount = (initialCosts: number, sellingValue: number): number => {
   return initialCosts + sellingValue;
 };
+
+export function getInterestRatePerPeriod(
+  type: Extract<InterestRateTypes, "effective">,
+  rate: number,
+  frequency: TimeFrequencies | number,
+  paymentFrequency: TimeFrequencies | number,
+): number;
+export function getInterestRatePerPeriod(
+  type: Extract<InterestRateTypes, "nominal">,
+  rate: number,
+  frequency: TimeFrequencies | number,
+  paymentFrequency: TimeFrequencies | number,
+  capitalization: TimeFrequencies | number,
+): number;
+export function getInterestRatePerPeriod(
+  type: InterestRateTypes,
+  rate: number,
+  frequency: TimeFrequencies | number,
+  paymentFrequency: TimeFrequencies | number,
+  capitalization?: TimeFrequencies | number,
+): number {
+  frequency = assertFrequencyToDays(frequency);
+  paymentFrequency = assertFrequencyToDays(paymentFrequency);
+  capitalization = capitalization ? assertFrequencyToDays(capitalization) : undefined;
+  if (type === "nominal") {
+    if (!capitalization) throw new Error("Capitalization is required when `type` is set to `nominal`.");
+    const m = frequency / capitalization;
+    const n = frequency / capitalization;
+    return nominalRateToEffectiveRate(rate, m, n);
+  }
+  return effectiveToEffectiveRate(rate, frequency, paymentFrequency);
+}
