@@ -1,6 +1,14 @@
 import { RefinementCtx, z } from "zod";
 
-import { Currencies, DateWithParsing, ExpenseType, InterestRateTypes, NumericalType, TimeFrequencies } from "./common";
+import {
+  Currencies,
+  DateWithParsing,
+  ExpenseType,
+  GracePeriod,
+  InterestRateTypes,
+  NumericalType,
+  TimeFrequencies,
+} from "./common";
 import { User } from "./user";
 
 type SuperRefineFn<T> = (value: T, ctx: RefinementCtx) => void | unknown;
@@ -141,6 +149,7 @@ export const LeasingModel = z.object({
   userId: User.shape.uuid,
   name: z.string(),
   sellingPrice: z.number().min(0),
+  percentageInitialFee: z.number().min(0).max(100),
   currency: Currencies,
   leasingTime: z.number().min(0),
   paymentFrequency: TimeFrequencies,
@@ -151,6 +160,9 @@ export const LeasingModel = z.object({
   buyback: z.boolean(),
   buybackType: NumericalType.optional(),
   buybackValue: z.number().min(0).optional(),
+  ksRate: z.number().min(0).max(100),
+  waccRate: z.number().min(0).max(100),
+  gracePeriods: z.array(GracePeriod).default([]),
   extras: z.array(LeasingExtrasModel).default([]),
   createdAt: DateWithParsing,
   updatedAt: DateWithParsing,
