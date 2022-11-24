@@ -45,7 +45,12 @@ const postHandler: LeasingFunction = async ctx => {
   };
 
   await ctx.env.leasings.put(ctx.data.leasingKey, JSON.stringify(merged), {
-    metadata: { name: merged.name },
+    metadata: {
+      name: merged.name,
+      createdAt: merged.createdAt,
+      sellingPrice: merged.sellingPrice,
+      currency: merged.currency,
+    },
   });
 
   const sanitized = SanitizedLeasing.parse(merged);
@@ -71,7 +76,12 @@ const patchHandler: LeasingFunction = async ctx => {
   merged.updatedAt = new Date();
 
   await ctx.env.leasings.put(ctx.data.leasingKey, JSON.stringify(merged), {
-    metadata: { name: merged.name },
+    metadata: {
+      name: merged.name,
+      createdAt: merged.createdAt,
+      sellingPrice: merged.sellingPrice,
+      currency: merged.currency,
+    },
   });
 
   const sanitized = SanitizedLeasing.parse(merged);
