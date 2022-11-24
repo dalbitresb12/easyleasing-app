@@ -18,7 +18,7 @@ import {
   LeasingModel,
   leasingRateTypeValidation,
 } from "@/shared/models/leasing";
-import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/algorithm";
+import { createCurrencyFormatter, percentFormatter } from "@/shared/utils/numbers";
 import { capitalize } from "@/shared/utils/strings";
 
 import { usersHandler } from "@/api/handlers";

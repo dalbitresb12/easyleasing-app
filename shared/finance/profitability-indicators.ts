@@ -13,6 +13,7 @@ export const vnaCalculation = (cashFlows: number[], rate: number): number => {
 export const tirCalculation = (cashFlows: number[]): number => {
   return irr(cashFlows, 0.01);
 };
+
 export const tceaCalculation = (tir: number, annualPayments: number): number => {
   return Math.pow(1 + tir, annualPayments) - 1;
 };
