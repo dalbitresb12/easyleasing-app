@@ -5,7 +5,7 @@ lastUpdate: "2022-11-24"
 
 ## Guardados
 
-En esta pestaña se puede visualizar
+En esta pestaña se puede visualizar todos los leasings que se han calculado previamente con la sección de la calculadora. Estos son guardados automáticamente al continuar con el segundo paso, por lo que puede retomarlos en cualquier momento.
 
 ## Calculadora
 
