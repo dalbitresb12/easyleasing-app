@@ -2,6 +2,7 @@
 title: "Conceptos"
 lastUpdate: "2022-11-23"
 ---
+
 Se presentan algunos conceptos clave que son usados a lo largo de la aplicación
 
 ## Conceptos Basicos
