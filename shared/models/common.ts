@@ -92,7 +92,7 @@ const gradePeriodLocalization: Record<GracePeriod, string> = {
   partial: "Parcial",
   no: "Sin plazo de gracia",
 };
-
+export const GracePeriodValues = Object.values(GracePeriod.Values);
 export const localizeGracePeriod = (gracePeriod: GracePeriod) => {
   return gradePeriodLocalization[gracePeriod];
 };

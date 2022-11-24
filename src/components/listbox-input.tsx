@@ -57,6 +57,7 @@ export const ListboxInput = <T,>(props: Props<T>): ReactElement => {
               <Listbox.Option
                 key={option.key}
                 value={option.value}
+                disabled={option.disabled}
                 className={({ active }) =>
                   clsx(
                     "relative cursor-default select-none py-2 pl-10 pr-4",

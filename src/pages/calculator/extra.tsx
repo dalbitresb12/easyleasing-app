@@ -51,7 +51,7 @@ const ExtraCalculatorPage: FC = () => {
           mutationFn: (data: PartialEditableLeasing) => leasingPatchHandler(id, data),
           onSuccess: response => {
             queryClient.setQueryData(queries.leasings.getById(id).queryKey, response);
-            router.push({ pathname: "/leasings/details", query: { id } });
+            router.push({ pathname: "/calculator/periods", query: { id } });
           },
         },
   );
