@@ -6,6 +6,11 @@ Made for the course of Financial Engineering of the [Universidad Peruana de Cien
 
 ## Getting Started
 
+Set the environment variables for the backend:
+
+- Create a copy of the `.dev.vars.example` file named `.dev.vars` on the root folder.
+- Change values as needed.
+
 Start the development server:
 
 ```sh
