@@ -24,6 +24,7 @@ export const createCurrencyFormatter = (currency: Currencies): Intl.NumberFormat
   cached = Intl.NumberFormat(locales, {
     style: "currency",
     currency: currency,
+    currencySign: "accounting",
   });
   currencyFormatters[currency] = cached;
 

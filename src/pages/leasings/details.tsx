@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
 
@@ -29,6 +30,7 @@ import { leasingGetHandler } from "@/api/handlers/leasings";
 import { queries } from "@/api/keys";
 
 import { DividedTable, DividedTableItem } from "@/components/divided-table";
+import { FormButton } from "@/components/form-button";
 import { SearchBarLayout } from "@/components/search-bar-layout";
 
 import { takeFirstQuery } from "@/utils/query";
@@ -109,8 +111,13 @@ const LeasingsDetailsPage: FC = () => {
 
   return (
     <SearchBarLayout>
-      <div className="mb-4">
+      <div className="mb-4 flex justify-between items-center">
         <h2 className="text-3xl font-bold text-slate-800">{leasing.name}</h2>
+        <Link href={{ pathname: "/leasings/schedule", query: { id } }}>
+          <FormButton type="button" style="secondary" className="max-w-fit whitespace-nowrap">
+            Cronograma de pagos
+          </FormButton>
+        </Link>
       </div>
       <DividedTable>
         <DividedTableItem label="Frecuencia de pagos">
