@@ -90,7 +90,7 @@ export const getInterestRatePerPeriod = (
   if (type === "nominal") {
     if (!capitalization) throw new Error("Capitalization is required when `type` is set to `nominal`.");
     const m = frequency / capitalization;
-    const n = frequency / capitalization;
+    const n = paymentFrequency / capitalization;
     return nominalRateToEffectiveRate(rate, m, n);
   }
   return effectiveToEffectiveRate(rate, frequency, paymentFrequency);
