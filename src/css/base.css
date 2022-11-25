@@ -35,4 +35,8 @@
     height: 1em;
     fill: currentcolor;
   }
+
+  th {
+    font-weight: inherit;
+  }
 }
